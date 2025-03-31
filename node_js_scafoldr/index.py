@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 from prompt import PROMPT_TEMPLATE
 from initial_files_templates import README_TEMPLATE, DOT_ENV_TEMPLATE, GIT_IGNORE_TEMPLATE
 import json
+import shutil
 
 load_dotenv()
 
@@ -58,6 +59,10 @@ def setup_initial_files(project_name, port=3000, db_user='user', db_password='pa
 
     print(f"✅ Initial files (.gitignore, README.md, .env) added.")
 
+    # Copy everything from ./template to project directory
+    template_dir = './templates/node_js_postgres'
+    shutil.copytree(os.path.join(template_dir), os.path.join(project_dir), symlinks=True, dirs_exist_ok=True) 
+
     # Run npm init -y
     subprocess.run(['npm', 'init', '-y'], cwd=project_dir)
 
@@ -105,7 +110,8 @@ def main():
     ai_response = call_openai(dbml_schema)
 
     print("🟡 Setting up initial project structure...")
-    setup_initial_files(project_name)
+    # setup_initial_files(project_name)
+    setup_initial_files(project_name, 3000, 'gliba', 'test', 5432, 'localhost')
 
     print("🟡 Creating project files from AI response...")
     parse_and_create_files(ai_response, project_name)

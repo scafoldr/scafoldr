@@ -1,4 +1,4 @@
-README_TEMPLATE = """ \
+README_TEMPLATE = """\
 # {project_name}
 
 Generated with Scafoldr.
@@ -10,12 +10,12 @@ Generated with Scafoldr.
 - Access the server at `http://localhost:{port}`
 """
 
-DOT_ENV_TEMPLATE = """ \
+DOT_ENV_TEMPLATE = """\
 DATABASE_URL={DATABASE_URL}
 PORT={port}
 """
 
-GIT_IGNORE_TEMPLATE = """ \ 
+GIT_IGNORE_TEMPLATE = """\
 node_modules
 .env
 """

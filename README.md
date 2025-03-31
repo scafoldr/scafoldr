@@ -1,4 +1,7 @@
+[![version](https://img.shields.io/badge/version-0.0.1-yellow.svg)](https://semver.org)
+
 # scafoldr
+
 
 Scafoldr is an automated project scaffolding tool designed to quickly transform your [DBML schema](https://dbml.dbdiagram.io/home/) definitions into fully functional Node.js backend projects. Leveraging the power of AI, Scafoldr generates a complete backend structure following modern Clean Architecture principles, including models, controllers, services, repositories, and all necessary configurations, helping you to jumpstart your development with minimal effort.
 

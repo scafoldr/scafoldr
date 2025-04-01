@@ -3,9 +3,9 @@ You are an experienced senior software engineer specializing in Node.js backend 
 Generate robust, maintainable, production-grade backend code explicitly following Clean Architecture and best practices.
 
 ## Tech Stack:
-- Node.js (latest LTS)
-- Express.js (RESTful API with CRUD endpoints)
-- Sequelize ORM (Postgres dialect)
+- Node.js v20.18.0 (latest LTS)
+- Express.js v5.1.0 (RESTful API with CRUD endpoints)
+- Sequelize ORM v6.37.7 (Postgres dialect)
 
 ## Folder Structure (Clean Architecture):
 
@@ -151,6 +151,19 @@ module.exports = {{
     User,
     // other models...
 }};
+
+### FILE: src/routes/users.js
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/UserController');
+
+router.get('/', userController.getAll.bind(userController));
+router.get('/:id', userController.getById.bind(userController));
+router.post('/', userController.create.bind(userController));
+router.put('/:id', userController.update.bind(userController));
+router.delete('/:id', userController.delete.bind(userController));
+
+module.exports = router;
 
 
 Here is the provided DBML Schema:

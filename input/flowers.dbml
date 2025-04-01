@@ -1,0 +1,66 @@
+Project flower_delivery_app {
+  database_type: "PostgreSQL"
+}
+
+Table customers {
+  id serial [pk]
+  name varchar
+  email varchar
+  phone varchar
+  address text
+  created_at timestamp
+}
+
+Table categories {
+  id serial [pk]
+  name varchar
+  description text
+}
+
+Table products {
+  id serial [pk]
+  name varchar
+  description text
+  price decimal
+  inventory_count int
+  category_id int [ref: > categories.id]
+  created_at timestamp
+}
+
+Table orders {
+  id serial [pk]
+  customer_name varchar
+  customer_email varchar
+  customer_phone varchar
+  delivery_address text
+  status varchar // e.g. 'pending', 'confirmed', 'shipped', 'delivered'
+  promo_code_id int [ref: - promo_codes.id]
+  total_amount decimal
+  created_at timestamp
+}
+
+Table order_items {
+  id serial [pk]
+  order_id int [ref: > orders.id]
+  product_id int [ref: > products.id]
+  quantity int
+  unit_price decimal
+}
+
+Table payments {
+  id serial [pk]
+  order_id int [ref: > orders.id]
+  payment_method varchar // e.g. 'credit_card', 'paypal'
+  amount decimal
+  status varchar // e.g. 'paid', 'failed', 'refunded'
+  paid_at timestamp
+}
+
+Table promo_codes {
+  id serial [pk]
+  code varchar [unique]
+  discount_percentage decimal
+  expires_at timestamp
+  usage_limit int
+  used_count int
+}

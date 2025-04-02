@@ -2,9 +2,9 @@ from core.generators.base_generator import BaseGenerator
 from core.agents.coordinator import AgentCoordinator
 from models.request import GenerateRequest
 
-class NodeJSExpressGenerator(BaseGenerator):
+class NodeExpressJSGenerator(BaseGenerator):
     def __init__(self):
-        self.agent_coordinator = AgentCoordinator(api_key="your-openai-key")
+        self.agent_coordinator = AgentCoordinator()
 
     def generate(self, request: GenerateRequest) -> dict[str, str]:
         print("Generating Node.js Express code")

@@ -1,17 +1,16 @@
 from core.agents.base_agent import BaseAgent
 import openai
+from langchain_openai import ChatOpenAI
 
 class OpenAIAgent(BaseAgent):
-    def __init__(self, api_key: str):
-        openai.api_key = api_key
+    model: str
 
-    def generate_code(self, prompt: str) -> str:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a code generator AI."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3
-        )
-        return response['choices'][0]['message']['content'].strip()
+    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
+        openai.api_key = api_key
+        self.model = model
+
+    def ask(self, prompt: str) -> str:    
+        llm = ChatOpenAI(model=self.model)
+        response = llm.invoke(prompt)
+
+        return response.content

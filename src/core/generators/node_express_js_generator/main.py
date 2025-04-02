@@ -8,11 +8,16 @@ class NodeExpressJSGenerator(BaseGenerator):
 
     def get_ai_code(self, dbml_schema: str) -> dict[str, str]:
         prompt = PROMPT_TEMPLATE.format(dbml=dbml_schema)
-        # return self.agent_coordinator.ask_agent(prompt)
+        ai_response = self.agent_coordinator.ask_agent(prompt)
+        sections = ai_response.split("### FILE:")[1:]
 
-        return {
-            "index.js": "console.log('Hello from Express');"
-        }
+        result = {}
+        for section in sections:
+            lines = section.strip().splitlines()
+            filepath = lines[0].strip()
+            file_content = '\n'.join(lines[1:]).strip()
+            result[filepath] = file_content
+        return result
     
     def get_predefined_code(self, request: GenerateRequest) -> dict[str, str]:
         return {

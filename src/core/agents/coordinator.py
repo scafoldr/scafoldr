@@ -8,5 +8,4 @@ class AgentCoordinator:
         self.agent = OpenAIAgent(os.getenv("OPENAI_API_KEY"), os.getenv("OPENAI_API_MODEL"))
 
     def ask_agent(self, prompt: str) -> str:
-        print (prompt)
         return self.agent.ask(prompt)

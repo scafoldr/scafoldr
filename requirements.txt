@@ -1,2 +1,7 @@
 langchain-openai
 langchain_core
+InquirerPy
+typer
+dotenv
+pydantic
+fastapi

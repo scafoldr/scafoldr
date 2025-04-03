@@ -1,33 +1,111 @@
-[![version](https://img.shields.io/badge/version-0.0.1-yellow.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.0.2-yellow.svg)](https://semver.org)
 
-# scafoldr
+# 🏗️ Scafoldr
 
+**Scafoldr** is an AI-powered backend generator that builds boilerplate codebases for different programming languages and frameworks using your [DBML schema](https://dbml.dbdiagram.io/home/) and a few prompts.
 
-Scafoldr is an automated project scaffolding tool designed to quickly transform your [DBML schema](https://dbml.dbdiagram.io/home/) definitions into fully functional Node.js backend projects. Leveraging the power of AI, Scafoldr generates a complete backend structure following modern Clean Architecture principles, including models, controllers, services, repositories, and all necessary configurations, helping you to jumpstart your development with minimal effort.
+Scafoldr generates a complete backend structure following modern Clean Architecture principles, including models, controllers, services, repositories, and all necessary configurations, helping you to jumpstart your development with minimal effort.
 
-## Features
+---
 
-- Automatically generates backend structures from DBML schema.
+## 🚀 Features
 
-- Follows Clean Architecture and best practices.
+- Generate Node Express JavaScript code based on your DBML schema, with postgress and sequlize-cli
+- More options for generating code will come soon...
+---
 
-- Provides ready-to-use, production-grade code.
+## ⚙️ Requirements
 
-- Highly customizable and extendable.
+- Python 3.9+ (installed via [Homebrew](https://brew.sh/) recommended)
+- [OpenAI API key](https://platform.openai.com/account/api-keys) if AI generation is used
 
+---
 
-## Instructions for Running the Tool
+## 🧪 Getting Started
 
-1. Install the required dependencies:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/scafoldr.git
+cd scafoldr
+```
+
+### 2. Create .env file
+
+```bash
+cp .env.example .env
+```
+
+Open the `.env` file and fill in the required values:
+
+- `OPENAI_API_KEY`: Your OpenAI API key for AI-powered generation.
+- `OPENAI_API_MODEL`: default to gpt-4o-mini
+
+Refer to the documentation or comments in `.env.example` for detailed explanations of each variable.
+
+### 3. Create a virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 4. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Run the app from source
+```bash
+PYTHONPATH=src python3 src/cli/main.py generate
+```
+
+🧰 Optional: Install as a real CLI command
+
+```bash
+pip install -e .
+```
+Now you can just run:
+
+```bash
+scafoldr
+```
+
+### 6. Using scafoldr
+
+1. Create your `input/*.dbml` file with your specific DBML schema.
+
+2. Run the following command and follow further instructions in console:
     ```bash
-    pip3 install -r requirements.txt
+    PYTHONPATH=src python3 src/cli/main.py generate
     ```
-2. Create `.env` file and fill it with variables and values from `.env.example` (OPENAI_API_KEY required here)
-
-2. Create your `input/*.dbml` file with your specific DBML schema.
-
-3. Run the following command and follow further instructions in console:
-    ```bash
-    python3 node_js_scafoldr/index.py
+    or just:
+    ```base
+    scafoldr
     ```
 3. Open output/* folder and inside you will see all your Scafoldr projects
+
+
+## Running api
+
+Run:
+```bash
+uvicorn src.api.main:app --reload
+```
+
+Visit http://localhost:8000/docs to see available methods and try them out. 
+
+## Generate POST request: 
+
+URL: http://localhost:8000/generate
+
+Request body:
+```json
+{
+  "project_name": "my-api-test-app",
+  "database_name": "my_api_test_app_db",
+  "backend_option": "nodejs-express-js",
+  "features": [],
+  "user_input": "// Use DBML to define your database structure\n// Docs: https://dbml.dbdiagram.io/docs\n\nTable follows {\n  following_user_id integer\n  followed_user_id integer\n  created_at timestamp \n}\n\nTable users {\n  id integer [primary key]\n  username varchar\n  role varchar\n  created_at timestamp\n}\n\nTable posts {\n  id integer [primary key]\n  title varchar\n  body text [note: 'Content of the post']\n  user_id integer [not null]\n  status varchar\n  created_at timestamp\n}\n\nRef user_posts: posts.user_id > users.id // many-to-one\n\nRef: users.id < follows.following_user_id\n\nRef: users.id < follows.followed_user_id"
+}
+```

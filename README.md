@@ -84,3 +84,28 @@ scafoldr
     scafoldr
     ```
 3. Open output/* folder and inside you will see all your Scafoldr projects
+
+
+## Running api
+
+Run:
+```bash
+uvicorn src.api.main:app --reload
+```
+
+Visit http://localhost:8000/docs to see available methods and try them out. 
+
+## Generate POST request: 
+
+URL: http://localhost:8000/generate
+
+Request body:
+```json
+{
+  "project_name": "my-api-test-app",
+  "database_name": "my_api_test_app_db",
+  "backend_option": "nodejs-express-js",
+  "features": [],
+  "user_input": "// Use DBML to define your database structure\n// Docs: https://dbml.dbdiagram.io/docs\n\nTable follows {\n  following_user_id integer\n  followed_user_id integer\n  created_at timestamp \n}\n\nTable users {\n  id integer [primary key]\n  username varchar\n  role varchar\n  created_at timestamp\n}\n\nTable posts {\n  id integer [primary key]\n  title varchar\n  body text [note: 'Content of the post']\n  user_id integer [not null]\n  status varchar\n  created_at timestamp\n}\n\nRef user_posts: posts.user_id > users.id // many-to-one\n\nRef: users.id < follows.following_user_id\n\nRef: users.id < follows.followed_user_id"
+}
+```

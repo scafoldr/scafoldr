@@ -4,3 +4,4 @@ InquirerPy
 typer
 dotenv
 pydantic
+fastapi

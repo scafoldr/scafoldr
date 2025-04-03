@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from models.request import GenerateRequest
+from models.generate import GenerateRequest, GenerateResponse
 
 class BaseGenerator(ABC):
     @abstractmethod
-    def generate(self, request: GenerateRequest) -> dict[str, str]:
+    def generate(self, request: GenerateRequest) -> GenerateResponse:
         """Generate files and return a dict of {path: content}"""
         pass

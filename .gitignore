@@ -1,3 +1,4 @@
 .env
 output/
 __pycache__/
+.idea

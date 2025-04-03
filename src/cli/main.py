@@ -1,7 +1,7 @@
 import typer
 from InquirerPy import prompt
 from core.orchestrator import generate_backend
-from models.request import GenerateRequest
+from models.generate import GenerateRequest
 import os
 
 app = typer.Typer()
@@ -88,7 +88,7 @@ def generate(
         project_files = generate_backend(request)
 
         # Save files
-        for path, content in project_files.items():
+        for path, content in project_files.files.items():
             full_path = os.path.join(output_dir, path)
 
             print(f"Creating file: {full_path} {content}")
@@ -100,7 +100,6 @@ def generate(
         typer.secho("✅ Project generated successfully!", fg=typer.colors.GREEN)
     except Exception as e:
         typer.secho(f"❌ Error: {str(e)}", fg=typer.colors.RED)
-
 
 if __name__ == "__main__":
     app()

@@ -3,3 +3,4 @@ langchain_core
 InquirerPy
 typer
 dotenv
+pydantic

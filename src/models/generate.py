@@ -6,3 +6,7 @@ class GenerateRequest(BaseModel):
     backend_option: str
     features: list[str] = []
     user_input: str # For now this will be dbml schema
+
+class GenerateResponse(BaseModel):
+    files: dict[str, str]
+    commands: list[str]

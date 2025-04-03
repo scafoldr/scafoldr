@@ -29,7 +29,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         return []
     
     def get_predefined_code(self, request: GenerateRequest) -> dict[str, str]:
-        template_dir = "./templates/node_express_ts"
+        template_dir = "./templates/node_express_js"
         predefined_code = {}
 
         for root, _, files in os.walk(template_dir):

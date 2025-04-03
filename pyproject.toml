@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scafoldr"
+version = "0.1.0"
+description = "AI backend generator"
+authors = [{ name = "Dimitrije Glibic", email = "dimitrije.glibic1@gmail.com" }]
+dependencies = [
+    "typer",
+    "InquirerPy",
+    "openai",
+    "langchain-openai",
+    "langchain_core",
+    "dotenv",
+    "pydantic"
+
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+scafoldr = "cli.main:app"

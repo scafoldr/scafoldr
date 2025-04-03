@@ -102,7 +102,8 @@ def generate(
 
         # Run commands
         for command in project_files.commands:
-            print(f"Running command: {command}")
+            print(f"Running command: {command} path: {project_path}")
+            # BUG: Commands are executing in the project directory, not in the output directory
             subprocess.run(command.split(' '), cwd=project_path)
             os.system(command)
 

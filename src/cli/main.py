@@ -3,6 +3,7 @@ from InquirerPy import prompt
 from core.orchestrator import generate_backend
 from models.generate import GenerateRequest
 import os
+import subprocess
 
 app = typer.Typer()
 
@@ -76,6 +77,8 @@ def generate(
     with open(dbml_file_path, 'r') as file:
         dbml_schema = file.read()
 
+    project_path = os.path.join(output_dir, project_name)
+
     request = GenerateRequest(
         project_name=project_name,
         database_name=database_name,
@@ -89,13 +92,19 @@ def generate(
 
         # Save files
         for path, content in project_files.files.items():
-            full_path = os.path.join(output_dir, path)
+            full_path = os.path.join(project_path, path)
 
-            print(f"Creating file: {full_path} {content}")
+            print(f"Creating file: {full_path}")
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
             with open(full_path, 'w') as f:
                 f.write(content)
+
+        # Run commands
+        for command in project_files.commands:
+            print(f"Running command: {command}")
+            subprocess.run(command.split(' '), cwd=project_path)
+            os.system(command)
 
         typer.secho("✅ Project generated successfully!", fg=typer.colors.GREEN)
     except Exception as e:

@@ -103,9 +103,7 @@ def generate(
         # Run commands
         for command in project_files.commands:
             print(f"Running command: {command} path: {project_path}")
-            # BUG: Commands are executing in the project directory, not in the output directory
-            subprocess.run(command.split(' '), cwd=project_path)
-            os.system(command)
+            subprocess.run(command.split(' '), cwd=os.path.abspath(project_path))
 
         typer.secho("✅ Project generated successfully!", fg=typer.colors.GREEN)
     except Exception as e:

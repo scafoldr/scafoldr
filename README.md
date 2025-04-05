@@ -1,4 +1,4 @@
-[![version](https://img.shields.io/badge/version-0.0.2-yellow.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.1.0-yellow.svg)](https://semver.org)
 
 # 🏗️ Scafoldr
 

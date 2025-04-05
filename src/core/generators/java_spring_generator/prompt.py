@@ -74,9 +74,10 @@ These files are generated locally and reused across projects.
 ### FILE: path/to/ClassName.java
 - Provide the file content immediately below this indicator.
 - Do NOT use Markdown or backticks. Write file content as plain text.
+- All file paths should have this prefix: src/main/java/com.example.demo/
 
-## Examples for User:
-### FILE: src/main/java/com.example.demo/models/User.java
+## Examples:
+### FILE: src/main/java/com.example.demo/models/<ClassName>.java
 package com.example.demo.models;
 
 import jakarta.persistence.*;
@@ -85,22 +86,25 @@ import lombok.*;
 import java.sql.Timestamp; import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "<table_name>")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseModel {{
+public class <ClassName> extends BaseModel {{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // Example attributes
     private String username;
     private String role;
 
     @Column(name = "created_at")
     private Timestamp createdAt;
 
+    
+    // Relationships examples
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts;
 
@@ -113,65 +117,67 @@ public class User extends BaseModel {{
     private List<Follow> followers;
 }}
 
-### FILE: src/main/java/com.example.demo/repositories/UserRepository.java
+### FILE: src/main/java/com.example.demo/repositories/<ClassName>Repository.java
 package com.example.demo.repositories;
 
-import com.example.demo.models.User; import org.springframework.stereotype.Repository;
+import com.example.demo.models.<ClassName>; 
+import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends BaseRepository<User, Integer> {{}}
+public interface <ClassName>Repository extends BaseRepository<<ClassName>, Integer> {{}}
 
-### FILE: src/main/java/com.example.demo/services/UserService.java
+### FILE: src/main/java/com.example.demo/services/<ClassName>Service.java
 package com.example.demo.repositories;
 
-import com.example.demo.models.User; import org.springframework.stereotype.Repository;
+import com.example.demo.models.<ClassName>; 
+import org.springframework.stereotype.Repository;
 
 @Repository
-package src/main/java/com.example.demo/com.example.demo.services;
+package com.example.demo/com.example.demo.services;
 
-import com.example.demo.models.User;
-import com.example.demo.repositories.UserRepository;
+import com.example.demo.models.<ClassName>;
+import com.example.demo.repositories.<ClassName>Repository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService extends BaseService<User> {{
-    public UserService(UserRepository repository) {{
+public class <ClassName>Service extends BaseService<<ClassName>> {{
+    public <ClassName>Service(<ClassName>Repository repository) {{
         super(repository);
     }}
 
 }}
 
-### FILE: src/main/java/com.example.demo/controllers/UserController.java
+### FILE: src/main/java/com.example.demo/controllers/<ClassName>Controller.java
 package com.example.demo.controllers;
 
-import com.example.demo.dto.UserDTO;
-import com.example.demo.models.User;
-import com.example.demo.services.UserService;
+import com.example.demo.dto.<ClassName>DTO;
+import com.example.demo.models.<ClassName>;
+import com.example.demo.services.<ClassName>Service;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
-public class UserController extends BaseController<User, UserDTO> {{
-    public UserController(UserService service) {{
-        super(service, UserDTO::from);
+@RequestMapping("/api/<route>")
+public class <ClassName>Controller extends BaseController<<ClassName>, <ClassName>DTO> {{
+    public <ClassName>Controller(<ClassName>Service service) {{
+        super(service, <ClassName>DTO::from);
     }}
 }}
 
-### FILE: src/main/java/com.example.demo/dto/UserDTO.java
+### FILE: src/main/java/com.example.demo/dto/<ClassName>DTO.java
 package com.example.demo.dto;
 
-import com.example.demo.models.User;
+import com.example.demo.models.<ClassName>;
 
 import java.sql.Timestamp;
 
-public record UserDTO(
+public record <ClassName>DTO(
         Integer id,
         String username,
         String role,
         Timestamp createdAt
 ) implements BaseDTO {{
-    public static UserDTO from(User user) {{
-        return new UserDTO(user.getId(), user.getUsername(), user.getRole(), user.getCreatedAt());
+    public static <ClassName>DTO from(<ClassName> className) {{
+        return new <ClassName>DTO(className.getId(), className.getUsername(), className.getRole(), className.getCreatedAt());
     }}
 }}
 

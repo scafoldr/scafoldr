@@ -1,10 +1,12 @@
 from core.generators.base_generator import BaseGenerator
 from core.generators.node_express_js_generator.main import NodeExpressJSGenerator
+from core.generators.java_spring_generator.main import JavaSpringGenerator
 
 # Define a mapping of language + framework to generator class
 GENERATOR_MAP = {
     # ("python", "django"): DjangoGenerator,
     ("nodejs-express-js"): NodeExpressJSGenerator,
+    ("java-spring"): JavaSpringGenerator,
     # ("nodejs-express-ts"): NodeTSExpressGenerator,
     # Add more mappings as needed
 }

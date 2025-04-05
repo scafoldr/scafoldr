@@ -12,10 +12,6 @@ class JavaSpringGenerator(BaseGenerator):
         prompt = PROMPT_TEMPLATE.format(dbml=request.user_input)
         ai_response = self.agent_coordinator.ask_agent(prompt)
 
-        # DEBUG: Save AI response to a file for debugging 
-        with open("ai_response.md", "w") as f:
-            f.write(ai_response)
-
         sections = ai_response.split("### FILE:")[1:]
 
         result = {}

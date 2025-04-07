@@ -34,15 +34,15 @@ export default function Home() {
                   Backend
                 </label>
                 <select
+                  defaultValue={'nodejs-express-js'}
                   id="category"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                  <option>Select backend</option>
-                  <option selected value="nodejs-express-js">
-                    Node.js Express with Sequelize
-                  </option>
+                  <option value="nodejs-express-js">Node.js Express with Sequelize</option>
                   <option value="java-spring">Java Spring</option>
                 </select>
               </div>
+
+
               <div className="flex items-start">
                 <div className="flex items-center h-5">
                   <input
@@ -76,7 +76,7 @@ export default function Home() {
               </div>
               <button
                 type="submit"
-                className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                className="inline-block rounded-sm border border-indigo-600 bg-indigo-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:ring-3 focus:outline-hidden">
                 Get your code
               </button>
             </form>

@@ -42,7 +42,6 @@ export default function Home() {
                 </select>
               </div>
 
-
               <div className="flex items-start">
                 <div className="flex items-center h-5">
                   <input

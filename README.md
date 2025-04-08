@@ -1,4 +1,4 @@
-[![version](https://img.shields.io/badge/version-0.1.0-yellow.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-0.2.0-yellow.svg)](https://semver.org)
 
 # 🏗️ Scafoldr
 
@@ -95,7 +95,7 @@ uvicorn src.api.main:app --reload
 
 Visit http://localhost:8000/docs to see available methods and try them out. 
 
-## Generate POST request: 
+### Generate POST request: 
 
 URL: http://localhost:8000/generate
 
@@ -109,3 +109,29 @@ Request body:
   "user_input": "// Use DBML to define your database structure\n// Docs: https://dbml.dbdiagram.io/docs\n\nTable follows {\n  following_user_id integer\n  followed_user_id integer\n  created_at timestamp \n}\n\nTable users {\n  id integer [primary key]\n  username varchar\n  role varchar\n  created_at timestamp\n}\n\nTable posts {\n  id integer [primary key]\n  title varchar\n  body text [note: 'Content of the post']\n  user_id integer [not null]\n  status varchar\n  created_at timestamp\n}\n\nRef user_posts: posts.user_id > users.id // many-to-one\n\nRef: users.id < follows.following_user_id\n\nRef: users.id < follows.followed_user_id"
 }
 ```
+
+
+## Running the Frontend
+
+To run the frontend, ensure that the Python API is running first. Follow the steps in the "Running api" section above to start the backend.
+
+### Steps to run the frontend:
+
+1. Navigate to the `web` directory:
+  ```bash
+  cd web
+  ```
+
+2. Install dependencies:
+  ```bash
+  npm install
+  ```
+
+3. Start the development server:
+  ```bash
+  npm run dev
+  ```
+
+4. Open your browser and visit http://localhost:3000 to access the frontend.
+
+Make sure the backend API is running at http://localhost:8000, as the frontend relies on it for data and functionality.

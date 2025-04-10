@@ -1,10 +1,12 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Result from './Result/Result';
+import { FileMap } from './Result/types';
 
 const GenerateForm = () => {
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
+  const [response, setResponse] = useState<{ files: FileMap; command: string } | null>(null);
   const [error, setError] = useState(null);
 
   const handleSubmit = async (formData: FormData) => {
@@ -115,7 +117,7 @@ const GenerateForm = () => {
       </button>
 
       {loading && <div>Loading...</div>}
-      {response && <pre>{JSON.stringify(response, null, 2)}</pre>}
+      {response && <Result files={response?.files} />}
       {error && <div>Error: {error}</div>}
     </form>
   );

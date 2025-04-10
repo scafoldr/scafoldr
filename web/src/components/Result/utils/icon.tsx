@@ -1,7 +1,15 @@
 import React, { ReactNode } from 'react';
-import { SiHtml5, SiCss3, SiJavascript, SiTypescript, SiJson } from 'react-icons/si';
+import {
+  SiHtml5,
+  SiCss3,
+  SiJavascript,
+  SiTypescript,
+  SiJson,
+  SiPhp,
+  SiPython
+} from 'react-icons/si';
 import { FcFolder, FcOpenedFolder, FcPicture, FcFile } from 'react-icons/fc';
-import { AiFillFileText } from 'react-icons/ai';
+import { AiFillFileText, AiOutlineJava } from 'react-icons/ai';
 
 function getIconHelper() {
   const cache = new Map<string, ReactNode>();
@@ -16,6 +24,9 @@ function getIconHelper() {
   cache.set('jpg', <FcPicture />);
   cache.set('ico', <FcPicture />);
   cache.set('txt', <AiFillFileText color="white" />);
+  cache.set('java', <AiOutlineJava />);
+  cache.set('php', <SiPhp />);
+  cache.set('py', <SiPython />);
   cache.set('closedDirectory', <FcFolder />);
   cache.set('openDirectory', <FcOpenedFolder />);
   const getIcon = (extension: string, name: string): ReactNode => {

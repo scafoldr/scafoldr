@@ -5,10 +5,10 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 });
 
 export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
-  if (!selectedFile) return null;
+  const code = selectedFile?.content ?? '// Select a file to view its content';
+  const fileName = selectedFile?.name ?? 'index.js';
 
-  const code = selectedFile.content;
-  let language = selectedFile.name.split('.').pop();
+  let language = fileName.split('.').pop();
 
   if (language === 'js' || language === 'jsx') language = 'javascript';
   else if (language === 'ts' || language === 'tsx') language = 'typescript';

@@ -17,4 +17,6 @@ services:
       - ./web:/srv/www
     ports:
       - "3000:3000"
+    environment:
+      - CORE_API_BASE_URL=${CORE_API_BASE_URL}
 

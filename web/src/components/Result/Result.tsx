@@ -23,6 +23,9 @@ export default function Result({ files }: { files: FileMap }) {
 
   return (
     <section id="code-viewer">
+      <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded" onClick={handleDownload}>
+        Download ZIP
+      </button>
       <div className="py-8 px-4 mx-auto max-w-screen-lg">
         <div className="flex flex-col md:flex-row gap-6 p-4">
           <div className="md:w-1/3">
@@ -45,10 +48,6 @@ export default function Result({ files }: { files: FileMap }) {
           </div>
         </div>
       </div>
-
-      <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded" onClick={handleDownload}>
-        Download ZIP
-      </button>
     </section>
   );
 }

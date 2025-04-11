@@ -1,7 +1,7 @@
 // app/api/generate/route.js
 
 export async function POST(req: Request) {
-  const externalUrl = 'http://localhost:8000/generate';
+  const externalUrl = `${process.env.CORE_API_BASE_URL}/generate`;
   const { project_name, backend_option, features, user_input } = await req.json();
 
   const payload = {

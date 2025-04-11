@@ -1,0 +1,12 @@
+services:
+  core:
+    image: scafoldr/core
+    build:
+      context: ./core
+    restart: unless-stopped
+    
+  web:
+    image: scafoldr/web
+    build:
+      context: ./web
+    restart: unless-stopped

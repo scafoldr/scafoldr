@@ -1,0 +1,22 @@
+services:
+  core:
+    build:
+      context: ./core
+      target: app_dev
+    volumes:
+      - ./core:/srv/www
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_MODEL=${OPENAI_API_MODEL}
+
+  web:
+    build:
+      context: ./web
+      target: app_dev
+    volumes:
+      - ./web:/srv/www
+    ports:
+      - "3000:3000"
+    environment:
+      - CORE_API_BASE_URL=${CORE_API_BASE_URL}
+

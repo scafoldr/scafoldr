@@ -26,7 +26,13 @@ export default function Result({ files }: { files: FileMap }) {
       <div className="py-8 px-4 mx-auto max-w-screen-lg">
         <div className="flex flex-col md:flex-row gap-6 p-4">
           <div className="md:w-1/3">
-            <div className="h-[500px] overflow-y-scroll">
+            <div
+              className="h-[500px] overflow-y-scroll 
+                [&::-webkit-scrollbar]:w-2
+              [&::-webkit-scrollbar-track]:bg-gray-100
+              [&::-webkit-scrollbar-thumb]:bg-gray-300
+              dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+              dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
               <FileTree
                 rootDir={filesTree}
                 onSelect={setSelectedFile}

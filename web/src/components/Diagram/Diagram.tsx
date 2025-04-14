@@ -1,37 +1,57 @@
-// components/Diagram.tsx
 'use client';
 
-import { Stage, Layer, Rect, Text } from 'react-konva';
+import { Stage, Layer } from 'react-konva';
+import Relationship from './components/Relationship';
+import { IERDiagram } from './types';
+import Table from './components/Table';
+import { useEffect, useState } from 'react';
 
-const Diagram = ({ dbml }: { dbml: string }) => {
-  // Define dimensions matching your HTML snippet
+interface DiagramProps {
+  initialDiagram: IERDiagram;
+}
+
+const Diagram = ({ initialDiagram }: DiagramProps) => {
+  const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
+
+  useEffect(() => {
+    setDiagram(initialDiagram);
+  }, [initialDiagram]);
+
+  const handleDragMove = (tableId: string, x: number, y: number) => {
+    setDiagram((prevDiagram) => {
+      const updatedTables = prevDiagram.tables.map((table) => {
+        if (table.id === tableId) {
+          return { ...table, position: { x, y } };
+        }
+        return table;
+      });
+
+      return { ...prevDiagram, tables: updatedTables };
+    });
+  };
+
   const stageWidth = 905;
-  const stageHeight = 1300;
+  const stageHeight = 900;
 
   return (
     <div
       tabIndex={0}
       className="diagram"
       style={{
-        backgroundColor: 'rgb(68, 68, 76)', // dark background as provided
+        backgroundColor: 'rgb(68, 68, 76)',
         cursor: 'default',
-        width: `${stageWidth}px`,
-        height: `${stageHeight}px`
+        width: stageWidth,
+        height: stageHeight
       }}>
-      <Stage width={stageWidth} height={stageHeight}>
+      <Stage width={stageWidth} height={stageHeight} draggable>
         <Layer>
-          {/* Example shape: A draggable white rectangle with text */}
-          <Rect
-            x={50}
-            y={50}
-            width={200}
-            height={100}
-            fill="white"
-            stroke="#2b6cb0"
-            strokeWidth={2}
-            draggable
-          />
-          <Text text="Drag me!" x={60} y={70} fontSize={16} fill="black" />
+          {diagram.tables.map((table) => {
+            return <Table key={table.id} table={table} onDragMove={handleDragMove} />;
+          })}
+
+          {diagram.relationships.map((rel) => {
+            return <Relationship key={rel.id} relationship={rel} tables={diagram.tables} />;
+          })}
         </Layer>
       </Stage>
     </div>

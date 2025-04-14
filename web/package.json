@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dbml/core": "^3.12.0",
     "@monaco-editor/react": "^4.7.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",

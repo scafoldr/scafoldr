@@ -27,7 +27,7 @@ const Relationship = ({ relationship, tables }: RelationshipProps) => {
   const startY =
     sourceTable.position.y +
     HEADER_COLUMN_HEIGHT +
-    COLUMN_HEIGHT * sourceColumn.index -
+    COLUMN_HEIGHT * sourceColumn.index +
     COLUMN_HEIGHT / 2;
 
   const endX =
@@ -37,14 +37,14 @@ const Relationship = ({ relationship, tables }: RelationshipProps) => {
   const endY =
     targetTable.position.y +
     HEADER_COLUMN_HEIGHT +
-    COLUMN_HEIGHT * targetColumn.index -
+    COLUMN_HEIGHT * targetColumn.index +
     COLUMN_HEIGHT / 2;
 
   return (
     <Arrow
       points={[startX, startY, endX, endY]}
-      stroke="red"
-      fill="red"
+      stroke="#FAD02C"
+      fill="#FAD02C"
       pointerLength={10}
       pointerWidth={10}
     />

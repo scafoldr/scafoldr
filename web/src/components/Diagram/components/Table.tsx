@@ -3,6 +3,13 @@
 import React from 'react';
 import { Group, Rect, Text } from 'react-konva';
 import { ITable } from '../types';
+import {
+  COLUMN_HEIGHT,
+  COLUMN_PADDING_LEFT,
+  COLUMN_PADDING_TOP,
+  FONT_SIZE,
+  HEADER_COLUMN_HEIGHT
+} from '../constants';
 
 const Table = ({
   table,
@@ -22,22 +29,39 @@ const Table = ({
       }}>
       <Rect
         width={table.width}
-        height={table.height}
-        fill="white"
+        height={HEADER_COLUMN_HEIGHT}
+        fill="#333652"
         stroke="#2b6cb0"
-        strokeWidth={2}
-        cornerRadius={4}
+        strokeWidth={0}
+        cornerRadius={0}
       />
-      <Text text={table.name} x={10} y={10} fontSize={14} fill="blue" />
+      <Text
+        text={table.name}
+        x={COLUMN_PADDING_LEFT}
+        y={COLUMN_PADDING_TOP}
+        fontSize={FONT_SIZE}
+        fill="#FAD02C"
+      />
       {table.columns.map((col, idx) => (
-        <Text
-          key={col.id}
-          text={`${col.name}: ${col.dataType}${col.isPrimary ? ' [pk]' : ''} ${col.isForeign ? ' [fk]' : ''}`}
-          x={10}
-          y={30 + idx * 20} // header height (30) plus an increment per column
-          fontSize={12}
-          fill="#333"
-        />
+        <>
+          <Rect
+            key={col.id}
+            width={table.width}
+            height={COLUMN_HEIGHT}
+            y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT} // header height (30) plus an increment per column
+            fill="#90ADC6"
+            stroke="#2b6cb0"
+            strokeWidth={0}
+            cornerRadius={0}
+          />
+          <Text
+            text={`${col.name}: ${col.dataType}${col.isPrimary ? ' [pk]' : ''} ${col.isForeign ? ' [fk]' : ''}`}
+            x={COLUMN_PADDING_LEFT}
+            y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT + COLUMN_PADDING_TOP} // header height (30) plus an increment per column
+            fontSize={FONT_SIZE}
+            fill="#333652"
+          />
+        </>
       ))}
     </Group>
   );

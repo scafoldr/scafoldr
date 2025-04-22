@@ -9,13 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dbml/core": "^3.12.0",
     "@monaco-editor/react": "^4.7.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-konva": "^19.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

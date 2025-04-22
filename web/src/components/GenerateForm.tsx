@@ -3,11 +3,19 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Result from './Result/Result';
 import { FileMap } from './Result/types';
+import { EXAMPLE_DBML } from '@/constants';
+
+import dynamic from 'next/dynamic';
+import { parseDbmlToDiagram } from './Diagram/utils/dbml';
+
+const Diagram = dynamic(() => import('./Diagram/Diagram'), { ssr: false });
 
 const GenerateForm = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<{ files: FileMap; command: string } | null>(null);
   const [error, setError] = useState(null);
+
+  const [dbmlInput, setDbmlInput] = useState<string>(EXAMPLE_DBML);
 
   const handleSubmit = async (formData: FormData) => {
     // event.preventDefault();
@@ -104,6 +112,10 @@ const GenerateForm = () => {
           to create your DBML schema
         </label>
         <textarea
+          value={dbmlInput}
+          onChange={(e) => {
+            setDbmlInput(e.target.value);
+          }}
           name="schema"
           id="schema"
           rows={8}
@@ -115,6 +127,7 @@ const GenerateForm = () => {
         className="inline-block rounded-sm border border-indigo-600 bg-indigo-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:ring-3 focus:outline-hidden">
         Get your code
       </button>
+      <Diagram initialDiagram={parseDbmlToDiagram(dbmlInput)} />
 
       {loading && <div>Loading...</div>}
       {response && <Result files={response?.files} />}

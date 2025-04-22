@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Group, Rect, Text } from 'react-konva';
 import { ITable } from '../types';
 import {
@@ -43,9 +43,8 @@ const Table = ({
         fill="#FAD02C"
       />
       {table.columns.map((col, idx) => (
-        <>
+        <Fragment key={col.id}>
           <Rect
-            key={col.id}
             width={table.width}
             height={COLUMN_HEIGHT}
             y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT} // header height (30) plus an increment per column
@@ -61,7 +60,7 @@ const Table = ({
             fontSize={FONT_SIZE}
             fill="#333652"
           />
-        </>
+        </Fragment>
       ))}
     </Group>
   );

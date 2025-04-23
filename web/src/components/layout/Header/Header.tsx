@@ -3,7 +3,7 @@ import Container from '../Container/Container';
 const Header = () => (
   <header>
     <Container>
-      <div className="flex justify-between py-4">
+      <div className="flex justify-between py-6">
         <div className="text-xl font-bold">🏗️ scafoldr</div>
         <div>
           <label className="toggle text-base-content">

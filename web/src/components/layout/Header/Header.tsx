@@ -4,7 +4,7 @@ const Header = () => (
   <header>
     <Container>
       <div className="flex justify-between py-4">
-        <div>scafoldr</div>
+        <div className="text-xl font-bold">🏗️ scafoldr</div>
         <div>
           <label className="toggle text-base-content">
             <input type="checkbox" value="dark" className="theme-controller" />

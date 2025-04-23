@@ -4,18 +4,32 @@ import { Stage, Layer } from 'react-konva';
 import Relationship from './components/Relationship';
 import { IERDiagram } from './types';
 import Table from './components/Table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface DiagramProps {
   initialDiagram: IERDiagram;
 }
 
 const Diagram = ({ initialDiagram }: DiagramProps) => {
+  const ref = useRef<HTMLDivElement>(null);
   const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
+
+  const [scaleX, setScaleX] = useState(1);
+  const [scaleY, setScaleY] = useState(1);
+
+  const sceneWidth = 2000;
+  const sceneHeight = 1000;
 
   useEffect(() => {
     setDiagram(initialDiagram);
   }, [initialDiagram]);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    setScaleX(ref.current.getBoundingClientRect().width / sceneWidth);
+    setScaleY(ref.current.getBoundingClientRect().height / sceneHeight);
+  }, [ref?.current]);
 
   const handleDragMove = (tableId: string, x: number, y: number) => {
     setDiagram((prevDiagram) => {
@@ -30,20 +44,22 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
     });
   };
 
-  const stageWidth = 905;
-  const stageHeight = 900;
+  // const scaleX = (ref?.current?.getBoundingClientRect().width ?? sceneWidth) / sceneWidth;
+  // const scaleY = (ref?.current?.getBoundingClientRect().height ?? sceneHeight) / sceneHeight;
 
   return (
     <div
       tabIndex={0}
-      className="diagram"
+      className="diagram w-full h-full"
       style={{
-        backgroundColor: 'rgb(68, 68, 76)',
-        cursor: 'default',
-        width: stageWidth,
-        height: stageHeight
-      }}>
-      <Stage width={stageWidth} height={stageHeight} draggable>
+        backgroundColor: 'rgb(68, 68, 76)'
+      }}
+      ref={ref}>
+      <Stage
+        width={sceneWidth * scaleX}
+        height={sceneHeight * scaleY}
+        scale={{ x: scaleX, y: scaleY }}
+        draggable>
         <Layer>
           {diagram.tables.map((table) => {
             return <Table key={table.id} table={table} onDragMove={handleDragMove} />;

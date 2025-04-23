@@ -13,10 +13,14 @@ const GenerateCode = ({ dbmlCode }: GenerateCodeProps) => {
   const [response, setResponse] = useState<{ files: FileMap; command: string } | null>(null);
   const [error, setError] = useState(null);
 
+  const isFormVisible = !loading && !response && !error;
+  const isResultsVisible = !!response && !loading && !error;
+  const isErrorVisible = !!error && !loading && !response;
+  const isLoadingVisible = loading;
+
   const handleSubmit = async (formData: FormData) => {
     // event.preventDefault();
     setLoading(true);
-
     const requestData = {
       project_name: formData.get('project-name'),
       backend_option: formData.get('backend-option'),
@@ -50,7 +54,11 @@ const GenerateCode = ({ dbmlCode }: GenerateCodeProps) => {
   };
 
   const renderForm = () => (
-    <form action={handleSubmit}>
+    <form
+      action={(formData: FormData) => {
+        setLoading(true);
+        handleSubmit(formData);
+      }}>
       <fieldset className="fieldset">
         <legend className="fieldset-legend">Project name:</legend>
         <input
@@ -107,12 +115,18 @@ const GenerateCode = ({ dbmlCode }: GenerateCodeProps) => {
         Get your code
       </button>
       <dialog id="my_modal_1" className="modal">
-        <div className="modal-box w-11/12 max-w-5xl">
+        <div className={`modal-box ${isResultsVisible ? 'w-11/12 max-w-5xl' : ''}`}>
+          <form method="dialog">
+            {/* if there is a button in form, it will close the modal */}
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
           <h3 className="font-bold text-lg">Generate your code</h3>
-          {!loading && !response && renderForm()}
-          {loading && renderLoader()}
-          {error && renderError()}
-          {response && !error && renderResults()}
+          <div className="mt-3">
+            {isFormVisible && renderForm()}
+            {isLoadingVisible && renderLoader()}
+            {isErrorVisible && renderError()}
+            {isResultsVisible && renderResults()}
+          </div>
         </div>
       </dialog>
     </>

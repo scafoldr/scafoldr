@@ -5,7 +5,7 @@ const Chat = () => (
         <input type="text" placeholder="Describe your database" required />
       </label>
     </div>
-    <button className="btn btn-xl btn-neutral join-item">Ask</button>
+    <button className="btn btn-xl btn-primary join-item">Ask</button>
   </div>
 );
 

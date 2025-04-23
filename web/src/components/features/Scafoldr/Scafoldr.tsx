@@ -16,12 +16,20 @@ const Scafoldr = () => {
   };
 
   return (
-    <section>
-      <Container>
-        <Preview dbmlCode={dbmlCode} onDbmlCodeChange={handleDbmlCodeChange} />
-        <Chat />
-      </Container>
-    </section>
+    <>
+      <section id="preview">
+        <Container>
+          <Preview dbmlCode={dbmlCode} onDbmlCodeChange={handleDbmlCodeChange} />
+        </Container>
+      </section>
+      <section id="scafoldr-chat">
+        <div className="fixed bottom-16 left-0 right-0">
+          <Container>
+            <Chat />
+          </Container>
+        </div>
+      </section>
+    </>
   );
 };
 

@@ -48,13 +48,7 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   // const scaleY = (ref?.current?.getBoundingClientRect().height ?? sceneHeight) / sceneHeight;
 
   return (
-    <div
-      tabIndex={0}
-      className="diagram w-full h-full"
-      style={{
-        backgroundColor: 'rgb(68, 68, 76)'
-      }}
-      ref={ref}>
+    <div tabIndex={0} className="diagram w-full h-full" ref={ref}>
       <Stage
         width={sceneWidth * scaleX}
         height={sceneHeight * scaleY}

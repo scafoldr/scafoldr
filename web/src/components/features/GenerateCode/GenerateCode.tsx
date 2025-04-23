@@ -1,7 +1,7 @@
 'use client';
 
-import Result from '@/components/Result/Result';
-import { FileMap } from '@/components/Result/types';
+import Result from '@/components/features/Result/Result';
+import { FileMap } from '@/components/features/Result/types';
 import { useState } from 'react';
 
 interface GenerateCodeProps {

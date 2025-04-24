@@ -5,6 +5,17 @@ from core.chat.chats.dbml_chat.prompt import PROMPT_TEMPLATE
 from typing import Iterator
 
 class DBMLChat(BaseChat):
+    # a simple in-memory store; replace with Redis/db in prod
+    _history: dict[str, list[dict]] = {}
+
+    def _get_history(self, key: str):
+        return self._history.setdefault(
+            key,
+            # seed with your system prompt so it’s always first
+            [{"role": "system", "content": PROMPT_TEMPLATE.split("Conversation:")[0]}],
+        )
+
+
     def __init__(self):
         self.agent_coordinator = AgentCoordinator()
 
@@ -14,9 +25,21 @@ class DBMLChat(BaseChat):
         return ai_response
     
     def get_DBML_stream(self, request: ChatRequest) -> Iterator[str]:
-        prompt = PROMPT_TEMPLATE.format(user_description=request.user_input)
-        for chunk in self.agent_coordinator.ask_agent_interactively(prompt):
+        # use conversation id instead of chat key
+        history = self._get_history(request.chat_key)
+        # append the new user message
+        history.append({"role": "user", "content": request.user_input})
+
+        # call your streaming agent with the full history
+        stream = self.agent_coordinator.ask_agent_interactively(history)
+
+        full_resp = ""
+        for chunk in stream:
             yield chunk
+            full_resp += chunk
+
+        # once done, record the assistant reply for next time
+        history.append({"role": "assistant", "content": full_resp})
 
     def generate(self, request: ChatRequest) -> ChatResponse:
         print("Generating DBML code")

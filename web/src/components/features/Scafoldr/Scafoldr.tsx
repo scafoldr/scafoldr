@@ -25,7 +25,7 @@ const Scafoldr = () => {
       <section id="scafoldr-chat">
         <div className="fixed bottom-16 left-0 right-0">
           <Container>
-            <Chat />
+            <Chat onDbmlCodeChange={handleDbmlCodeChange} />
           </Container>
         </div>
       </section>

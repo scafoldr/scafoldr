@@ -55,14 +55,14 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
     e.preventDefault();
     addMessage(chatInput, MessageType.TEXT, MessageFrom.USER);
     addMessage('Thinking', MessageType.LOADING, MessageFrom.AGENT);
+    const userInput = chatInput;
+    setChatInput('');
 
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_input: chatInput })
+      body: JSON.stringify({ user_input: userInput })
     });
-
-    setChatInput('');
 
     if (!res.ok || !res.body) {
       const errText = await res.text();

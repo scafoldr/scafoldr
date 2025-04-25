@@ -1,13 +1,17 @@
 export const runtime = 'edge';
 
 export async function POST(req: Request) {
-  const { user_input } = await req.json();
+  const { userInput, conversationId } = await req.json();
   const externalUrl = `${process.env.CORE_API_BASE_URL}/chat-interactive`;
 
   const upstream = await fetch(externalUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_key: 'dbml-chat', user_input })
+    body: JSON.stringify({
+      chat_key: 'dbml-chat',
+      user_input: userInput,
+      conversation_id: conversationId
+    })
   });
 
   if (!upstream.ok) {

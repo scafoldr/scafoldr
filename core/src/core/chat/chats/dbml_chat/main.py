@@ -25,8 +25,7 @@ class DBMLChat(BaseChat):
         return ai_response
     
     def get_DBML_stream(self, request: ChatRequest) -> Iterator[str]:
-        # use conversation id instead of chat key
-        history = self._get_history(request.chat_key)
+        history = self._get_history(request.conversation_id)
         # append the new user message
         history.append({"role": "user", "content": request.user_input})
 

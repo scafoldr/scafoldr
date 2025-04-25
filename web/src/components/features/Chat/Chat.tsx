@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import ChatHistory from './components/ChatHistory';
 import { Message, MessageFrom, MessageType } from './types/messageTypes';
 
@@ -9,6 +9,7 @@ interface ChatProps {
 }
 
 const Chat = ({ onDbmlCodeChange }: ChatProps) => {
+  const conversationId = useMemo(() => Math.random().toString(), []);
   const [chatInput, setChatInput] = useState('');
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -58,10 +59,10 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
     const userInput = chatInput;
     setChatInput('');
 
-    const res = await fetch('/api/chat', {
+    const res = await fetch('/api/chat-interactive', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_input: userInput })
+      body: JSON.stringify({ userInput, conversationId })
     });
 
     if (!res.ok || !res.body) {

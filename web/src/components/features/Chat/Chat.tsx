@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChatError from './components/ChatError';
 import ChatLoader from './components/ChatLoader';
 import ChatHistory from './components/ChatHistory';
@@ -14,7 +14,12 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const bottomRef = useRef<HTMLDivElement>(null);
   const [chatHistory, setChatHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory]);
 
   const handleAskButtonClick = async () => {
     setIsLoading(true);
@@ -61,10 +66,11 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
 
   return (
     <div className="flex flex-col h-full gap-2">
-      <div className="w-full grow">
+      <div className="w-full grow overflow-y-scroll">
         {isLoading && <ChatLoader />}
         {error && <ChatError error={error} />}
         <ChatHistory chatHistory={chatHistory} />
+        <div ref={bottomRef} />
       </div>
       <div className="join w-full">
         <div className="w-full">

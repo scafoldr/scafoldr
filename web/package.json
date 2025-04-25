@@ -22,6 +22,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -15,7 +15,7 @@ const ChatHistory = ({ chatHistory }: ChatHistoryProps) => {
           <p>🛠️ Edit: Hop into DBML view & fine-tune tables and columns. </p>
           <p>👀 Preview: Watch your ER-diagram spring to life.</p>
           <p>
-            ⚡ Generate: Click “Generate Code” to spin up your backend. Ready to build? Let’s go!
+            ⚡ Generate: Click “Get your code” to spin up your backend. Ready to build? Let’s go!
           </p>
         </div>
       )}

@@ -89,7 +89,7 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
     if (accumulated.startsWith('Table')) {
       // Assuming the response is a DBML code
       onDbmlCodeChange(accumulated);
-      addMessage('Done, you can now use the Diagram', MessageType.TEXT, MessageFrom.AGENT);
+      addMessage('Done, you can now generate backend code!', MessageType.TEXT, MessageFrom.AGENT);
     }
   };
 

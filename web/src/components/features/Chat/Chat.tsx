@@ -60,8 +60,8 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
   };
 
   return (
-    <>
-      <div className="w-full">
+    <div className="flex flex-col h-full gap-2">
+      <div className="w-full grow">
         {isLoading && <ChatLoader />}
         {error && <ChatError error={error} />}
         <ChatHistory chatHistory={chatHistory} />
@@ -82,7 +82,7 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
           Ask
         </button>
       </div>
-    </>
+    </div>
   );
 };
 

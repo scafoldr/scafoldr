@@ -1,7 +1,8 @@
+import { Message } from '../types/messageTypes';
 import ChatBubble from './ChatBubble';
 
 interface ChatHistoryProps {
-  chatHistory: string[];
+  chatHistory: Message[];
 }
 
 const ChatHistory = ({ chatHistory }: ChatHistoryProps) => {
@@ -18,12 +19,8 @@ const ChatHistory = ({ chatHistory }: ChatHistoryProps) => {
           </p>
         </div>
       )}
-      {chatHistory.map((chatText, index) => (
-        <ChatBubble
-          chatText={chatText}
-          key={index}
-          direction={index % 2 === 0 ? 'outgoing' : 'incoming'}
-        />
+      {chatHistory.map((message, index) => (
+        <ChatBubble chatText={message.text} key={index} from={message.from} type={message.type} />
       ))}
     </div>
   );

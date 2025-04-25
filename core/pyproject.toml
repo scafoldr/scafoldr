@@ -14,8 +14,9 @@ dependencies = [
     "langchain-openai",
     "langchain_core",
     "dotenv",
-    "pydantic"
-
+    "pydantic",
+    "pydbml",
+    "inflect"
 ]
 
 [tool.setuptools.packages.find]

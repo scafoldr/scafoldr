@@ -17,8 +17,8 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
 
-  const sceneWidth = 2000;
-  const sceneHeight = 1000;
+  const sceneWidth = 1000;
+  const sceneHeight = 1500;
 
   useEffect(() => {
     setDiagram(initialDiagram);
@@ -27,8 +27,8 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   useEffect(() => {
     if (!ref.current) return;
 
-    setScaleX(ref.current.getBoundingClientRect().width / sceneWidth);
-    setScaleY(ref.current.getBoundingClientRect().height / sceneHeight);
+    setScaleX(ref.current.offsetWidth / sceneWidth);
+    setScaleY(ref.current.offsetHeight / sceneHeight);
   }, [ref?.current]);
 
   const handleDragMove = (tableId: string, x: number, y: number) => {
@@ -50,7 +50,8 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   return (
     <div tabIndex={0} className="diagram w-full h-full" ref={ref}>
       <Stage
-        width={sceneWidth * scaleX}
+        // quick fix for glitching issue on tabs switching
+        width={sceneWidth * scaleX - 8}
         height={sceneHeight * scaleY}
         scale={{ x: scaleX, y: scaleY }}
         draggable>

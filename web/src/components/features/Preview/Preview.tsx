@@ -15,7 +15,8 @@ interface PreviewProps {
 
 const Preview = ({ dbmlCode, onDbmlCodeChange }: PreviewProps) => {
   return (
-    <div className="tabs tabs-lift tabs-xs h-[70vh] relative">
+    // add content-end because of sizing bug
+    <div className="tabs tabs-lift tabs-xs relative h-full content-end">
       <input type="radio" name="my_tabs_3" className="tab" aria-label="Visual" defaultChecked />
       <div className="tab-content bg-base-100 border-base-300 p-6">
         <Diagram initialDiagram={parseDbmlToDiagram(dbmlCode)} />

@@ -1,6 +1,7 @@
 from core.agents.base_agent import BaseAgent
 import openai
 from langchain_openai import ChatOpenAI
+from typing import Iterator
 
 class OpenAIAgent(BaseAgent):
     model: str
@@ -10,7 +11,15 @@ class OpenAIAgent(BaseAgent):
         self.model = model
 
     def ask(self, prompt: str) -> str:    
-        llm = ChatOpenAI(model=self.model)
+        llm = ChatOpenAI(model=self.model, streaming=True)
         response = llm.invoke(prompt)
 
         return response.content
+    
+    def ask_interactively(self, prompt: str) -> Iterator[str]:
+        llm = ChatOpenAI(model=self.model)
+
+        for chunk in llm.stream(prompt):
+            text = chunk.content
+            if text:
+                yield text

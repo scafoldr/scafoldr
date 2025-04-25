@@ -17,8 +17,8 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
 
-  const sceneWidth = 2000;
-  const sceneHeight = 1000;
+  const sceneWidth = 1000;
+  const sceneHeight = 1500;
 
   useEffect(() => {
     setDiagram(initialDiagram);

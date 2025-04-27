@@ -8,7 +8,7 @@ import os
 from inflect import engine
 
 class NodeExpressJSGenerator(BaseGenerator):
-    def get_static_files(self, request: GenerateRequest) -> dict[str, str]:
+    def get_static_files(self) -> dict[str, str]:
         template_dir = "./templates/node_express_js"
         predefined_code = {}
         for root, _, files in os.walk(template_dir):
@@ -30,7 +30,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         if "float" in t:   return "FLOAT"
         return "STRING"
 
-    def generate_models(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_models(self, schema: Database) -> dict[str, str]:
         out = {}
         inflect_engine = inflect.engine()
         for tbl in schema.tables:
@@ -58,7 +58,7 @@ class NodeExpressJSGenerator(BaseGenerator):
 
         return out
 
-    def generate_models_index(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_models_index(self, schema: Database) -> dict[str, str]:
         inflect_engine = engine()
 
         lines = [
@@ -111,7 +111,7 @@ class NodeExpressJSGenerator(BaseGenerator):
 
 
     
-    def generate_repositories(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_repositories(self, schema: Database) -> dict[str, str]:
         out = {}
         inflect_engine = inflect.engine()
         for tbl in schema.tables:
@@ -132,7 +132,7 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/repositories/{Model}Repository.js"] = "\n".join(repo)
         return out
 
-    def generate_services(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_services(self, schema: Database) -> dict[str, str]:
         out = {}
         inflect_engine = inflect.engine()
         for tbl in schema.tables:
@@ -153,7 +153,7 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/services/{Model}Service.js"] = "\n".join(svc)
         return out
 
-    def generate_controllers(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_controllers(self, schema: Database) -> dict[str, str]:
         out = {}
         inflect_engine = inflect.engine()
         for tbl in schema.tables:
@@ -173,7 +173,7 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/controllers/{Model}Controller.js"] = "\n".join(ctrl)
         return out
 
-    def generate_routes(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_routes(self, schema: Database) -> dict[str, str]:
         out = {}
         inflect_engine = inflect.engine()
 
@@ -202,7 +202,7 @@ class NodeExpressJSGenerator(BaseGenerator):
 
         return out
         
-    def generate_app_file(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
+    def generate_app_file(self, schema: Database) -> dict[str, str]:
         inflect_engine = engine()  # from `from inflect import engine`
         lines = [
             "const express = require('express');",
@@ -242,14 +242,14 @@ class NodeExpressJSGenerator(BaseGenerator):
         print("Generating Node.js Express code")
         schema = PyDBML(request.user_input)
         files: dict[str,str] = {
-            **self.get_static_files(request),
-            **self.generate_models(request, schema),
-            **self.generate_models_index(request, schema),
-            **self.generate_repositories(request, schema),
-            **self.generate_services(request, schema),
-            **self.generate_controllers(request, schema),
-            **self.generate_routes(request, schema),
-            **self.generate_app_file(request, schema),
+            **self.get_static_files(),
+            **self.generate_models(schema),
+            **self.generate_models_index(schema),
+            **self.generate_repositories(schema),
+            **self.generate_services(schema),
+            **self.generate_controllers(schema),
+            **self.generate_routes(schema),
+            **self.generate_app_file(schema),
         }
 
 

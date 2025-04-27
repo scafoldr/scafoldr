@@ -59,8 +59,56 @@ class NodeExpressJSGenerator(BaseGenerator):
         return out
 
     def generate_models_index(self, request: GenerateRequest, schema: Database) -> dict[str, str]:
-        # TODO: Add support for associations
-        return {"src/models/index.js": ""}
+        inflect_engine = engine()
+
+        lines = [
+            "const sequelize = require('../../config/database');",
+            ""
+        ]
+        models = []
+        # 1) Require each model
+        for tbl in schema.tables:
+            singular = inflect_engine.singular_noun(tbl.name) or tbl.name
+            Model = singular[0].upper() + singular[1:]
+            lines.append(f"const {Model} = require('./{Model}')(sequelize);")
+            models.append((tbl.name, Model))
+        lines.append("")
+        lines.append("// Define associations")
+
+
+        # 2) one-to-many / many-to-one
+        for ref in schema.refs:
+            if ref.type not in ('>', '<'):
+                continue
+
+            # pick columns based on arrow direction
+            if ref.type == '>':  # left > right  → left is “many”, right is “one”
+                many_col = ref.col1[0]
+                one_col = ref.col2[0]
+            else:  # left < right  → left is “one”,  right is “many”
+                many_col = ref.col2[0]
+                one_col = ref.col1[0]
+
+            ManyModel = inflect_engine.singular_noun(many_col.table.name) or many_col.table.name
+            OneModel = inflect_engine.singular_noun(one_col.table.name) or one_col.table.name
+            MM = ManyModel[0].upper() + ManyModel[1:]
+            OM = OneModel[0].upper() + OneModel[1:]
+            fk = many_col.name
+
+            # many side belongsTo one side
+            lines.append(f"{MM}.belongsTo({OM}, {{ foreignKey: '{fk}' }});")
+            # one side hasMany   many side
+            lines.append(f"{OM}.hasMany({MM}, {{ foreignKey: '{fk}' }});")
+
+        # 4) Export all models
+        lines.append("")
+        lines.append("module.exports = {")
+        for _, Model in models:
+            lines.append(f"  {Model},")
+        lines.append("};")
+
+        return {"src/models/index.js": "\n".join(lines)}
+
 
     
     def generate_repositories(self, request: GenerateRequest, schema: Database) -> dict[str, str]:

@@ -6,3 +6,5 @@ dotenv
 pydantic
 fastapi
 uvicorn
+pydbml
+inflect

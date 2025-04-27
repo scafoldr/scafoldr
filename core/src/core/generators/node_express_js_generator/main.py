@@ -18,6 +18,9 @@ class NodeExpressJSGenerator(BaseGenerator):
                     relative_path = os.path.relpath(file_path, template_dir)
                     predefined_code[relative_path] = f.read()
 
+        # we need to do this manually since .env is in git ignore
+        predefined_code['.env'] = predefined_code['.env.example']
+
         return predefined_code
     
     def _map_type(self, sql_type: str) -> str:
@@ -25,7 +28,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         if "int" in t:     return "INTEGER"
         if "char" in t or "text" in t: return "STRING"
         if "bool" in t:    return "BOOLEAN"
-        if "date" in t:    return "DATE"
+        if "date" in t or "timestamp" in t:    return "DATE"
         if "decimal" in t: return "DECIMAL"
         if "float" in t:   return "FLOAT"
         return "STRING"
@@ -214,7 +217,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         for tbl in schema.tables:
             singular = inflect_engine.singular_noun(tbl.name) or tbl.name
             name_lower = singular.lower()
-            lines.append(f"const {name_lower}Routes = require('./routes/{name_lower}');")
+            lines.append(f"const {name_lower}Routes = require('./routes/{tbl.name.lower()}');")
         lines += [
             "",
             "const app = express();",

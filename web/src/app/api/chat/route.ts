@@ -9,7 +9,6 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        chat_key: 'dbml-chat',
         user_input: userInput,
         conversation_id: conversationId
       })

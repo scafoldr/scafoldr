@@ -1,8 +1,15 @@
+from pydantic import BaseModel, Field
+
 from core.chat.base_chat import BaseChat
 from core.agents.coordinator import AgentCoordinator
 from models.chat import ChatRequest, ChatResponse
 from core.chat.chats.dbml_chat.prompt import PROMPT_TEMPLATE
-from typing import Iterator
+from typing import Iterator, Literal
+
+
+class DBMLChatResponseFormat(BaseModel):
+    response_type: Literal['question', 'dbml'] = Field(description="Type of response, dbml code or question")
+    response: str = Field(description="Content of response, dbml code or question")
 
 class DBMLChat(BaseChat):
     # a simple in-memory store; replace with Redis/db in prod
@@ -19,9 +26,12 @@ class DBMLChat(BaseChat):
     def __init__(self):
         self.agent_coordinator = AgentCoordinator()
 
-    def get_DBML_schema(self, request: ChatRequest):
-        prompt = PROMPT_TEMPLATE.format(user_description=request.user_input)
-        ai_response = self.agent_coordinator.ask_agent(prompt)
+    def get_DBML_schema(self, request: ChatRequest) -> DBMLChatResponseFormat:
+        history = self._get_history(request.conversation_id)
+        history.append({"role": "user", "content": request.user_input})
+        ai_response = self.agent_coordinator.ask_agent_with_response_format(history, DBMLChatResponseFormat)
+        history.append({"role": "assistant", "content": ai_response.model_dump(mode="json").__str__()})
+
         return ai_response
     
     def get_DBML_stream(self, request: ChatRequest) -> Iterator[str]:
@@ -40,13 +50,11 @@ class DBMLChat(BaseChat):
         # once done, record the assistant reply for next time
         history.append({"role": "assistant", "content": full_resp})
 
-    def generate(self, request: ChatRequest) -> ChatResponse:
+    def generate(self, request: ChatRequest) -> DBMLChatResponseFormat:
         print("Generating DBML code")
         response = self.get_DBML_schema(request)
 
-        return ChatResponse(
-            response=response
-        )
+        return response
     
     def interactive_chat(self, request: ChatRequest) -> Iterator[str]:
         return self.get_DBML_stream(request)

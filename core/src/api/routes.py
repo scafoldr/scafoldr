@@ -1,6 +1,8 @@
 # src/api/routes.py
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
+
+from core.chat.chats.dbml_chat.main import DBMLChatResponseFormat
 from core.orchestrator import generate_backend, chat, chat_interactive
 from models.generate import GenerateRequest, GenerateResponse
 from models.chat import ChatRequest, ChatResponse
@@ -12,7 +14,7 @@ def generate_backend_route(request: GenerateRequest):
     project_files = generate_backend(request)
     return project_files
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat", response_model=DBMLChatResponseFormat)
 def chat_route(request: ChatRequest):
     response = chat(request)
     return response

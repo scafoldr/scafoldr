@@ -1,11 +1,10 @@
-# src/api/routes.py
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from core.chat.chats.dbml_chat.main import DBMLChatResponseFormat
-from core.orchestrator import generate_backend, dbml_chat
+from core.orchestrator import generate_backend, dbml_chat, stream_dbml_chat
 from models.generate import GenerateRequest, GenerateResponse
-from models.chat import ChatRequest, ChatResponse
+from models.chat import ChatRequest
 
 router = APIRouter()
 
@@ -19,7 +18,7 @@ def dbml_chat_route(request: ChatRequest):
     response = dbml_chat(request)
     return response
 
-# @router.post("/chat-interactive")
-# def chat_interactive_route(request: ChatRequest):
-#     print("Starting interactive chat")
-#     return StreamingResponse(chat_interactive(request), media_type="text/plain")
+@router.post("/generate-dbml-chat-stream")
+def chat_interactive_route(request: ChatRequest):
+    print("Starting interactive chat")
+    return StreamingResponse(stream_dbml_chat(request), media_type="text/plain")

@@ -15,9 +15,9 @@ def dbml_chat(request: ChatRequest) -> ChatResponse:
     response = chat.talk(request.user_input, request.conversation_id)
     
     return response
-#
-# def chat_interactive(request: ChatRequest) -> Iterator[str]:
-#     chat = get_chat(request.chat_key)
-#     response = chat.interactive_chat(request)
-#
-#     return response
+
+def stream_dbml_chat(request: ChatRequest) -> Iterator[str]:
+    chat = DBMLChat()
+    response = chat.stream_talk(request.user_input, request.conversation_id)
+
+    return response

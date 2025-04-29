@@ -13,6 +13,6 @@ class BaseAgent(ABC):
         pass
 
     @abstractmethod
-    def ask_interactively(self, prompt: str) ->  Iterator[str]:
+    def stream_ask(self, prompt: str) ->  Iterator[str]:
         """Given a prompt, return interactive response."""
         pass

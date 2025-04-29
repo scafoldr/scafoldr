@@ -17,5 +17,5 @@ class AgentCoordinator:
     def ask_agent_with_response_format(self, prompt, response_format):
         return self.agent.ask_with_response_format(prompt, response_format)
     
-    def ask_agent_interactively(self, prompt: str) -> Iterator[str]:
-        return self.agent.ask_interactively(prompt)
+    def stream_ask_agent(self, prompt) -> Iterator[str]:
+        return self.agent.stream_ask(prompt)

@@ -23,7 +23,7 @@ class OpenAIAgent(BaseAgent):
         result = structured_llm.invoke(prompt)
         return result
     
-    def ask_interactively(self, prompt: str) -> Iterator[str]:
+    def stream_ask(self, prompt: str) -> Iterator[str]:
         llm = ChatOpenAI(model=self.model)
 
         for chunk in llm.stream(prompt):

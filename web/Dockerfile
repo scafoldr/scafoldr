@@ -63,16 +63,11 @@ RUN mkdir .next; \
 COPY --from=node_builder --link --chown=1001:1001 /srv/www/.next/standalone ./
 COPY --from=node_builder --link --chown=1001:1001 /srv/www/.next/static ./.next/static
 
-# Copy NewRelic configuration file
-COPY --link ./newrelic.js ./newrelic.js
-
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
-
-ENV NODE_OPTIONS='-r newrelic'
 
 CMD ["node", "server.js"]

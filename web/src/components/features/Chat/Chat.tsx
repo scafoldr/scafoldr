@@ -59,7 +59,7 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
     const userInput = chatInput;
     setChatInput('');
 
-    const res = await fetch('/api/chat-interactive', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userInput, conversationId })
@@ -71,25 +71,13 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
       return;
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let accumulated = '';
+    const responseData = await res.json();
 
-    while (!done) {
-      const { value, done: streamDone } = await reader.read();
-      done = streamDone;
-      if (value) {
-        const chunk = decoder.decode(value, { stream: true });
-        accumulated += chunk;
-
-        updateLastMessage(accumulated, MessageType.TEXT);
-      }
-    }
-    if (accumulated.startsWith('Table')) {
-      // Assuming the response is a DBML code
-      onDbmlCodeChange(accumulated);
-      addMessage('Done, you can now generate backend code!', MessageType.TEXT, MessageFrom.AGENT);
+    if (responseData.response_type === 'question') {
+      updateLastMessage(responseData.response, MessageType.TEXT);
+    } else if (responseData.response_type === 'dbml') {
+      onDbmlCodeChange(responseData.response);
+      updateLastMessage('Done, you can now generate backend code!', MessageType.TEXT);
     }
   };
 

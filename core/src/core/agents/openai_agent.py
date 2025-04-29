@@ -15,8 +15,15 @@ class OpenAIAgent(BaseAgent):
         response = llm.invoke(prompt)
 
         return response.content
+
+    def ask_with_response_format(self, prompt: str, response_format) -> str:
+        model = ChatOpenAI(model=self.model)
+        structured_llm = model.with_structured_output(response_format)
+
+        result = structured_llm.invoke(prompt)
+        return result
     
-    def ask_interactively(self, prompt: str) -> Iterator[str]:
+    def stream_ask(self, prompt: str) -> Iterator[str]:
         llm = ChatOpenAI(model=self.model)
 
         for chunk in llm.stream(prompt):

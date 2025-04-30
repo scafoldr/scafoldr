@@ -10,3 +10,9 @@ services:
     build:
       context: ./web
     restart: unless-stopped
+
+  proxy:
+    image: scafoldr/proxy
+    build:
+      context: ./proxy
+    restart: unless-stopped

@@ -32,6 +32,8 @@ services:
       - ./proxy/site:/srv
       - caddy_data:/data
       - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN}
 
 volumes:
   caddy_data:

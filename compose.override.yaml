@@ -26,7 +26,6 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./proxy/Caddyfile:/etc/caddy/Caddyfile
       - ./proxy/site:/srv
       - caddy_data:/data
       - caddy_config:/config

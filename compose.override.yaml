@@ -19,4 +19,20 @@ services:
       - "3000:3000"
     environment:
       - CORE_API_BASE_URL=${CORE_API_BASE_URL}
+    
+  proxy:
+    build:
+      context: ./proxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile
+      - ./proxy/site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
 
+volumes:
+  caddy_data:
+  caddy_config:

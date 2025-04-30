@@ -15,8 +15,6 @@ services:
       target: app_dev
     volumes:
       - ./web:/srv/www
-    ports:
-      - "3000:3000"
     environment:
       - CORE_API_BASE_URL=${CORE_API_BASE_URL}
     

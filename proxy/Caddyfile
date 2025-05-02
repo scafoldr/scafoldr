@@ -1,7 +1,3 @@
-{
-  auto_https off
-}
-
 scafoldr.com {
   reverse_proxy /* scafoldr-web:3000
 }

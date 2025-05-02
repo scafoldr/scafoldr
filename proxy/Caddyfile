@@ -1,3 +1,7 @@
 {$DOMAIN} {
   reverse_proxy /* http://scafoldr-web:3000
+
+  tls {
+    dns cloudflare
+  }
 }

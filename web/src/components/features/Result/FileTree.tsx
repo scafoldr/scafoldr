@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react';
 import { Directory, File } from './types';
 import { sortDir, sortFile } from './utils/fileManager';
 import { getIcon } from './utils/icon';
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
 interface FileTreeProps {
   rootDir: Directory;
@@ -54,7 +55,11 @@ const FileDiv = ({
   onClick: () => void;
 }) => {
   const isSelected = (selectedFile && selectedFile.id === file.id) as boolean;
-  const depth = file.depth;
+
+  // Check if the file is a directory to make space for arrow icon
+  const isDirectory = (file as Directory).dirs !== undefined;
+  const depth = file.depth - (isDirectory ? 1 : 0);
+
   return (
     <div
       style={{ paddingLeft: `${depth * 16}px` }}
@@ -62,6 +67,8 @@ const FileDiv = ({
         isSelected ? 'bg-gray-700' : 'bg-transparent'
       } hover:cursor-pointer hover:bg-gray-500`}
       onClick={onClick}>
+      {icon === 'openDirectory' && <FaChevronDown />}
+      {icon === 'closedDirectory' && <FaChevronRight />}
       <FileIcon name={icon} extension={file.name.split('.').pop() || ''} />
       <span style={{ marginLeft: 1 }}>{file.name}</span>
     </div>

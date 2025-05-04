@@ -3,12 +3,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import ChatHistory from './components/ChatHistory';
 import { Message, MessageFrom, MessageType } from './types/messageTypes';
 
-interface ChatProps {
-  // eslint-disable-next-line no-unused-vars
-  onDbmlCodeChange: (value: string | undefined) => void;
-}
-
-const Chat = ({ onDbmlCodeChange }: ChatProps) => {
+const Chat = () => {
   const conversationId = useMemo(() => Math.random().toString(), []);
   const [chatInput, setChatInput] = useState('');
 
@@ -76,8 +71,9 @@ const Chat = ({ onDbmlCodeChange }: ChatProps) => {
     if (responseData.response_type === 'question') {
       updateLastMessage(responseData.response, MessageType.TEXT);
     } else if (responseData.response_type === 'dbml') {
-      onDbmlCodeChange(responseData.response);
-      updateLastMessage('Done, you can now generate backend code!', MessageType.TEXT);
+      updateLastMessage(responseData.response, MessageType.DBML);
+      addMessage('', MessageType.CALL_TO_ACTION, MessageFrom.AGENT);
+      // updateLastMessage('Done, you can now generate backend code!', MessageType.TEXT);
     }
   };
 

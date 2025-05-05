@@ -7,7 +7,7 @@ const Header = () => (
         <div className="text-xl font-bold">🏗️ scafoldr</div>
         <div>
           <label className="toggle text-base-content">
-            <input type="checkbox" value="light" className="theme-controller" />
+            <input type="checkbox" value="scafoldr-light" className="theme-controller" />
 
             <svg aria-label="moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <g

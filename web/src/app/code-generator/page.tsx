@@ -13,7 +13,7 @@ export default function CodeGenerator() {
     <div className="">
       <main className="">
         <Container>
-          <section id="scafoldr-code-generator" className="h-[100vh]">
+          <section id="scafoldr-code-generator" className="h-[100vh] mt-12">
             <Preview />
           </section>
         </Container>

@@ -22,7 +22,8 @@ class NodeExpressJSGenerator(BaseGenerator):
         predefined_code = {}
         for root, _, files in os.walk(template_dir):
             for file in files:
-                # TODO: filter out .j2 files
+                if file.endswith('.j2'):  # Skip .j2 files
+                    continue
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r') as f:
                     relative_path = os.path.relpath(file_path, template_dir)

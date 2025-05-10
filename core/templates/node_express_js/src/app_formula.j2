@@ -1,0 +1,16 @@
+const express = require('express');
+const cors = require('cors');
+{% for tbl in tables %}
+const {{ tbl.var }} = require('./routes/{{ tbl.plural }}');
+{% endfor %}
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+{% for tbl in tables %}
+app.use('/api/{{ tbl.plural }}', {{ tbl.var }});
+{% endfor %}
+
+module.exports = app;

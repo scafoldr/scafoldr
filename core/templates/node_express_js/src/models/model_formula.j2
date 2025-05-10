@@ -1,0 +1,14 @@
+module.exports = (sequelize) => {
+  const {{ Model }} = sequelize.define('{{ Model }}', {
+{% for col in columns %}
+    {{ col.name }}: {
+        {% if col.pk %}primaryKey: true, {% endif %}
+        type: sequelize.Sequelize.{{ col.mapped_type }},
+        allowNull: {{ 'true' if col.allowNull else 'false' }}
+    },
+{% endfor %}
+  }, {
+    tableName: '{{ table_name }}',
+  });
+  return {{ Model }};
+};

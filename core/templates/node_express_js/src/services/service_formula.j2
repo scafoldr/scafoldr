@@ -1,0 +1,11 @@
+const BaseService = require('./BaseService');
+const {{ Model }}Repository = require('../repositories/{{ Model }}Repository');
+
+class {{ Model }}Service extends BaseService {
+  constructor() {
+    const {{ variable_name }} = new {{ Model }}Repository();
+    super({{ variable_name }});
+  }
+}
+
+module.exports = new {{ Model }}Service();

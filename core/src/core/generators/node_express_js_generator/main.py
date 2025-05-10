@@ -1,11 +1,20 @@
-import inflect
-
 from core.generators.base_generator import BaseGenerator
+from core.generators.helpers.main import model_name, to_camel_case
 from models.generate import GenerateRequest, GenerateResponse
 from pydbml import PyDBML
 from pydbml.database import Database
 import os
-from inflect import engine
+
+from jinja2 import Environment, FileSystemLoader, Template
+
+TEMPLATES_DIR = "./templates/node_express_js"
+
+# configure Jinja2
+env = Environment(
+    loader=FileSystemLoader(TEMPLATES_DIR),
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
 
 class NodeExpressJSGenerator(BaseGenerator):
     def get_static_files(self) -> dict[str, str]:
@@ -13,6 +22,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         predefined_code = {}
         for root, _, files in os.walk(template_dir):
             for file in files:
+                # TODO: filter out .j2 files
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r') as f:
                     relative_path = os.path.relpath(file_path, template_dir)
@@ -34,211 +44,146 @@ class NodeExpressJSGenerator(BaseGenerator):
         return "STRING"
 
     def generate_models(self, schema: Database) -> dict[str, str]:
-        out = {}
-        inflect_engine = inflect.engine()
+        model_tpl = env.get_template("/src/models/model_formula.j2")
+        out: dict[str, str] = {}
         for tbl in schema.tables:
-            Model = inflect_engine.singular_noun(tbl.name.capitalize())
-            lines = [
-                "module.exports = (sequelize) => {",
-                f"  const {Model} = sequelize.define('{Model}', {{"
-            ]
+            Model = model_name(tbl.name)
+            table_name = tbl.name.lower()
+            # build a list of simple dicts for Jinja
+            columns = []
             for col in tbl.columns:
-                parts = [
-                    f"type: sequelize.Sequelize.{self._map_type(col.type)}",
-                    f"allowNull: {str(not col.not_null).lower()}"
-                ]
-                if col.pk:
-                    parts.insert(0, "primaryKey: true")
-                lines.append(f"    {col.name}: {{ " + ", ".join(parts) + " },")
-            lines += [
-                "  }, {",
-                f"    tableName: '{tbl.name.lower()}',",
-                "  });",
-                f"  return {Model};",
-                "};"
-            ]
-            out[f"src/models/{Model}.js"] = "\n".join(lines)
+                columns.append({
+                    "name":       col.name,
+                    "mapped_type": self._map_type(col.type),
+                    "allowNull":  not col.not_null,
+                    "pk":         col.pk,
+                })
 
+            content = model_tpl.render(
+                Model=Model,
+                table_name=table_name,
+                columns=columns,
+            )
+
+            out[f"src/models/{Model}.js"] = content
         return out
 
     def generate_models_index(self, schema: Database) -> dict[str, str]:
-        inflect_engine = engine()
-
-        lines = [
-            "const sequelize = require('../../config/database');",
-            ""
+        models_index_tpl = env.get_template("/src/models/models_index_formula.j2")
+        # 1) prepare table list
+        tables = [
+            {"Model": model_name(tbl.name)}
+            for tbl in schema.tables
         ]
-        models = []
-        # 1) Require each model
-        for tbl in schema.tables:
-            singular = inflect_engine.singular_noun(tbl.name) or tbl.name
-            Model = singular[0].upper() + singular[1:]
-            lines.append(f"const {Model} = require('./{Model}')(sequelize);")
-            models.append((tbl.name, Model))
-        lines.append("")
-        lines.append("// Define associations")
 
-
-        # 2) one-to-many / many-to-one
+        # 2) build association lines
+        associations: list[str] = []
         for ref in schema.refs:
             if ref.type not in ('>', '<'):
                 continue
 
-            # pick columns based on arrow direction
-            if ref.type == '>':  # left > right  → left is “many”, right is “one”
-                many_col = ref.col1[0]
-                one_col = ref.col2[0]
-            else:  # left < right  → left is “one”,  right is “many”
-                many_col = ref.col2[0]
-                one_col = ref.col1[0]
+            # decide which side is many vs. one
+            if ref.type == '>':
+                many_col, one_col = ref.col1[0], ref.col2[0]
+            else:
+                many_col, one_col = ref.col2[0], ref.col1[0]
 
-            ManyModel = inflect_engine.singular_noun(many_col.table.name) or many_col.table.name
-            OneModel = inflect_engine.singular_noun(one_col.table.name) or one_col.table.name
-            MM = ManyModel[0].upper() + ManyModel[1:]
-            OM = OneModel[0].upper() + OneModel[1:]
-            fk = many_col.name
+            ManyModel = model_name(many_col.table.name)
+            OneModel  = model_name(one_col.table.name)
+            fk         = many_col.name
 
-            # many side belongsTo one side
-            lines.append(f"{MM}.belongsTo({OM}, {{ foreignKey: '{fk}' }});")
-            # one side hasMany   many side
-            lines.append(f"{OM}.hasMany({MM}, {{ foreignKey: '{fk}' }});")
+            associations.append(
+                f"{ManyModel}.belongsTo({OneModel}, {{ foreignKey: '{fk}' }});"
+            )
+            associations.append(
+                f"{OneModel}.hasMany({ManyModel}, {{ foreignKey: '{fk}' }});"
+            )
 
-        # 4) Export all models
-        lines.append("")
-        lines.append("module.exports = {")
-        for _, Model in models:
-            lines.append(f"  {Model},")
-        lines.append("};")
+        # 3) render template
+        content = models_index_tpl.render(
+            tables=tables,
+            associations=associations
+        )
 
-        return {"src/models/index.js": "\n".join(lines)}
+        return {"src/models/index.js": content}
+
 
 
     
     def generate_repositories(self, schema: Database) -> dict[str, str]:
-        out = {}
-        inflect_engine = inflect.engine()
+        repo_tpl = env.get_template("/src/repositories/repository_formula.j2")
+        out: dict[str, str] = {}
         for tbl in schema.tables:
-            Model = inflect_engine.singular_noun(tbl.name.capitalize())
-            repo = [
-                "const BaseRepository = require('./BaseRepository');",
-                f"const {{ {Model} }} = require('../models');",
-                "",
-                f"class {Model}Repository extends BaseRepository {{",
-                "  constructor() {",
-                f"    super({Model});",
-                "  }",
-                "}",
-                "",
-                f"module.exports = {Model}Repository;",
-                "",
-            ]
-            out[f"src/repositories/{Model}Repository.js"] = "\n".join(repo)
+            Model = model_name(tbl.name)
+
+            content = repo_tpl.render(
+                Model=Model
+            )
+
+            out[f"src/repositories/{Model}Repository.js"] = content
         return out
 
+
+
     def generate_services(self, schema: Database) -> dict[str, str]:
-        out = {}
-        inflect_engine = inflect.engine()
+        service_tpl = env.get_template("/src/services/service_formula.j2")
+        out: dict[str, str] = {}
         for tbl in schema.tables:
-            Model = inflect_engine.singular_noun(tbl.name.capitalize())
-            variableName = Model[0].lower() + Model[1:] + "Repository"
-            svc = [
-                "const BaseService = require('./BaseService');",
-                f"const {Model}Repository = require('../repositories/{Model}Repository');",
-                "",
-                f"class {Model}Service extends BaseService {{",
-                "  constructor() {",
-                f"    const {variableName} = new {Model}Repository();",
-                f"    super({variableName});",
-                "  }",
-                "}",
-                f"module.exports = new {Model}Service();",
-            ]
-            out[f"src/services/{Model}Service.js"] = "\n".join(svc)
+            Model = model_name(tbl.name)
+            variable_name = to_camel_case(tbl.name) + "Repository"
+
+            # render the external template
+            content = service_tpl.render(
+                Model=Model,
+                variable_name=variable_name,
+            )
+
+            out[f"src/services/{Model}Service.js"] = content
         return out
 
     def generate_controllers(self, schema: Database) -> dict[str, str]:
-        out = {}
-        inflect_engine = inflect.engine()
+        controller_tpl = env.get_template("/src/controllers/controller_formula.j2")
+        out: dict[str, str] = {}
         for tbl in schema.tables:
-            Model = inflect_engine.singular_noun(tbl.name.capitalize())
-            ctrl = [
-                "const BaseController = require('./BaseController');",
-                f"const {Model}Service = require('../services/{Model}Service');",
-                "",
-                f"class {Model}Controller extends BaseController {{",
-                "  constructor() {",
-                f"    super({Model}Service);",
-                "  }",
-                "}",
-                "",
-                f"module.exports = new {Model}Controller();",
-            ]
-            out[f"src/controllers/{Model}Controller.js"] = "\n".join(ctrl)
+            Model = model_name(tbl.name)
+
+            content = controller_tpl.render(
+                Model=Model
+            )
+
+            out[f"src/controllers/{Model}Controller.js"] = content
         return out
 
     def generate_routes(self, schema: Database) -> dict[str, str]:
-        out = {}
-        inflect_engine = inflect.engine()
-
+        route_tpl = env.get_template("/src/routes/route_formula.j2")
+        out: dict[str, str] = {}
         for tbl in schema.tables:
-            # Determine singular Model name
-            raw = tbl.name.capitalize()
-            Model = inflect_engine.singular_noun(raw) or raw
-            var = Model[0].lower() + Model[1:] + "Controller"
-            route_file = tbl.name.lower()  # e.g. "users" -> "users.js"
+            Model = model_name(tbl.name)
+            var = to_camel_case(tbl.name) + "Controller"
+            route_file = f"{tbl.name.lower()}.js"
 
-            lines = [
-                "const express = require('express');",
-                "const router = express.Router();",
-                f"const {var} = require('../controllers/{Model}Controller');",
-                "",
-                f"router.get('/', {var}.getAll.bind({var}));",
-                f"router.get('/:id', {var}.getById.bind({var}));",
-                f"router.post('/', {var}.create.bind({var}));",
-                f"router.put('/:id', {var}.update.bind({var}));",
-                f"router.delete('/:id', {var}.delete.bind({var}));",
-                "",
-                "module.exports = router;"
-            ]
+            content = route_tpl.render(
+                Model=Model,
+                var=var
+            )
 
-            out[f"src/routes/{route_file}.js"] = "\n".join(lines)
-
+            out[f"src/routes/{route_file}"] = content
         return out
+
         
     def generate_app_file(self, schema: Database) -> dict[str, str]:
-        inflect_engine = engine()  # from `from inflect import engine`
-        lines = [
-            "const express = require('express');",
-            "const cors = require('cors');",
-            ""
+        app_tpl = env.get_template("/src/app_formula.j2")
+        # prepare a list of route imports & mounts
+        tables = [
+            {
+                "var": to_camel_case(tbl.name) + "Routes",
+                "plural": tbl.name.lower()
+            }
+            for tbl in schema.tables
         ]
 
-        # import each router
-        for tbl in schema.tables:
-            singular = inflect_engine.singular_noun(tbl.name) or tbl.name
-            name_lower = singular.lower()
-            lines.append(f"const {name_lower}Routes = require('./routes/{tbl.name.lower()}');")
-        lines += [
-            "",
-            "const app = express();",
-            "",
-            "app.use(cors());",
-            "app.use(express.json());",
-            ""
-        ]
-
-        # mount each under /api/<plural>
-        for tbl in schema.tables:
-            singular = inflect_engine.singular_noun(tbl.name) or tbl.name
-            name_lower = singular.lower()
-            plural = tbl.name.lower()
-            lines.append(f"app.use('/api/{plural}', {name_lower}Routes);")
-        lines += [
-            "",
-            "module.exports = app;"
-        ]
-
-        return {"src/app.js": "\n".join(lines)}
+        content = app_tpl.render(tables=tables)
+        return {"src/app.js": content}
 
 
     def generate(self, request: GenerateRequest) -> GenerateResponse:

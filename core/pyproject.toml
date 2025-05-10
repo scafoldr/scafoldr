@@ -16,7 +16,8 @@ dependencies = [
     "dotenv",
     "pydantic",
     "pydbml",
-    "inflect"
+    "inflect",
+    "jinja2"
 ]
 
 [tool.setuptools.packages.find]

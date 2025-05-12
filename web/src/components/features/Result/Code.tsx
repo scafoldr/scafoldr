@@ -12,6 +12,7 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
 
   if (language === 'js' || language === 'jsx') language = 'javascript';
   else if (language === 'ts' || language === 'tsx') language = 'typescript';
+  else if (language === 'java') language = 'java';
 
   return (
     <div className="m-0 text-base">

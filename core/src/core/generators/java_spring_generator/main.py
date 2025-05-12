@@ -1,68 +1,157 @@
 from core.generators.base_generator import BaseGenerator
-from core.agents.coordinator import AgentCoordinator
+from core.generators.helpers.main import model_name, to_camel_case
 from models.generate import GenerateRequest, GenerateResponse
-from core.generators.java_spring_generator.prompt import PROMPT_TEMPLATE
+from pydbml import PyDBML
+from pydbml.database import Database
 import os
 
+from jinja2 import Environment, FileSystemLoader
+
+TEMPLATES_DIR = "./templates/java_spring"
+
+# configure Jinja2
+env = Environment(
+    loader=FileSystemLoader(TEMPLATES_DIR),
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
+
 class JavaSpringGenerator(BaseGenerator):
-    def __init__(self):
-        self.agent_coordinator = AgentCoordinator()
-
-    def get_ai_code(self, request: GenerateRequest) -> dict[str, str]:
-        prompt = PROMPT_TEMPLATE.format(dbml=request.user_input)
-        ai_response = self.agent_coordinator.ask_agent(prompt)
-
-        sections = ai_response.split("### FILE:")[1:]
-
-        result = {}
-        for section in sections:
-            lines = section.strip().splitlines()
-            filepath = lines[0].strip()
-            file_content = '\n'.join(lines[1:]).strip()
-
-            result[filepath] = file_content
-        return result
-    
-    def get_ai_commands(self, request: GenerateRequest) -> list[str]:
-        # TODO: Alternative wy to generate ai code, using cli commands instead of files (WORK IN PROGRESS)
-        # TODO: specify prompt that will generate cli commands, can be useful for libraries like: sequelize-cli
-        # TODO: cli command could generate files, or execute commands on the terminal
-        return []
-    
-    def get_predefined_code(self, request: GenerateRequest) -> dict[str, str]:
-        template_dir = "./templates/java_spring"
-        predefined_code = {}
-
+    def get_static_files(self) -> dict[str, str]:
+        template_dir = TEMPLATES_DIR
+        predefined_code: dict[str, str] = {}
         for root, _, files in os.walk(template_dir):
             for file in files:
+                # Skip Jinja2 templates
+                if file.endswith('.j2'):
+                    continue
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r') as f:
-                    relative_path = os.path.relpath(file_path, template_dir)
-                    predefined_code[relative_path] = f.read()
-
+                    # compute path relative to templates root
+                    rel_path = os.path.relpath(file_path, template_dir)
+                    rel_path = rel_path.replace('com.example.demo', 'com/example/demo')
+                    predefined_code[rel_path] = f.read()
         return predefined_code
-    
-    def get_predefined_commands(self, request: GenerateRequest) -> list[str]:
-        commands = [
-            "./mvnw clean install",
-        ]
-        return commands
+
+    def _map_type(self, sql_type: str) -> str:
+        t = sql_type.lower()
+        if 'int' in t:
+            return 'Integer'
+        if 'char' in t or 'text' in t:
+            return 'String'
+        if 'bool' in t:
+            return 'Boolean'
+        if 'timestamp' in t:
+            return 'Timestamp'
+        if 'date' in t and 'timestamp' not in t:
+            return 'LocalDate'
+        if 'decimal' in t or 'numeric' in t:
+            return 'BigDecimal'
+        if 'float' in t:
+            return 'Float'
+        if 'double' in t:
+            return 'Double'
+        return 'String'
+
+    def generate_entities(self, schema: Database) -> dict[str, str]:
+        entity_tpl = env.get_template('src/main/java/com.example.demo/models/model_formula.j2')
+        out: dict[str, str] = {}
+        for tbl in schema.tables:
+            ClassName = model_name(tbl.name)
+            imports = {'jakarta.persistence.*', 'lombok.*'}
+            fields = []
+            for col in tbl.columns:
+                java_type = self._map_type(col.type)
+                # add type-specific imports
+                if java_type == 'Timestamp':
+                    imports.add('java.sql.Timestamp')
+                elif java_type == 'LocalDate':
+                    imports.add('java.time.LocalDate')
+                elif java_type == 'LocalDateTime':
+                    imports.add('java.time.LocalDateTime')
+                elif java_type == 'BigDecimal':
+                    imports.add('java.math.BigDecimal')
+                fields.append({
+                    'name': col.name,
+                    'type': java_type,
+                    'primaryKey': col.pk,
+                    'nullable': not col.not_null,
+                })
+            content = entity_tpl.render(
+                ClassName=ClassName,
+                table_name=tbl.name.lower(),
+                fields=fields,
+                imports=sorted(imports)
+            )
+            out[f'src/main/java/com/example/models/{ClassName}.java'] = content
+        return out
+
+    def generate_repositories(self, schema: Database) -> dict[str, str]:
+        repo_tpl = env.get_template('src/main/java/com.example.demo/repositories/repository_formula.j2')
+        out: dict[str, str] = {}
+        for tbl in schema.tables:
+            ClassName = model_name(tbl.name)
+            content = repo_tpl.render(
+                ClassName=ClassName,
+            )
+            out[f'src/main/java/com/example/repository/{ClassName}Repository.java'] = content
+        return out
+
+    def generate_services(self, schema: Database) -> dict[str, str]:
+        service_tpl = env.get_template('src/main/java/com.example.demo/services/service_formula.j2')
+        out: dict[str, str] = {}
+        for tbl in schema.tables:
+            ClassName = model_name(tbl.name)
+            var_name = to_camel_case(tbl.name) + 'Repository'
+            content = service_tpl.render(
+                ClassName=ClassName,
+                var_name=var_name
+            )
+            out[f'src/main/java/com/example/service/{ClassName}Service.java'] = content
+        return out
+
+    def generate_controllers(self, schema: Database) -> dict[str, str]:
+        ctrl_tpl = env.get_template('src/main/java/com.example.demo/controllers/controller_formula.j2')
+        out: dict[str, str] = {}
+        for tbl in schema.tables:
+            ClassName = model_name(tbl.name)
+            var_name = to_camel_case(tbl.name) + 'Service'
+            content = ctrl_tpl.render(
+                ClassName=ClassName,
+                var_name=var_name,
+                path=tbl.name.lower()
+            )
+            out[f'src/main/java/com/example/controller/{ClassName}Controller.java'] = content
+        return out
+
+    def generate_dtos(self, schema: Database) -> dict[str, str]:
+        tpl = env.get_template('src/main/java/com.example.demo/dto/dto_formula.j2')
+        out: dict[str, str] = {}
+        for tbl in schema.tables:
+            ClassName = model_name(tbl.name)
+            modelVar = to_camel_case(tbl.name)
+            imports = {f'com.example.models.{ClassName}'}
+            fields = []
+            for col in tbl.columns:
+                java_type = self._map_type(col.type)
+                if java_type == 'Timestamp': imports.add('java.sql.Timestamp')
+                if java_type == 'LocalDate': imports.add('java.time.LocalDate')
+                if java_type == 'LocalDateTime': imports.add('java.time.LocalDateTime')
+                if java_type == 'BigDecimal': imports.add('java.math.BigDecimal')
+                fields.append({'name': col.name, 'type': java_type})
+            content = tpl.render(ClassName=ClassName, model_var=modelVar, fields=fields, imports=sorted(imports))
+            out[f'src/main/java/com/example/dto/{ClassName}DTO.java'] = content
+        return out
 
     def generate(self, request: GenerateRequest) -> GenerateResponse:
-        print("Generating Java Spring code")
-
-        ai_code = self.get_ai_code(request)
-    
-        predefined_code = self.get_predefined_code(request);
-
-        combined_code = {**ai_code, **predefined_code}
-
-        ai_commands = self.get_ai_commands(request)
-        predefined_commands = self.get_predefined_commands(request)
-
-        combined_commands = [*ai_commands, *predefined_commands]
-
-        return GenerateResponse(
-            files=combined_code,
-            commands=combined_commands
-        )
+        print('Generating Java Spring Boot code')
+        schema = PyDBML(request.user_input)
+        files: dict[str, str] = {
+            **self.get_static_files(),
+            **self.generate_entities(schema),
+            **self.generate_repositories(schema),
+            **self.generate_services(schema),
+            **self.generate_controllers(schema),
+            **self.generate_dtos(schema)
+        }
+        return GenerateResponse(files=files, commands=[])

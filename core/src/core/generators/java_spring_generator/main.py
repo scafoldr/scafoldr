@@ -29,7 +29,7 @@ class JavaSpringGenerator(BaseGenerator):
                 with open(file_path, 'r') as f:
                     # compute path relative to templates root
                     rel_path = os.path.relpath(file_path, template_dir)
-                    rel_path = rel_path.replace('com.example.demo', 'com/example/demo')
+                    rel_path = rel_path.replace('com.example.demo', 'com/example')
                     predefined_code[rel_path] = f.read()
         return predefined_code
 
@@ -94,7 +94,7 @@ class JavaSpringGenerator(BaseGenerator):
             content = repo_tpl.render(
                 ClassName=ClassName,
             )
-            out[f'src/main/java/com/example/repository/{ClassName}Repository.java'] = content
+            out[f'src/main/java/com/example/repositories/{ClassName}Repository.java'] = content
         return out
 
     def generate_services(self, schema: Database) -> dict[str, str]:
@@ -107,7 +107,7 @@ class JavaSpringGenerator(BaseGenerator):
                 ClassName=ClassName,
                 var_name=var_name
             )
-            out[f'src/main/java/com/example/service/{ClassName}Service.java'] = content
+            out[f'src/main/java/com/example/services/{ClassName}Service.java'] = content
         return out
 
     def generate_controllers(self, schema: Database) -> dict[str, str]:
@@ -121,11 +121,11 @@ class JavaSpringGenerator(BaseGenerator):
                 var_name=var_name,
                 path=tbl.name.lower()
             )
-            out[f'src/main/java/com/example/controller/{ClassName}Controller.java'] = content
+            out[f'src/main/java/com/example/controllers/{ClassName}Controller.java'] = content
         return out
 
     def generate_dtos(self, schema: Database) -> dict[str, str]:
-        tpl = env.get_template('src/main/java/com.example.demo/dto/dto_formula.j2')
+        tpl = env.get_template('src/main/java/com.example.demo/dtos/dto_formula.j2')
         out: dict[str, str] = {}
         for tbl in schema.tables:
             ClassName = model_name(tbl.name)
@@ -140,7 +140,7 @@ class JavaSpringGenerator(BaseGenerator):
                 if java_type == 'BigDecimal': imports.add('java.math.BigDecimal')
                 fields.append({'name': col.name, 'type': java_type})
             content = tpl.render(ClassName=ClassName, model_var=modelVar, fields=fields, imports=sorted(imports))
-            out[f'src/main/java/com/example/dto/{ClassName}DTO.java'] = content
+            out[f'src/main/java/com/example/dtos/{ClassName}DTO.java'] = content
         return out
 
     def generate(self, request: GenerateRequest) -> GenerateResponse:

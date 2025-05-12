@@ -1,0 +1,22 @@
+package com.example.models;
+
+{% for imp in imports %}
+import {{ imp }};
+{% endfor %}
+
+@Entity
+@Table(name="{{ table_name }}")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class {{ ClassName }} extends BaseModel {
+    {%- for field in fields %}
+    {%- if field.primaryKey %}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    {%- endif %}
+    @Column(name="{{ field.name }}")
+    private {{ field.type }} {{ field.name }};
+    {% endfor %}
+}

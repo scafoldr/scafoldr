@@ -1,0 +1,10 @@
+const BaseController = require('./BaseController');
+const {{ Model }}Service = require('../services/{{ Model }}Service');
+
+class {{ Model }}Controller extends BaseController {
+  constructor() {
+    super({{ Model }}Service);
+  }
+}
+
+module.exports = new {{ Model }}Controller();

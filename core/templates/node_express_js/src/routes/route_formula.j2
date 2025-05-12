@@ -1,0 +1,11 @@
+const express = require('express');
+const router = express.Router();
+const {{ var }} = require('../controllers/{{ Model }}Controller');
+
+router.get('/', {{ var }}.getAll.bind({{ var }}));
+router.get('/:id', {{ var }}.getById.bind({{ var }}));
+router.post('/', {{ var }}.create.bind({{ var }}));
+router.put('/:id', {{ var }}.update.bind({{ var }}));
+router.delete('/:id', {{ var }}.delete.bind({{ var }}));
+
+module.exports = router;

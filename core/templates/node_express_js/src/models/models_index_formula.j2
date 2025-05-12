@@ -1,0 +1,18 @@
+const sequelize = require('../../config/database');
+
+{# 1) Require each model #}
+{% for tbl in tables %}
+const {{ tbl.Model }} = require('./{{ tbl.Model }}')(sequelize);
+{% endfor %}
+
+// Define associations
+{% for assoc in associations %}
+{{ assoc }}
+{% endfor %}
+
+// Export all models
+module.exports = {
+{% for tbl in tables %}
+  {{ tbl.Model }},
+{% endfor %}
+};

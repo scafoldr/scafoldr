@@ -11,6 +11,7 @@ import {{ imp }};
 @AllArgsConstructor
 @Builder
 public class {{ ClassName }} extends BaseModel {
+
     {%- for field in fields %}
     {%- if field.primaryKey %}
     @Id

@@ -1,7 +1,7 @@
-package com.example.demo.models;
+package com.example.models;
 
 import java.io.Serializable;
 
 
-public abstract class BaseModel implements Serializable { public abstract Integer getId(); public abstract void setId(Integer id); }
+public abstract class BaseModel implements Serializable {  }
 

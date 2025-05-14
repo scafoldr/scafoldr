@@ -44,17 +44,17 @@ const Preview = ({ initialDbmlCode = EXAMPLE_DBML }: PreviewProps) => {
   return (
     // add content-end because of sizing bug
     <div className="tabs tabs-lift tabs-xs relative h-1/2 content-end">
-      <input type="radio" name="my_tabs_3" className="tab" aria-label="Visual" defaultChecked />
+      <input type="radio" name="my_tabs_3" className="tab" aria-label="Visual" />
       <div className="tab-content bg-base-100 border-base-300 p-6">
         <Diagram initialDiagram={parseDbmlToDiagram(dbmlCode)} />
       </div>
 
-      <input type="radio" name="my_tabs_3" className="tab" aria-label="DBML Code" />
+      <input type="radio" name="my_tabs_3" className="tab" aria-label="DBML Code" defaultChecked />
       <div className="tab-content bg-base-100 border-base-300 p-6">
         <DBMLCodeEditor dbmlCode={dbmlCode} onDbmlCodeChange={handleDbmlCodeChange} />
       </div>
 
-      <div className=" absolute right-12 bottom-6 z-1000">
+      <div className=" absolute right-12 bottom-8 z-1000">
         <GenerateCode dbmlCode={dbmlCode} />
       </div>
 

@@ -7,17 +7,20 @@ import {{ imp }};
 @Entity
 @Table(name="{{ table_name }}")
 @Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class {{ ClassName }} extends BaseModel {
 
     {%- for field in fields %}
+    {%- if field.name != 'id' %}
     {%- if field.primaryKey %}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     {%- endif %}
     @Column(name="{{ field.name }}")
     private {{ field.type }} {{ field.name }};
+    {%- endif %}
     {% endfor %}
 }

@@ -1,6 +1,6 @@
 package com.example.controllers;
 
-import com.example.dto.BaseDTO;
+import com.example.dtos.BaseDTO;
 import com.example.models.BaseModel; import com.example.services.BaseService; import lombok.RequiredArgsConstructor; import org.springframework.http.ResponseEntity; import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

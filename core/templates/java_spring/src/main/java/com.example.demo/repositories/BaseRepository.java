@@ -1,6 +1,6 @@
-package com.example.demo.repositories;
+package com.example.repositories;
 
-import com.example.demo.models.BaseModel;
+import com.example.models.BaseModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 

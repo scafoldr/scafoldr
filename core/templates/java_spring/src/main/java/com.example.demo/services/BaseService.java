@@ -1,7 +1,7 @@
-package com.example.demo.services;
+package com.example.services;
 
-import com.example.demo.models.BaseModel;
-import com.example.demo.repositories.BaseRepository;
+import com.example.models.BaseModel;
+import com.example.repositories.BaseRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

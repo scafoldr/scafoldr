@@ -1,7 +1,7 @@
-package com.example.demo.controllers;
+package com.example.controllers;
 
-import com.example.demo.dto.BaseDTO;
-import com.example.demo.models.BaseModel; import com.example.demo.services.BaseService; import lombok.RequiredArgsConstructor; import org.springframework.http.ResponseEntity; import org.springframework.web.bind.annotation.*;
+import com.example.dtos.BaseDTO;
+import com.example.models.BaseModel; import com.example.services.BaseService; import lombok.RequiredArgsConstructor; import org.springframework.http.ResponseEntity; import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -17,8 +17,8 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
 
-  const sceneWidth = 2100;
-  const sceneHeight = 1000;
+  const sceneWidth = 710;
+  const sceneHeight = 626;
 
   useEffect(() => {
     setDiagram(initialDiagram);
@@ -48,7 +48,7 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   // const scaleY = (ref?.current?.getBoundingClientRect().height ?? sceneHeight) / sceneHeight;
 
   return (
-    <div tabIndex={0} className="diagram w-full h-full overflow-hidden" ref={ref}>
+    <div tabIndex={0} className="diagram w-full h-full overflow-hidden cursor-pointer" ref={ref}>
       <Stage
         // quick fix for glitching issue on tabs switching
         width={sceneWidth * scaleX - 8}

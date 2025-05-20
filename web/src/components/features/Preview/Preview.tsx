@@ -18,6 +18,7 @@ interface PreviewProps {
 const Preview = ({ initialDbmlCode = EXAMPLE_DBML }: PreviewProps) => {
   const [dbmlCode, setDbmlCode] = useState<string>(initialDbmlCode);
   const [errors, setErrors] = useState<CompilerDiagnostic[]>([]);
+  const [activeTab, setActiveTab] = useState<'visual' | 'code'>('code');
 
   const canCompileDBMLCode = (dbmlCode: string) => {
     try {
@@ -44,12 +45,25 @@ const Preview = ({ initialDbmlCode = EXAMPLE_DBML }: PreviewProps) => {
   return (
     // add content-end because of sizing bug
     <div className="tabs tabs-lift tabs-xs relative h-1/2 content-end">
-      <input type="radio" name="my_tabs_3" className="tab" aria-label="Visual" />
+      <input
+        type="radio"
+        name="my_tabs_3"
+        className="tab"
+        aria-label="Visual"
+        onChange={() => setActiveTab('visual')}
+      />
       <div className="tab-content bg-base-100 border-base-300 p-6">
-        <Diagram initialDiagram={parseDbmlToDiagram(dbmlCode)} />
+        {activeTab === 'visual' && <Diagram initialDiagram={parseDbmlToDiagram(dbmlCode)} />}
       </div>
 
-      <input type="radio" name="my_tabs_3" className="tab" aria-label="DBML Code" defaultChecked />
+      <input
+        type="radio"
+        name="my_tabs_3"
+        className="tab"
+        aria-label="DBML Code"
+        onChange={() => setActiveTab('code')}
+        defaultChecked
+      />
       <div className="tab-content bg-base-100 border-base-300 p-6">
         <DBMLCodeEditor dbmlCode={dbmlCode} onDbmlCodeChange={handleDbmlCodeChange} />
       </div>

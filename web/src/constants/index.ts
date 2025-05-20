@@ -1,5 +1,4 @@
-export const EXAMPLE_DBML = `
-// Use DBML to define your database structure
+export const EXAMPLE_DBML = `// Use DBML to define your database structure
 // Docs: https://dbml.dbdiagram.io/docs
 
 Table follows {

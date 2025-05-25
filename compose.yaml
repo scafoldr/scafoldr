@@ -1,17 +1,20 @@
 services:
   core:
+    container_name: core
     image: scafoldr/core
     build:
       context: ./core
     restart: unless-stopped
     
   web:
+    container_name: web
     image: scafoldr/web
     build:
       context: ./web
     restart: unless-stopped
 
   proxy:
+    container_name: proxy
     image: scafoldr/proxy
     build:
       context: ./proxy

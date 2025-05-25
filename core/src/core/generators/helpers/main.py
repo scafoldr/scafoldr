@@ -13,10 +13,3 @@ def model_name(entity_name: str) -> str:
 
     return singular_model_name
 
-
-tests = ['users', 'user_profiles', 'user_roles', 'user_permissions', 'all_our_users']
-
-for tbl in tests:
-    # Determine singular Model name
-
-    print(f"raw: {tbl} = model_name: {model_name(tbl)}")

@@ -50,7 +50,7 @@ Open the `.env` file and fill in the required values. Refer to the documentation
 docker-compose up -d
 ```
 
-This command will start all the necessary services in detached mode. Make sure Docker is installed and running on your system.
+This command will start all the necessary services in detached mode. Once running, the app will be accessible at: http://127.0.0.1/
 
 ### or Start the application without Docker (optional)
 

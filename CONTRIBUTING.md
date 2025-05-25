@@ -1,62 +1,85 @@
 # 🤝 Contributing to Scafoldr
 
-Thanks for your interest in contributing! Scafoldr is built to be modular and extensible, and we welcome contributions for new backend stacks, features, or improvements.
+First off, thanks for your interest in contributing! Scafoldr is an open-source tool built to help developers move faster from database design to working backend code — and we welcome contributions of all kinds.
 
----
 
-## 📦 Adding a New Backend Option
+## 🧑‍💻 Ways to Contribute
 
-To add a new backend stack (e.g., Java Spring, Ruby on Rails, etc.), follow these steps:
+Whether you're a developer, designer, tester, or just passionate about the project, here are some great ways to contribute:
 
-### 1. Add CLI Support
+- 🐛 Report bugs
+- 🌟 Suggest new features or improvements
+- 🧩 Add new backend templates
+- 💅 Improve UI/UX
+- 🧪 Add or improve tests
+- 📝 Improve documentation
 
-Update the CLI to make your new backend available in the interactive prompt:
+## 💬 Communication
+- Have a question or need help? [Open a Discussion](https://github.com/scafoldr/scafoldr/discussions)
+- Found a bug? [Please open an issue](https://github.com/scafoldr/scafoldr/issues)
+- Want to propose a big change? [Start a discussion first!](https://github.com/scafoldr/scafoldr/discussions)
 
-- File: `src/cli/main.py`
-- Add your backend to the `BACKEND_OPTIONS` list:
+## 💻 Setup Instructions
 
-```python
-BACKEND_OPTIONS = [
-    {"name": "Java Spring", "value": "java-spring"},
-    # other options...
-]
+### Requirements
+
+- [OpenAI API key](https://platform.openai.com/account/api-keys) if AI generation is used
+
+- [Docker](https://www.docker.com/) (required for running the application using Docker)
+or 
+- Python 3.9+ (for running locally)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/scafoldr/scafoldr.git
+cd scafoldr
 ```
 
-### 2. Register Generator in the Factory
-Add an entry to the generator factory so your stack is recognized:
+### 2. Create .env file
 
-File: src/core/generators/generator_factory.py
-```python
-from core.generators.java_spring_generator.main import JavaSpringGenerator
-
-GENERATOR_MAP = {
-    "java-spring": JavaSpringGenerator,
-    # other mappings...
-}
+```bash
+cp .env.example .env
 ```
 
-### 3. Implement the Generator
-```python
-src/core/generators/java_spring_generator/
-```
-Then implement:
-- main.py: the main generator class that returns GenerateResponse
-- prompt.py: prompt builder to generate an AI-friendly prompt based on user input
+Open the `.env` file and fill in the required values. Refer to the documentation or comments in `.env.example` for detailed explanations of each variable.
 
-### 4. Add Templates
-If your generator uses static templates, add them here:
-```python
-templates/java-spring/
+### 3. Start the application using Docker (recommended)
+
+```bash
+docker-compose up -d
 ```
 
-## 📚 Example PR
-See this pull request for a full example of adding a Java Spring generator:
-🔗 https://github.com/DimitrijeGlibic/scafoldr/pull/13
+This command will start all the necessary services in detached mode. Make sure Docker is installed and running on your system.
 
-## 🧪 Testing
-Make sure to:
-- Test via CLI
-- Test bia API
+### or Start the application without Docker (optional)
 
-## 💬 Questions?
-Feel free to open an issue or discussion if you need help getting started!
+If you prefer not to use Docker, you can start the application manually:
+
+1. Run core as specified in [core/README.md](./core/README.md)
+
+2. Run web as specified in [web/README.md](./web/README.md)
+
+Ensure all required services (e.g., database) are running and properly configured before starting the application.
+
+## 🔀 Git Workflow
+
+1. Fork the repository
+2. Create a new branch for your feature or fix:
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
+3. Make your changes
+4. Commit with a meaningful message:
+
+    ```bash
+    git commit -m "Add: feature or fix description"
+    ```
+5. Push to your fork:
+    ```bash
+    git push origin feature/your-feature-name
+    ```
+6. Open a Pull Request (PR) to the main branch
+
+
+_*Thank you for being awesome! 🙌*_

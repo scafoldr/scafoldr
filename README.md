@@ -34,7 +34,7 @@ Not sure how to structure your database? Just describe your use case and let our
 
 1. Go to https://scafoldr.com/code-generator  
 2. **Paste your DBML** or use our example to get started
-3. Click `Generate Code`
+3. Click `Get your code`
 4. Fill in your project name and pick your backend
 5. Download or preview your generated project
 
@@ -59,15 +59,7 @@ Or...
 We’re looking for contributors! 🚀  
 Whether you want to add a new backend template, improve the UI/UX, or help with DBML parsing logic—your help is welcome.
 
-### How to Contribute
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Open a Pull Request
-
-Join us in shaping the future of backend automation. Contributions of all kinds are welcome – code, docs, templates, ideas!
+➡️ Check out our [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines and setup instructions.
 
 ## 📣 Contact & Community
 
@@ -77,72 +69,8 @@ If you like what we're building, feel free to:
 - 📢 Share it with your team or dev community
 - 🗣️ Join the discussion via issues or pull requests
 
+
+
 ## 🧪 Example Projects
 
 Coming soon! We'll share a few examples of backend projects built with Scafoldr.
-
-
-
-## ⚙️ Requirements
-
-- [OpenAI API key](https://platform.openai.com/account/api-keys) if AI generation is used
-
-- [Docker](https://www.docker.com/) (required for running the application using Docker)
-or 
-- Python 3.9+ (for running locally)
-
-
-## 🚀 Getting Started
-
-1. **Paste your DBML** or use our example to get started
-2. Click `Generate Code`
-3. Fill in your project name and pick your backend
-4. Download or preview your generated project
-
-Or...
-
-1. **Chat with the AI Architect**
-2. Describe your app or idea
-3. Receive DBML and tweak it if needed
-4. Convert it into backend code in one click
-
----
-
-
-
----
-
-## 💻 How to Run Locally
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/your-username/scafoldr.git
-cd scafoldr
-```
-
-### 2. Create .env file
-
-```bash
-cp .env.example .env
-```
-
-Open the `.env` file and fill in the required values. Refer to the documentation or comments in `.env.example` for detailed explanations of each variable.
-
-### 3. Start the application using Docker (recommended)
-
-```bash
-docker-compose up -d
-```
-
-This command will start all the necessary services in detached mode. Make sure Docker is installed and running on your system.
-
-### 4. Start the application without Docker (optional)
-
-If you prefer not to use Docker, you can start the application manually:
-
-1. Run core as specified in [core/README.md](./core/README.md)
-
-2. Run web as specified in [web/README.md](./web/README.md)
-
-Ensure all required services (e.g., database) are running and properly configured before starting the application.

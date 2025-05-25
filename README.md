@@ -49,7 +49,7 @@ Or...
 
 ## 🧩 Tech Stack
 
-- Frontend: Next.js, TailwindCSS
+- Frontend: Next.js, TailwindCSS, [daisyui](https://github.com/saadeghi/daisyui)
 - Backend: Python, FastAPI, Jinja2 for templating
 - AI: OpenAI GPT models
 - Parsing: [DBML Parser by Holistics](https://github.com/holistics/dbml) and [PyDBML by Vanderhoof](https://github.com/Vanderhoof/PyDBML)

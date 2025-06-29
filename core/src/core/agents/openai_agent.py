@@ -1,7 +1,10 @@
+import os
+
 from core.agents.base_agent import BaseAgent
 import openai
 from langchain_openai import ChatOpenAI
 from typing import Iterator
+from tensorzero import TensorZeroGateway
 
 class OpenAIAgent(BaseAgent):
     model: str
@@ -16,12 +19,34 @@ class OpenAIAgent(BaseAgent):
 
         return response.content
 
-    def ask_with_response_format(self, prompt: str, response_format) -> str:
-        model = ChatOpenAI(model=self.model)
-        structured_llm = model.with_structured_output(response_format)
+    def ask_with_response_format(self, prompt: dict[str, list[dict]], response_format) -> str:
+        # model = ChatOpenAI(model=self.model)
+        config_file = os.path.join(os.path.dirname(__file__), 'tensorzero.toml')
 
-        result = structured_llm.invoke(prompt)
-        return result
+
+        client = TensorZeroGateway.build_embedded(
+            clickhouse_url="http://chuser:chpassword@clickhouse:8123/tensorzero",
+            config_file=config_file,
+        )
+        response = client.inference(
+            function_name="generate_haiku",
+            input={
+                "system": prompt[0]["content"],
+                "messages": prompt[1:]
+            },
+            output_schema=response_format,
+        )
+
+        # patch_openai_client(
+        #     model,
+        #     # config_file="./tensorzero/config.toml",
+        #     clickhouse_url="https://user:password@host:port/database",
+        # )
+        # structured_llm = model.with_structured_output(response_format)
+
+        # result = structured_llm.invoke(prompt)
+        print(response)
+        return 'asd'
     
     def stream_ask(self, prompt: str) -> Iterator[str]:
         llm = ChatOpenAI(model=self.model)

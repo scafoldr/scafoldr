@@ -7,7 +7,6 @@ Please refer to the table below to understand which versions currently receive s
 | Version | Supported          |
 |---------|--------------------|
 | 1.x     | ✅ Actively supported |
-|---------|--------------------|
 | 2.x     | 🟡 WORK IN PROGRESS |
 
 ---

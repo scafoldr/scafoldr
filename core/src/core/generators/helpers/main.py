@@ -10,6 +10,7 @@ def model_name(entity_name: str) -> str:
     camel_case = to_camel_case(entity_name)
     model_name = camel_case[0].upper() + camel_case[1:]
     singular_model_name = inflect_engine.singular_noun(model_name)
-
-    return singular_model_name
+    if singular_model_name:
+        return singular_model_name
+    return model_name
 

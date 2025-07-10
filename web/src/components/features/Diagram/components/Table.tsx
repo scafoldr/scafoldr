@@ -30,6 +30,7 @@ const Table = ({
   onDragMove
 }: {
   table: ITable;
+  // eslint-disable-next-line no-unused-vars
   onDragMove: (tableId: string, x: number, y: number) => void;
 }) => {
   const lastIdx = table.columns.length - 1;
@@ -41,8 +42,7 @@ const Table = ({
       draggable
       onDragMove={(e) => {
         onDragMove(table.id, e.target.x(), e.target.y());
-      }}
-    >
+      }}>
       <Rect
         width={table.width}
         height={HEADER_COLUMN_HEIGHT}

@@ -14,22 +14,20 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
 
-  const [scaleX, setScaleX] = useState(1);
-  const [scaleY, setScaleY] = useState(1);
-
-  const sceneWidth = 710;
-  const sceneHeight = 626;
-
   useEffect(() => {
     setDiagram(initialDiagram);
   }, [initialDiagram]);
 
-  useEffect(() => {
-    if (!ref.current) return;
+  const [sceneWidth, setSceneWidth] = useState(710);
+  const [sceneHeight, setSceneHeight] = useState(626);
 
-    setScaleX(ref.current.offsetWidth / sceneWidth);
-    setScaleY(ref.current.offsetHeight / sceneHeight);
-  }, [ref?.current]);
+  useEffect(() => {
+    if (ref.current) {
+      const bounds = ref.current.getBoundingClientRect();
+      setSceneWidth(bounds.width);
+      setSceneHeight(bounds.height);
+    }
+  }, []);
 
   const handleDragMove = (tableId: string, x: number, y: number) => {
     setDiagram((prevDiagram) => {
@@ -44,17 +42,9 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
     });
   };
 
-  // const scaleX = (ref?.current?.getBoundingClientRect().width ?? sceneWidth) / sceneWidth;
-  // const scaleY = (ref?.current?.getBoundingClientRect().height ?? sceneHeight) / sceneHeight;
-
   return (
     <div tabIndex={0} className="diagram w-full h-full overflow-hidden cursor-pointer" ref={ref}>
-      <Stage
-        // quick fix for glitching issue on tabs switching
-        width={sceneWidth * scaleX - 8}
-        height={sceneHeight * scaleY}
-        scale={{ x: scaleX, y: scaleY }}
-        draggable>
+      <Stage width={sceneWidth} height={sceneHeight} pixelRatio={window.devicePixelRatio} draggable>
         <Layer>
           {diagram.tables.map((table) => {
             return <Table key={table.id} table={table} onDragMove={handleDragMove} />;

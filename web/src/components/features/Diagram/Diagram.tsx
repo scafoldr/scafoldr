@@ -44,13 +44,7 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
 
   return (
     <div tabIndex={0} className="diagram w-full h-full overflow-hidden cursor-pointer" ref={ref}>
-      <Stage
-        // quick fix for glitching issue on tabs switching
-        width={sceneWidth}
-        height={sceneHeight}
-        // scale={{ x: scaleX, y: scaleY }}
-        pixelRatio={window.devicePixelRatio}
-        draggable>
+      <Stage width={sceneWidth} height={sceneHeight} pixelRatio={window.devicePixelRatio} draggable>
         <Layer>
           {diagram.tables.map((table) => {
             return <Table key={table.id} table={table} onDragMove={handleDragMove} />;

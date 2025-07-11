@@ -18,7 +18,7 @@ interface PreviewProps {
 const Preview = ({ initialDbmlCode = EXAMPLE_DBML }: PreviewProps) => {
   const [dbmlCode, setDbmlCode] = useState<string>(initialDbmlCode);
   const [errors, setErrors] = useState<CompilerDiagnostic[]>([]);
-  const [activeTab, setActiveTab] = useState<'visual' | 'code'>('code');
+  const [activeTab, setActiveTab] = useState<'visual' | 'code'>('visual');
 
   const canCompileDBMLCode = (dbmlCode: string) => {
     try {
@@ -51,6 +51,7 @@ const Preview = ({ initialDbmlCode = EXAMPLE_DBML }: PreviewProps) => {
         className="tab"
         aria-label="Visual"
         onChange={() => setActiveTab('visual')}
+        defaultChecked
       />
       <div className="tab-content bg-base-100 border-base-300 p-6">
         {activeTab === 'visual' && <Diagram initialDiagram={parseDbmlToDiagram(dbmlCode)} />}
@@ -62,7 +63,6 @@ const Preview = ({ initialDbmlCode = EXAMPLE_DBML }: PreviewProps) => {
         className="tab"
         aria-label="DBML Code"
         onChange={() => setActiveTab('code')}
-        defaultChecked
       />
       <div className="tab-content bg-base-100 border-base-300 p-6">
         <DBMLCodeEditor dbmlCode={dbmlCode} onDbmlCodeChange={handleDbmlCodeChange} />

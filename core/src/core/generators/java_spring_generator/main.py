@@ -1,8 +1,8 @@
 from core.generators.base_generator import BaseGenerator
 from core.generators.helpers.main import model_name, to_camel_case
+from core.scafoldr_schema_maker.schema_adapter import from_dbml
 from models.generate import GenerateRequest, GenerateResponse
-from pydbml import PyDBML
-from pydbml.database import Database
+from models.scafoldr_schema import DatabaseSchema
 import os
 
 from jinja2 import Environment, FileSystemLoader
@@ -53,7 +53,7 @@ class JavaSpringGenerator(BaseGenerator):
             return 'Double'
         return 'String'
 
-    def generate_entities(self, schema: Database) -> dict[str, str]:
+    def generate_entities(self, schema: DatabaseSchema) -> dict[str, str]:
         entity_tpl = env.get_template('src/main/java/com.example.demo/models/model_formula.j2')
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -86,7 +86,7 @@ class JavaSpringGenerator(BaseGenerator):
             out[f'src/main/java/com/example/models/{ClassName}.java'] = content
         return out
 
-    def generate_repositories(self, schema: Database) -> dict[str, str]:
+    def generate_repositories(self, schema: DatabaseSchema) -> dict[str, str]:
         repo_tpl = env.get_template('src/main/java/com.example.demo/repositories/repository_formula.j2')
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -97,7 +97,7 @@ class JavaSpringGenerator(BaseGenerator):
             out[f'src/main/java/com/example/repositories/{ClassName}Repository.java'] = content
         return out
 
-    def generate_services(self, schema: Database) -> dict[str, str]:
+    def generate_services(self, schema: DatabaseSchema) -> dict[str, str]:
         service_tpl = env.get_template('src/main/java/com.example.demo/services/service_formula.j2')
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -110,7 +110,7 @@ class JavaSpringGenerator(BaseGenerator):
             out[f'src/main/java/com/example/services/{ClassName}Service.java'] = content
         return out
 
-    def generate_controllers(self, schema: Database) -> dict[str, str]:
+    def generate_controllers(self, schema: DatabaseSchema) -> dict[str, str]:
         ctrl_tpl = env.get_template('src/main/java/com.example.demo/controllers/controller_formula.j2')
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -124,7 +124,7 @@ class JavaSpringGenerator(BaseGenerator):
             out[f'src/main/java/com/example/controllers/{ClassName}Controller.java'] = content
         return out
 
-    def generate_dtos(self, schema: Database) -> dict[str, str]:
+    def generate_dtos(self, schema: DatabaseSchema) -> dict[str, str]:
         tpl = env.get_template('src/main/java/com.example.demo/dtos/dto_formula.j2')
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -145,7 +145,7 @@ class JavaSpringGenerator(BaseGenerator):
 
     def generate(self, request: GenerateRequest) -> GenerateResponse:
         print('Generating Java Spring Boot code')
-        schema = PyDBML(request.user_input)
+        schema = from_dbml(request.user_input)
         files: dict[str, str] = {
             **self.get_static_files(),
             **self.generate_entities(schema),

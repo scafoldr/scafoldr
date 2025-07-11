@@ -1,8 +1,8 @@
 from core.generators.base_generator import BaseGenerator
 from core.generators.helpers.main import model_name, to_camel_case
+from core.scafoldr_schema_maker.schema_adapter import from_dbml
 from models.generate import GenerateRequest, GenerateResponse
-from pydbml import PyDBML
-from pydbml.database import Database
+from models.scafoldr_schema import DatabaseSchema
 import os
 
 from jinja2 import Environment, FileSystemLoader, Template
@@ -44,7 +44,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         if "float" in t:   return "FLOAT"
         return "STRING"
 
-    def generate_models(self, schema: Database) -> dict[str, str]:
+    def generate_models(self, schema: DatabaseSchema) -> dict[str, str]:
         model_tpl = env.get_template("/src/models/model_formula.j2")
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -69,7 +69,7 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/models/{Model}.js"] = content
         return out
 
-    def generate_models_index(self, schema: Database) -> dict[str, str]:
+    def generate_models_index(self, schema: DatabaseSchema) -> dict[str, str]:
         models_index_tpl = env.get_template("/src/models/models_index_formula.j2")
         # 1) prepare table list
         tables = [
@@ -85,12 +85,12 @@ class NodeExpressJSGenerator(BaseGenerator):
 
             # decide which side is many vs. one
             if ref.type == '>':
-                many_col, one_col = ref.col1[0], ref.col2[0]
+                many_col, one_col = ref.col1, ref.col2
             else:
-                many_col, one_col = ref.col2[0], ref.col1[0]
+                many_col, one_col = ref.col2, ref.col1
 
-            ManyModel = model_name(many_col.table.name)
-            OneModel  = model_name(one_col.table.name)
+            ManyModel = model_name(many_col.table)
+            OneModel  = model_name(one_col.table)
             fk         = many_col.name
 
             associations.append(
@@ -111,7 +111,7 @@ class NodeExpressJSGenerator(BaseGenerator):
 
 
     
-    def generate_repositories(self, schema: Database) -> dict[str, str]:
+    def generate_repositories(self, schema: DatabaseSchema) -> dict[str, str]:
         repo_tpl = env.get_template("/src/repositories/repository_formula.j2")
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -126,7 +126,7 @@ class NodeExpressJSGenerator(BaseGenerator):
 
 
 
-    def generate_services(self, schema: Database) -> dict[str, str]:
+    def generate_services(self, schema: DatabaseSchema) -> dict[str, str]:
         service_tpl = env.get_template("/src/services/service_formula.j2")
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -142,7 +142,7 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/services/{Model}Service.js"] = content
         return out
 
-    def generate_controllers(self, schema: Database) -> dict[str, str]:
+    def generate_controllers(self, schema: DatabaseSchema) -> dict[str, str]:
         controller_tpl = env.get_template("/src/controllers/controller_formula.j2")
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -155,7 +155,7 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/controllers/{Model}Controller.js"] = content
         return out
 
-    def generate_routes(self, schema: Database) -> dict[str, str]:
+    def generate_routes(self, schema: DatabaseSchema) -> dict[str, str]:
         route_tpl = env.get_template("/src/routes/route_formula.j2")
         out: dict[str, str] = {}
         for tbl in schema.tables:
@@ -172,7 +172,7 @@ class NodeExpressJSGenerator(BaseGenerator):
         return out
 
         
-    def generate_app_file(self, schema: Database) -> dict[str, str]:
+    def generate_app_file(self, schema: DatabaseSchema) -> dict[str, str]:
         app_tpl = env.get_template("/src/app_formula.j2")
         # prepare a list of route imports & mounts
         tables = [
@@ -189,7 +189,7 @@ class NodeExpressJSGenerator(BaseGenerator):
 
     def generate(self, request: GenerateRequest) -> GenerateResponse:
         print("Generating Node.js Express code")
-        schema = PyDBML(request.user_input)
+        schema = from_dbml(request.user_input)
         files: dict[str,str] = {
             **self.get_static_files(),
             **self.generate_models(schema),

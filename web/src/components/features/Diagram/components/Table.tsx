@@ -14,11 +14,11 @@ import {
 const HEADER_FILL = '#2c3e50';
 const HEADER_FONT_COLOR = '#f1c40f';
 
-const PK_ROW_FILL = '#f8c1c1'; // пастельный розовый
-const PK_TEXT_COLOR = '#8b3e3e'; // тёмно-бордовый
+const PK_ROW_FILL = '#f8c1c1';
+const PK_TEXT_COLOR = '#8b3e3e';
 
-const FK_ROW_FILL = '#a8d0ff'; // пастельный голубой
-const FK_TEXT_COLOR = '#2a4d8f'; // тёмно-синий
+const FK_ROW_FILL = '#a8d0ff';
+const FK_TEXT_COLOR = '#2a4d8f';
 
 const DEFAULT_ROW_FILL = '#ecf0f1';
 const DEFAULT_TEXT_COLOR = '#2c3e50';
@@ -55,7 +55,7 @@ const Table = ({
         text={table.name}
         x={COLUMN_PADDING_LEFT}
         y={COLUMN_PADDING_TOP}
-        fontSize={FONT_SIZE}
+        fontSize={FONT_SIZE + 2}
         fill={HEADER_FONT_COLOR}
         fontStyle="bold"
       />
@@ -80,9 +80,10 @@ const Table = ({
             <Text
               text={`${col.name}: ${col.dataType}`}
               x={COLUMN_PADDING_LEFT}
-              y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT + COLUMN_PADDING_TOP}
+              y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT + COLUMN_PADDING_TOP - 2}
               fontSize={FONT_SIZE}
               fill={textColor}
+              fontFamily="Arial"
               fontStyle={isPK ? 'bold' : 'normal'}
             />
           </Fragment>

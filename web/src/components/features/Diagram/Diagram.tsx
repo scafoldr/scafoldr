@@ -53,7 +53,7 @@ const Diagram = ({ initialDiagram }: DiagramProps) => {
         // quick fix for glitching issue on tabs switching
         width={sceneWidth * scaleX - 8}
         height={sceneHeight * scaleY}
-        scale={{ x: scaleX, y: scaleY }}
+        scale={{ x: scaleX * 0.7, y: scaleY }}
         draggable>
         <Layer>
           {diagram.tables.map((table) => {

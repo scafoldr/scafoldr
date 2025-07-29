@@ -5,6 +5,7 @@ export { ChatInterface } from './components/chat-interface';
 export { ChatBubble } from './components/chat-bubble';
 export { ChatHistory } from './components/chat-history';
 export { ChatInput } from './components/chat-input';
+export { ChatResultMessage } from './components/chat-result-message';
 
 // Hooks
 export { useChat } from './hooks/use-chat';

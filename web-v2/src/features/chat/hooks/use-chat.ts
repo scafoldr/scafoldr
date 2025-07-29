@@ -90,8 +90,7 @@ export function useChat(options: UseChatOptions = {}) {
       if (response.response_type === 'question') {
         updateLastMessage(response.response, MessageType.TEXT);
       } else if (response.response_type === 'dbml') {
-        updateLastMessage(response.response, MessageType.DBML);
-        addMessage('', MessageType.CALL_TO_ACTION, MessageFrom.AGENT);
+        updateLastMessage(response.response, MessageType.RESULT);
       }
     } catch (error) {
       const errorMessage = error instanceof ChatApiError 

@@ -3,7 +3,8 @@ export enum MessageType {
   TEXT = 'text',
   LOADING = 'loading',
   DBML = 'dbml',
-  CALL_TO_ACTION = 'call_to_action'
+  CALL_TO_ACTION = 'call_to_action',
+  RESULT = 'result'
 }
 
 export enum MessageFrom {

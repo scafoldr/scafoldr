@@ -11,6 +11,7 @@ import { CodeViewer } from "@/components/code-viewer"
 import { DatabaseViewer } from "@/components/database-viewer"
 import { AppPreview } from "@/components/app-preview"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
+import { ResizableLayout } from "@/components/resizable-layout"
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState("er-diagram")
@@ -70,58 +71,58 @@ export default function AppPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Chat */}
-        <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col">
-          <ChatInterface initialPrompt={initialPrompt} />
-        </div>
+      {/* Main Content with Resizable Layout */}
+      <ResizableLayout
+        leftPanel={<ChatInterface initialPrompt={initialPrompt} />}
+        rightPanel={
+          <>
+            {/* Tab Navigation */}
+            <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-800">
+                  <TabsTrigger value="er-diagram" className="flex items-center space-x-2">
+                    <GitBranch className="w-4 h-4" />
+                    <span className="hidden sm:inline">ER Diagram</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="code" className="flex items-center space-x-2">
+                    <Code2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Code</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="database" className="flex items-center space-x-2">
+                    <Database className="w-4 h-4" />
+                    <span className="hidden sm:inline">Database</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="preview" className="flex items-center space-x-2">
+                    <Eye className="w-4 h-4" />
+                    <span className="hidden sm:inline">Preview</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
 
-        {/* Right Panel - Main Stage */}
-        <div className="flex-1 flex flex-col">
-          {/* Tab Navigation */}
-          <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-800">
-                <TabsTrigger value="er-diagram" className="flex items-center space-x-2">
-                  <GitBranch className="w-4 h-4" />
-                  <span className="hidden sm:inline">ER Diagram</span>
-                </TabsTrigger>
-                <TabsTrigger value="code" className="flex items-center space-x-2">
-                  <Code2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Code</span>
-                </TabsTrigger>
-                <TabsTrigger value="database" className="flex items-center space-x-2">
-                  <Database className="w-4 h-4" />
-                  <span className="hidden sm:inline">Database</span>
-                </TabsTrigger>
-                <TabsTrigger value="preview" className="flex items-center space-x-2">
-                  <Eye className="w-4 h-4" />
-                  <span className="hidden sm:inline">Preview</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Tab Content */}
-          <div className="flex-1 overflow-hidden">
-            <Tabs value={activeTab} className="h-full">
-              <TabsContent value="er-diagram" className="h-full m-0">
-                <ERDiagram />
-              </TabsContent>
-              <TabsContent value="code" className="h-full m-0">
-                <CodeViewer />
-              </TabsContent>
-              <TabsContent value="database" className="h-full m-0">
-                <DatabaseViewer />
-              </TabsContent>
-              <TabsContent value="preview" className="h-full m-0">
-                <AppPreview />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </div>
+            {/* Tab Content */}
+            <div className="flex-1 overflow-hidden">
+              <Tabs value={activeTab} className="h-full">
+                <TabsContent value="er-diagram" className="h-full m-0">
+                  <ERDiagram />
+                </TabsContent>
+                <TabsContent value="code" className="h-full m-0">
+                  <CodeViewer />
+                </TabsContent>
+                <TabsContent value="database" className="h-full m-0">
+                  <DatabaseViewer />
+                </TabsContent>
+                <TabsContent value="preview" className="h-full m-0">
+                  <AppPreview />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </>
+        }
+        defaultLeftWidth={320}
+        minLeftWidth={280}
+        maxLeftWidth={600}
+      />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User } from "lucide-react";
 import { Message, MessageType, MessageFrom } from '../types/chat.types';
 import { motion } from "framer-motion";
+import { ChatResultMessage } from './chat-result-message';
 
 interface ChatBubbleProps {
   message: Message;
@@ -9,6 +10,17 @@ interface ChatBubbleProps {
 
 export function ChatBubble({ message }: ChatBubbleProps) {
   const isUser = message.from === MessageFrom.USER;
+  
+  // Handle RESULT messages - new combined widget for DBML + action
+  if (message.type === MessageType.RESULT) {
+    return (
+      <ChatResultMessage
+        dbmlCode={message.text}
+        timestamp={message.timestamp}
+        title="Database generated"
+      />
+    );
+  }
   
   // Handle DBML messages - these will need integration with ER diagram component
   if (message.type === MessageType.DBML) {

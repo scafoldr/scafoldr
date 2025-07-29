@@ -17,11 +17,6 @@ export function ChatResultMessage({
 }: ChatResultMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleGenerateCode = () => {
-    // TODO: Implement code generation logic
-    console.log('Generate backend code clicked');
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -76,15 +71,6 @@ export function ChatResultMessage({
               </motion.div>
             )}
           </div>
-
-          {/* Action Button */}
-          <Button
-            onClick={handleGenerateCode}
-            className="w-full bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded-md flex items-center justify-center space-x-2"
-          >
-            <span>✅</span>
-            <span>Done! You can now generate backend code</span>
-          </Button>
         </div>
         
         <p className="text-xs text-slate-500 mt-1">

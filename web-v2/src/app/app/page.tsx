@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Code2, Database, Eye, User, GitBranch, Play, Download, Share } from "lucide-react"
 import { ProjectSwitcher } from "@/components/project-switcher"
-import { ChatInterface } from "@/components/chat-interface"
+import { ChatInterface } from "@/features/chat"
 import { ERDiagram } from "@/components/er-diagram"
 import { CodeViewer } from "@/components/code-viewer"
 import { DatabaseViewer } from "@/components/database-viewer"
@@ -15,6 +15,18 @@ import { UserProfileDropdown } from "@/components/user-profile-dropdown"
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState("er-diagram")
   const [currentProject, setCurrentProject] = useState("Task Manager App")
+  const [initialPrompt, setInitialPrompt] = useState<string | undefined>()
+
+  useEffect(() => {
+    // Get prompt from URL params (passed from auth page)
+    const urlParams = new URLSearchParams(window.location.search)
+    const promptParam = urlParams.get("prompt")
+    if (promptParam) {
+      setInitialPrompt(decodeURIComponent(promptParam))
+      // Clean up URL after extracting prompt
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
@@ -62,7 +74,7 @@ export default function AppPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Chat */}
         <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col">
-          <ChatInterface />
+          <ChatInterface initialPrompt={initialPrompt} />
         </div>
 
         {/* Right Panel - Main Stage */}

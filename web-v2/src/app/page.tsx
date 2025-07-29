@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ArrowRight, Code2, Database, Zap, Github, Star } from "lucide-react"
 import { motion } from "framer-motion"
+import Link from "next/link"
 
 export default function LandingPage() {
   const [prompt, setPrompt] = useState("")
@@ -39,14 +40,12 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="hidden md:flex items-center space-x-2">
+            <Link href="https://github.com/scafoldr/scafoldr" target="_blank" className="hidden md:flex items-center space-x-2">
+            <Button variant="ghost" size="sm">
               <Github className="w-4 h-4" />
-              <span>GitHub</span>
+              <span>Star us</span>
             </Button>
-            <Button variant="ghost" size="sm" className="hidden md:flex items-center space-x-2">
-              <Star className="w-4 h-4" />
-              <span>Star</span>
-            </Button>
+            </Link>
             <ThemeToggle />
             <Button variant="outline" size="sm">
               Sign In
@@ -69,9 +68,7 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent leading-tight">
-            Just imagine.
-            <br />
-            We'll build it.
+            Let it happen.
           </h1>
 
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
@@ -127,7 +124,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
                 <Database className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Smart Database Design</h3>
@@ -137,7 +134,7 @@ export default function LandingPage() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
                 <Code2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Full-Stack Code</h3>
@@ -147,7 +144,7 @@ export default function LandingPage() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
                 <Zap className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Instant Preview</h3>

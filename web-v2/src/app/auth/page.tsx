@@ -30,7 +30,10 @@ export default function AuthPage() {
     setIsLoading(true)
     // Simulate API call
     setTimeout(() => {
-      window.location.href = "/app"
+      const redirectUrl = prompt
+        ? `/app?prompt=${encodeURIComponent(prompt)}`
+        : "/app"
+      window.location.href = redirectUrl
     }, 1500)
   }
 
@@ -38,7 +41,10 @@ export default function AuthPage() {
     setIsLoading(true)
     // Simulate social login
     setTimeout(() => {
-      window.location.href = "/app"
+      const redirectUrl = prompt
+        ? `/app?prompt=${encodeURIComponent(prompt)}`
+        : "/app"
+      window.location.href = redirectUrl
     }, 1000)
   }
 

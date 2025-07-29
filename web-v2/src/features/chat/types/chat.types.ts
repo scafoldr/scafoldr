@@ -4,7 +4,8 @@ export enum MessageType {
   LOADING = 'loading',
   DBML = 'dbml',
   CALL_TO_ACTION = 'call_to_action',
-  RESULT = 'result'
+  RESULT = 'result',
+  CODE_GENERATION = 'code_generation'
 }
 
 export enum MessageFrom {

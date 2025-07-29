@@ -3,12 +3,15 @@ import { Bot, User } from "lucide-react";
 import { Message, MessageType, MessageFrom } from '../types/chat.types';
 import { motion } from "framer-motion";
 import { ChatResultMessage } from './chat-result-message';
+import { ChatCodeGenerationMessage } from './chat-code-generation-message';
 
 interface ChatBubbleProps {
   message: Message;
+  onViewCode?: (files: any) => void;
+  onViewDB?: () => void;
 }
 
-export function ChatBubble({ message }: ChatBubbleProps) {
+export function ChatBubble({ message, onViewCode, onViewDB }: ChatBubbleProps) {
   const isUser = message.from === MessageFrom.USER;
   
   // Handle RESULT messages - new combined widget for DBML + action
@@ -18,6 +21,18 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         dbmlCode={message.text}
         timestamp={message.timestamp}
         title="Database generated"
+        onViewDB={onViewDB}
+      />
+    );
+  }
+
+  // Handle CODE_GENERATION messages
+  if (message.type === MessageType.CODE_GENERATION) {
+    return (
+      <ChatCodeGenerationMessage
+        dbmlCode={message.text}
+        timestamp={message.timestamp}
+        onViewCode={onViewCode}
       />
     );
   }

@@ -8,9 +8,11 @@ import { useChat } from '../hooks/use-chat';
 
 interface ChatInterfaceProps {
   initialPrompt?: string;
+  onViewCode?: (files: any) => void;
+  onViewDB?: () => void;
 }
 
-export function ChatInterface({ initialPrompt }: ChatInterfaceProps) {
+export function ChatInterface({ initialPrompt, onViewCode, onViewDB }: ChatInterfaceProps) {
   const {
     messages,
     isLoading,
@@ -51,7 +53,7 @@ export function ChatInterface({ initialPrompt }: ChatInterfaceProps) {
       </div>
 
       {/* Messages */}
-      <ChatHistory messages={messages} />
+      <ChatHistory messages={messages} onViewCode={onViewCode} onViewDB={onViewDB} />
 
       {/* Error Display */}
       {error && (

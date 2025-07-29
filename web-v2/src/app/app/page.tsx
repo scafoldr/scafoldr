@@ -17,6 +17,7 @@ export default function AppPage() {
   const [activeTab, setActiveTab] = useState("er-diagram")
   const [currentProject, setCurrentProject] = useState("Task Manager App")
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>()
+  const [generatedFiles, setGeneratedFiles] = useState<any>({})
 
   useEffect(() => {
     // Get prompt from URL params (passed from auth page)
@@ -28,6 +29,15 @@ export default function AppPage() {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])
+
+  const handleViewCode = (files: any) => {
+    setGeneratedFiles(files)
+    setActiveTab("code")
+  }
+
+  const handleViewDB = () => {
+    setActiveTab("er-diagram")
+  }
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
@@ -73,7 +83,7 @@ export default function AppPage() {
 
       {/* Main Content with Resizable Layout */}
       <ResizableLayout
-        leftPanel={<ChatInterface initialPrompt={initialPrompt} />}
+        leftPanel={<ChatInterface initialPrompt={initialPrompt} onViewCode={handleViewCode} onViewDB={handleViewDB} />}
         rightPanel={
           <>
             {/* Tab Navigation */}
@@ -107,160 +117,18 @@ export default function AppPage() {
                   <ERDiagram />
                 </TabsContent>
                 <TabsContent value="code" className="h-full m-0">
-                  <CodeEditor files={{
-                    "src/components/TaskList.jsx": `import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+                  <CodeEditor files={Object.keys(generatedFiles).length > 0 ? generatedFiles : {
+                    "README.md": `# Generated Code
 
-export function TaskList({ projectId }) {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+Click "View Code" from a code generation message to see the generated files here.
 
-  useEffect(() => {
-    fetchTasks();
-  }, [projectId]);
+This tab will display:
+- Generated Node.js Express application files
+- Database models and schemas
+- API routes and controllers
+- Configuration files
 
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch(\`/api/tasks?project=\${projectId}\`);
-      const data = await response.json();
-      setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in-progress': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  if (loading) return <div>Loading tasks...</div>;
-
-  return (
-    <div className="space-y-4">
-      {tasks.map(task => (
-        <Card key={task._id}>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{task.title}</CardTitle>
-              <Badge className={getStatusColor(task.status)}>
-                {task.status}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">{task.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">
-                Assigned to: {task.assignee?.name || 'Unassigned'}
-              </span>
-              <Button variant="outline" size="sm">
-                Edit
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}`,
-                    "src/models/User.js": `const mongoose = require('mongoose');
-
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true
-  }
-}, {
-  timestamps: true
-});
-
-module.exports = mongoose.model('User', userSchema);`,
-                    "src/routes/tasks.js": `const express = require('express');
-const Task = require('../models/Task');
-const auth = require('../middleware/auth');
-
-const router = express.Router();
-
-// GET /api/tasks
-router.get('/', auth, async (req, res) => {
-  try {
-    const tasks = await Task.find({
-      project: { $in: req.user.projects }
-    }).populate('assignee', 'name email');
-    
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// POST /api/tasks
-router.post('/', auth, async (req, res) => {
-  try {
-    const task = new Task({
-      ...req.body,
-      createdBy: req.user._id
-    });
-    
-    await task.save();
-    res.status(201).json(task);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-module.exports = router;`,
-                    "database/schema.sql": `-- Users table
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Projects table
-CREATE TABLE projects (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Tasks table
-CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    status VARCHAR(50) DEFAULT 'todo',
-    priority VARCHAR(20) DEFAULT 'medium',
-    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
-    assignee_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    created_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    due_date TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
+Start by asking the AI to generate a database schema, then the code will be automatically generated and displayed here.`
                   }} />
                 </TabsContent>
                 <TabsContent value="database" className="h-full m-0">

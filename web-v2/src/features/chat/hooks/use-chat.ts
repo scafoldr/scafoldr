@@ -91,6 +91,11 @@ export function useChat(options: UseChatOptions = {}) {
         updateLastMessage(response.response, MessageType.TEXT);
       } else if (response.response_type === 'dbml') {
         updateLastMessage(response.response, MessageType.RESULT);
+        
+        // Automatically add a code generation message after DBML result
+        setTimeout(() => {
+          addMessage(response.response, MessageType.CODE_GENERATION, MessageFrom.AGENT);
+        }, 500); // Small delay for better UX
       }
     } catch (error) {
       const errorMessage = error instanceof ChatApiError 

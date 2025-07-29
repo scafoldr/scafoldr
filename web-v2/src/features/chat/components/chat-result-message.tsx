@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Bot, ChevronDown, ChevronUp, Database, Code } from "lucide-react";
+import { Bot, ChevronDown, ChevronUp, Database, GitBranch } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ChatResultMessageProps {
   dbmlCode: string;
   timestamp: Date;
   title?: string;
+  onViewDB?: () => void;
 }
 
-export function ChatResultMessage({ 
-  dbmlCode, 
-  timestamp, 
-  title = "I've generated your database schema:" 
+export function ChatResultMessage({
+  dbmlCode,
+  timestamp,
+  title = "I've generated your database schema:",
+  onViewDB
 }: ChatResultMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -70,6 +72,17 @@ export function ChatResultMessage({
                 </pre>
               </motion.div>
             )}
+          </div>
+
+          {/* View DB Button */}
+          <div className="mt-3">
+            <Button
+              onClick={onViewDB}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <GitBranch className="w-4 h-4 mr-2" />
+              View DB
+            </Button>
           </div>
         </div>
         

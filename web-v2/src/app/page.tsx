@@ -89,11 +89,12 @@ export default function LandingPage() {
           >
             <div className="relative">
               <Input
+                name="prompt-input"
                 type="text"
                 placeholder="Describe your app idea... (e.g., 'A task management app with teams and real-time collaboration')"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="h-14 pr-32 text-lg bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-lg"
+                className="h-14 pr-48 text-lg bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-lg"
                 disabled={isSubmitting}
               />
               <Button

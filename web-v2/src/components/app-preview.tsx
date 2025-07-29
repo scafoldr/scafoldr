@@ -44,7 +44,11 @@ export function AppPreview() {
   const [viewMode, setViewMode] = useState("desktop")
   const [showNewTaskForm, setShowNewTaskForm] = useState(false)
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (
+    
+    
+    
+    status: string) => {
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"

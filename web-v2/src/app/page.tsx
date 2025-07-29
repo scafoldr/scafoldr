@@ -62,7 +62,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center max-w-4xl mx-auto"
-        >
+>
           <div className="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-8">
             <Zap className="w-4 h-4" />
             <span>Open Source AI App Generator</span>

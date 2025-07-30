@@ -43,10 +43,15 @@ const Relationship = ({ relationship, tables }: RelationshipProps) => {
   return (
     <Arrow
       points={[startX, startY, endX, endY]}
-      stroke="#FAD02C"
-      fill="#FAD02C"
-      pointerLength={10}
-      pointerWidth={10}
+      stroke="#a855f7"
+      fill="#a855f7"
+      strokeWidth={2}
+      pointerLength={8}
+      pointerWidth={8}
+      shadowColor="rgba(168, 85, 247, 0.3)"
+      shadowBlur={4}
+      shadowOffset={{ x: 0, y: 2 }}
+      shadowOpacity={0.5}
     />
   );
 };

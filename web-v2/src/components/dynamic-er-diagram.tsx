@@ -88,7 +88,7 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
   }
 
   return (
-    <div className="h-full bg-slate-50 dark:bg-slate-900 relative">
+    <div className="h-full bg-slate-900 relative">
       {/* Toolbar */}
       <div className="absolute top-4 right-4 z-10 flex space-x-2">
         <Button variant="outline" size="sm">
@@ -111,30 +111,31 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
       </div>
 
       {/* Legend */}
-      <Card className="absolute bottom-4 left-4 p-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
-        <h4 className="font-semibold text-sm mb-2">Legend</h4>
+      <Card className="absolute bottom-4 left-4 p-3 bg-slate-800/90 border-slate-700 backdrop-blur-sm">
+        <h4 className="font-semibold text-sm mb-2 text-slate-200">Legend</h4>
         <div className="space-y-1 text-xs">
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-red-200 border border-red-400 rounded-sm" />
-            <span>Primary Key</span>
+            <span className="text-sm">🔑</span>
+            <span className="text-slate-300">Primary Key</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-blue-200 border border-blue-400 rounded-sm" />
-            <span>Foreign Key</span>
+            <span className="text-sm">🔗</span>
+            <span className="text-slate-300">Foreign Key</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-1 bg-yellow-500" />
-            <span>Relationship</span>
+            <div className="w-3 h-1 bg-purple-500 rounded" />
+            <span className="text-slate-300">Relationship</span>
           </div>
         </div>
       </Card>
 
       {/* Instructions */}
-      <Card className="absolute bottom-4 right-4 p-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm max-w-xs">
-        <h4 className="font-semibold text-sm mb-2">Instructions</h4>
-        <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+      <Card className="absolute bottom-4 right-4 p-3 bg-slate-800/90 border-slate-700 backdrop-blur-sm max-w-xs">
+        <h4 className="font-semibold text-sm mb-2 text-slate-200">Instructions</h4>
+        <div className="space-y-1 text-xs text-slate-400">
           <p>• Drag tables to reposition them</p>
-          <p>• Scroll to pan around the diagram</p>
+          <p>• Drag the canvas to pan around</p>
+          <p>• Grid shows draggable area</p>
           <p>• Use toolbar buttons for zoom controls</p>
         </div>
       </Card>

@@ -11,19 +11,17 @@ import {
   HEADER_COLUMN_HEIGHT
 } from '../constants';
 
-const HEADER_FILL = '#2c3e50';
-const HEADER_FONT_COLOR = '#f1c40f';
+// Modern dark theme colors matching the design
+const TABLE_BACKGROUND = '#1e293b'; // slate-800
+const TABLE_BORDER = '#334155'; // slate-700
+const HEADER_BACKGROUND = '#0f172a'; // slate-900
+const HEADER_TEXT = '#e2e8f0'; // slate-200
+const TABLE_ICON_COLOR = '#a855f7'; // purple-500
 
-const PK_ROW_FILL = '#f8c1c1';
-const PK_TEXT_COLOR = '#8b3e3e';
-
-const FK_ROW_FILL = '#a8d0ff';
-const FK_TEXT_COLOR = '#2a4d8f';
-
-const DEFAULT_ROW_FILL = '#ecf0f1';
-const DEFAULT_TEXT_COLOR = '#2c3e50';
-
-const COLUMN_STROKE = '#bdc3c7';
+const FIELD_NAME_COLOR = '#f1f5f9'; // slate-100
+const FIELD_TYPE_COLOR = '#94a3b8'; // slate-400
+const PK_ICON_COLOR = '#f59e0b'; // amber-500
+const FK_ICON_COLOR = '#3b82f6'; // blue-500
 
 const Table = ({
   table,
@@ -43,48 +41,108 @@ const Table = ({
       onDragMove={(e) => {
         onDragMove(table.id, e.target.x(), e.target.y());
       }}>
+      
+      {/* Table container with shadow effect */}
+      <Rect
+        width={table.width}
+        height={table.height}
+        fill={TABLE_BACKGROUND}
+        stroke={TABLE_BORDER}
+        strokeWidth={1}
+        cornerRadius={8}
+        shadowColor="rgba(0, 0, 0, 0.3)"
+        shadowBlur={10}
+        shadowOffset={{ x: 0, y: 4 }}
+        shadowOpacity={0.3}
+      />
+      
+      {/* Header background */}
       <Rect
         width={table.width}
         height={HEADER_COLUMN_HEIGHT}
-        fill={HEADER_FILL}
-        stroke="#34495e"
+        fill={HEADER_BACKGROUND}
+        stroke={TABLE_BORDER}
         strokeWidth={1}
-        cornerRadius={[10, 10, 0, 0]}
+        cornerRadius={[8, 8, 0, 0]}
       />
+      
+      {/* Table icon (database symbol) */}
+      <Text
+        text="🗃️"
+        x={COLUMN_PADDING_LEFT}
+        y={COLUMN_PADDING_TOP - 2}
+        fontSize={16}
+      />
+      
+      {/* Table name */}
       <Text
         text={table.name}
-        x={COLUMN_PADDING_LEFT}
+        x={COLUMN_PADDING_LEFT + 25}
         y={COLUMN_PADDING_TOP}
-        fontSize={FONT_SIZE + 2}
-        fill={HEADER_FONT_COLOR}
+        fontSize={FONT_SIZE}
+        fill={HEADER_TEXT}
         fontStyle="bold"
+        fontFamily="system-ui, -apple-system, sans-serif"
       />
+      
+      {/* Column rows */}
       {table.columns.map((col, idx) => {
         const isPK = col.isPrimary;
         const isFK = col.isForeign;
-
-        const fill = isPK ? PK_ROW_FILL : isFK ? FK_ROW_FILL : DEFAULT_ROW_FILL;
-        const textColor = isPK ? PK_TEXT_COLOR : isFK ? FK_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+        const yPos = HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT;
 
         return (
           <Fragment key={col.id}>
-            <Rect
-              width={table.width}
-              height={COLUMN_HEIGHT}
-              y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT}
-              fill={fill}
-              stroke={COLUMN_STROKE}
-              strokeWidth={1}
-              cornerRadius={idx === lastIdx ? [0, 0, 10, 10] : 0}
-            />
+            {/* Column separator line */}
+            {idx > 0 && (
+              <Rect
+                x={COLUMN_PADDING_LEFT}
+                y={yPos}
+                width={table.width - COLUMN_PADDING_LEFT * 2}
+                height={0.5}
+                fill={TABLE_BORDER}
+              />
+            )}
+            
+            {/* Key icon */}
             <Text
-              text={`${col.name}: ${col.dataType}`}
+              text={isPK ? "🔑" : isFK ? "🔗" : ""}
               x={COLUMN_PADDING_LEFT}
-              y={HEADER_COLUMN_HEIGHT + idx * COLUMN_HEIGHT + COLUMN_PADDING_TOP - 2}
-              fontSize={FONT_SIZE}
-              fill={textColor}
-              fontFamily="Arial"
+              y={yPos + COLUMN_PADDING_TOP - 2}
+              fontSize={12}
+            />
+            
+            {/* Field name */}
+            <Text
+              text={col.name}
+              x={COLUMN_PADDING_LEFT + (isPK || isFK ? 20 : 0)}
+              y={yPos + COLUMN_PADDING_TOP}
+              fontSize={FONT_SIZE - 1}
+              fill={FIELD_NAME_COLOR}
+              fontFamily="system-ui, -apple-system, sans-serif"
               fontStyle={isPK ? 'bold' : 'normal'}
+            />
+            
+            {/* Required indicator */}
+            {(isPK || col.name.includes('_id')) && (
+              <Text
+                text="*"
+                x={COLUMN_PADDING_LEFT + (isPK || isFK ? 20 : 0) + col.name.length * 8}
+                y={yPos + COLUMN_PADDING_TOP}
+                fontSize={FONT_SIZE - 1}
+                fill="#ef4444" // red-500
+                fontFamily="system-ui, -apple-system, sans-serif"
+              />
+            )}
+            
+            {/* Data type */}
+            <Text
+              text={col.dataType.toUpperCase()}
+              x={table.width - COLUMN_PADDING_LEFT - col.dataType.length * 7}
+              y={yPos + COLUMN_PADDING_TOP}
+              fontSize={FONT_SIZE - 3}
+              fill={FIELD_TYPE_COLOR}
+              fontFamily="system-ui, -apple-system, monospace"
             />
           </Fragment>
         );

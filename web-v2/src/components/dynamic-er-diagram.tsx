@@ -123,8 +123,16 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
             <span className="text-slate-300">Foreign Key</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-1 bg-purple-500 rounded" />
-            <span className="text-slate-300">Relationship</span>
+            <div className="w-3 h-1 bg-slate-500 rounded" />
+            <span className="text-slate-300">Relationship Line</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-amber-500 rounded-full" />
+            <span className="text-slate-300">Source (PK)</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full" />
+            <span className="text-slate-300">Target (FK)</span>
           </div>
         </div>
       </Card>

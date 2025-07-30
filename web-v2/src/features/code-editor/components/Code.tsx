@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
+import { useTheme } from 'next-themes';
 import { File } from '../types';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -8,6 +9,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 });
 
 export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
+  const { theme, resolvedTheme } = useTheme();
   const code = selectedFile?.content ?? '// Select a file to view its content';
   const fileName = selectedFile?.name ?? 'index.js';
 
@@ -23,6 +25,10 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
   else if (language === 'sql') language = 'sql';
   else if (language === 'php') language = 'php';
 
+  // Determine Monaco theme based on current theme
+  // Use resolvedTheme to handle 'system' theme properly
+  const monacoTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
+
   return (
     <div className="h-full w-full">
       <MonacoEditor 
@@ -30,7 +36,7 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
         width="100%" 
         language={language} 
         value={code} 
-        theme="vs-dark"
+        theme={monacoTheme}
         options={{
           readOnly: true,
           minimap: { enabled: false },

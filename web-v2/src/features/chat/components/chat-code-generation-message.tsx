@@ -148,7 +148,7 @@ export function ChatCodeGenerationMessage({
               <div className="flex items-center space-x-2">
                 <Button
                   onClick={() => onViewCode?.(generatedFiles)}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-dark dark:text-white shadow-sm dark:shadow-md transition-all duration-200"
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   View Code

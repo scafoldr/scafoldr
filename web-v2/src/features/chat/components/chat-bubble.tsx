@@ -8,7 +8,7 @@ import { ChatCodeGenerationMessage } from './chat-code-generation-message';
 interface ChatBubbleProps {
   message: Message;
   onViewCode?: (files: any) => void;
-  onViewDB?: () => void;
+  onViewDB?: (dbmlCode: string) => void;
 }
 
 export function ChatBubble({ message, onViewCode, onViewDB }: ChatBubbleProps) {

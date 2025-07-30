@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Code2, Database, Eye, User, GitBranch, Play, Download, Share } from "lucide-react"
 import { ProjectSwitcher } from "@/components/project-switcher"
 import { ChatInterface } from "@/features/chat"
-import { ERDiagram } from "@/components/er-diagram"
+import { DynamicERDiagram } from "@/components/dynamic-er-diagram"
 import { CodeEditor } from "@/features/code-editor"
 import { DatabaseViewer } from "@/components/database-viewer"
 import { AppPreview } from "@/components/app-preview"
@@ -18,6 +18,7 @@ export default function AppPage() {
   const [currentProject, setCurrentProject] = useState("Task Manager App")
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>()
   const [generatedFiles, setGeneratedFiles] = useState<any>({})
+  const [currentDbml, setCurrentDbml] = useState<string | undefined>()
 
   useEffect(() => {
     // Get prompt from URL params (passed from auth page)
@@ -35,7 +36,10 @@ export default function AppPage() {
     setActiveTab("code")
   }
 
-  const handleViewDB = () => {
+  const handleViewDB = (dbmlCode?: string) => {
+    if (dbmlCode) {
+      setCurrentDbml(dbmlCode)
+    }
     setActiveTab("er-diagram")
   }
 
@@ -114,7 +118,7 @@ export default function AppPage() {
             <div className="flex-1 overflow-hidden">
               <Tabs value={activeTab} className="h-full">
                 <TabsContent value="er-diagram" className="h-full m-0">
-                  <ERDiagram />
+                  <DynamicERDiagram dbmlCode={currentDbml} />
                 </TabsContent>
                 <TabsContent value="code" className="h-full m-0">
                   <CodeEditor files={Object.keys(generatedFiles).length > 0 ? generatedFiles : {

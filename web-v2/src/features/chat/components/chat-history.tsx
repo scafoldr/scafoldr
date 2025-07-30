@@ -5,7 +5,7 @@ import { Message } from '../types/chat.types';
 interface ChatHistoryProps {
   messages: Message[];
   onViewCode?: (files: any) => void;
-  onViewDB?: () => void;
+  onViewDB?: (dbmlCode: string) => void;
 }
 
 export function ChatHistory({ messages, onViewCode, onViewDB }: ChatHistoryProps) {

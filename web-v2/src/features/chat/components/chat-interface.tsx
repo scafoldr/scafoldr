@@ -9,7 +9,7 @@ import { useChat } from '../hooks/use-chat';
 interface ChatInterfaceProps {
   initialPrompt?: string;
   onViewCode?: (files: any) => void;
-  onViewDB?: () => void;
+  onViewDB?: (dbmlCode: string) => void;
 }
 
 export function ChatInterface({ initialPrompt, onViewCode, onViewDB }: ChatInterfaceProps) {

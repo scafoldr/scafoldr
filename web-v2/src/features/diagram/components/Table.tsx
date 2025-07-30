@@ -70,7 +70,7 @@ const Table = ({
       <Text
         text="🗃️"
         x={COLUMN_PADDING_LEFT}
-        y={COLUMN_PADDING_TOP - 2}
+        y={HEADER_COLUMN_HEIGHT / 2 - 8}
         fontSize={16}
       />
       
@@ -78,7 +78,7 @@ const Table = ({
       <Text
         text={table.name}
         x={COLUMN_PADDING_LEFT + 25}
-        y={COLUMN_PADDING_TOP}
+        y={HEADER_COLUMN_HEIGHT / 2 - 8}
         fontSize={FONT_SIZE}
         fill={HEADER_TEXT}
         fontStyle="bold"
@@ -104,21 +104,33 @@ const Table = ({
               />
             )}
             
+            {/* Highlight background for PK/FK */}
+            {(isPK || isFK) && (
+              <Rect
+                x={0}
+                y={yPos}
+                width={table.width}
+                height={COLUMN_HEIGHT}
+                fill={isPK ? "rgba(245, 158, 11, 0.1)" : "rgba(59, 130, 246, 0.1)"} // amber-500 or blue-500 with low opacity
+                cornerRadius={idx === lastIdx ? [0, 0, 8, 8] : 0}
+              />
+            )}
+            
             {/* Key icon */}
             <Text
               text={isPK ? "🔑" : isFK ? "🔗" : ""}
               x={COLUMN_PADDING_LEFT}
-              y={yPos + COLUMN_PADDING_TOP - 2}
+              y={yPos + COLUMN_HEIGHT / 2 - 6}
               fontSize={12}
             />
             
             {/* Field name */}
             <Text
               text={col.name}
-              x={COLUMN_PADDING_LEFT + (isPK || isFK ? 20 : 0)}
-              y={yPos + COLUMN_PADDING_TOP}
+              x={COLUMN_PADDING_LEFT + (isPK || isFK ? 22 : 0)}
+              y={yPos + COLUMN_HEIGHT / 2 - 7}
               fontSize={FONT_SIZE - 1}
-              fill={FIELD_NAME_COLOR}
+              fill={isPK ? "#f59e0b" : isFK ? "#3b82f6" : FIELD_NAME_COLOR} // amber-500 for PK, blue-500 for FK
               fontFamily="system-ui, -apple-system, sans-serif"
               fontStyle={isPK ? 'bold' : 'normal'}
             />
@@ -127,8 +139,8 @@ const Table = ({
             {(isPK || col.name.includes('_id')) && (
               <Text
                 text="*"
-                x={COLUMN_PADDING_LEFT + (isPK || isFK ? 20 : 0) + col.name.length * 8}
-                y={yPos + COLUMN_PADDING_TOP}
+                x={COLUMN_PADDING_LEFT + (isPK || isFK ? 22 : 0) + col.name.length * 8}
+                y={yPos + COLUMN_HEIGHT / 2 - 7}
                 fontSize={FONT_SIZE - 1}
                 fill="#ef4444" // red-500
                 fontFamily="system-ui, -apple-system, sans-serif"
@@ -139,7 +151,7 @@ const Table = ({
             <Text
               text={col.dataType.toUpperCase()}
               x={table.width - COLUMN_PADDING_LEFT - col.dataType.length * 7}
-              y={yPos + COLUMN_PADDING_TOP}
+              y={yPos + COLUMN_HEIGHT / 2 - 7}
               fontSize={FONT_SIZE - 3}
               fill={FIELD_TYPE_COLOR}
               fontFamily="system-ui, -apple-system, monospace"

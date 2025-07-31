@@ -21,7 +21,7 @@ export default function LandingPage() {
     setIsSubmitting(true)
     // Simulate transition delay
     setTimeout(() => {
-      window.location.href = "/auth?prompt=" + encodeURIComponent(prompt)
+      window.location.href = "/app?prompt=" + encodeURIComponent(prompt)
     }, 800)
   }
 

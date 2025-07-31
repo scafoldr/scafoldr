@@ -17,11 +17,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AuthComingSoonModal } from "@/components/coming-soon-modal"
 
 export function UserProfileDropdown() {
   const { setTheme, theme } = useTheme()
+  const [showAuthModal, setShowAuthModal] = React.useState(false)
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
@@ -65,15 +68,22 @@ export function UserProfileDropdown() {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setShowAuthModal(true)}>
           <Settings className="mr-2 h-4 w-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setShowAuthModal(true)}>
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <AuthComingSoonModal
+      open={showAuthModal}
+      onOpenChange={setShowAuthModal}
+      githubRepo="https://github.com/scafoldr/scafoldr"
+    />
+    </>
   )
 }

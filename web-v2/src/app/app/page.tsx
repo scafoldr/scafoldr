@@ -13,6 +13,13 @@ import { AppPreview } from "@/components/app-preview"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
 import { ResizableLayout } from "@/components/resizable-layout"
 import { PreviewIndicator } from "@/components/preview-indicator"
+import {
+  DatabaseComingSoonModal,
+  PreviewComingSoonModal,
+  DeployComingSoonModal,
+  ExportComingSoonModal,
+  ShareComingSoonModal
+} from "@/components/coming-soon-modal"
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState("er-diagram")
@@ -21,6 +28,13 @@ export default function AppPage() {
   const [generatedFiles, setGeneratedFiles] = useState<any>({})
   const [currentDbml, setCurrentDbml] = useState<string | undefined>()
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  
+  // Coming Soon Modal states
+  const [showDatabaseModal, setShowDatabaseModal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [showDeployModal, setShowDeployModal] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
 
   useEffect(() => {
     // Get prompt from URL params (passed from auth page)
@@ -69,11 +83,9 @@ export default function AppPage() {
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Code2 className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Scafoldr
+            
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              🏗️ scafoldr
             </span>
           </div>
 
@@ -83,17 +95,28 @@ export default function AppPage() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm" className="hidden md:flex bg-transparent">
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden md:flex bg-transparent"
+            onClick={() => setShowShareModal(true)}
+          >
             <Share className="w-4 h-4 mr-2" />
             Share
           </Button>
-          <Button variant="outline" size="sm" className="hidden md:flex bg-transparent">
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden md:flex bg-transparent"
+            onClick={() => setShowExportModal(true)}
+          >
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
           <Button
             size="sm"
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            onClick={() => setShowDeployModal(true)}
           >
             <Play className="w-4 h-4 mr-2" />
             Deploy
@@ -122,11 +145,25 @@ export default function AppPage() {
                     <Code2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Code</span>
                   </TabsTrigger>
-                  <TabsTrigger value="database" className="flex items-center space-x-2">
+                  <TabsTrigger
+                    value="database"
+                    className="flex items-center space-x-2"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setShowDatabaseModal(true)
+                    }}
+                  >
                     <Database className="w-4 h-4" />
                     <span className="hidden sm:inline">Database</span>
                   </TabsTrigger>
-                  <TabsTrigger value="preview" className="flex items-center space-x-2">
+                  <TabsTrigger
+                    value="preview"
+                    className="flex items-center space-x-2"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setShowPreviewModal(true)
+                    }}
+                  >
                     <Eye className="w-4 h-4" />
                     <span className="hidden sm:inline">Preview</span>
                   </TabsTrigger>
@@ -172,6 +209,37 @@ Start by asking the AI to generate a database schema, then the code will be auto
         defaultLeftWidth={320}
         minLeftWidth={280}
         maxLeftWidth={600}
+      />
+
+      {/* Coming Soon Modals */}
+      <DatabaseComingSoonModal
+        open={showDatabaseModal}
+        onOpenChange={setShowDatabaseModal}
+        githubRepo="https://github.com/scafoldr/scafoldr"
+      />
+      
+      <PreviewComingSoonModal
+        open={showPreviewModal}
+        onOpenChange={setShowPreviewModal}
+        githubRepo="https://github.com/scafoldr/scafoldr"
+      />
+      
+      <DeployComingSoonModal
+        open={showDeployModal}
+        onOpenChange={setShowDeployModal}
+        githubRepo="https://github.com/scafoldr/scafoldr"
+      />
+      
+      <ExportComingSoonModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        githubRepo="https://github.com/scafoldr/scafoldr"
+      />
+      
+      <ShareComingSoonModal
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+        githubRepo="https://github.com/scafoldr/scafoldr"
       />
     </div>
   )

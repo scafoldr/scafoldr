@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, Maximize, Download } from "lucide-react"
-import { Diagram, parseDbmlToDiagram, IERDiagram } from "@/features/diagram"
+import { Diagram, parseDbmlToDiagram, IERDiagram, type DiagramRef } from "@/features/diagram"
 
 // Sample DBML for demonstration
 const sampleDbml = `
@@ -47,6 +47,7 @@ Table comments {
 export function EnhancedERDiagram() {
   const [diagram, setDiagram] = useState<IERDiagram>({ tables: [], relationships: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const diagramRef = useRef<DiagramRef>(null);
 
   useEffect(() => {
     try {
@@ -73,23 +74,38 @@ export function EnhancedERDiagram() {
     <div className="h-full bg-slate-50 dark:bg-slate-900 relative">
       {/* Toolbar */}
       <div className="absolute top-4 right-4 z-10 flex space-x-2">
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => diagramRef.current?.zoomOut()}
+          title="Zoom Out"
+        >
           <ZoomOut className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => diagramRef.current?.zoomIn()}
+          title="Zoom In"
+        >
           <ZoomIn className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => diagramRef.current?.fitToScreen()}
+          title="Fit to Screen"
+        >
           <Maximize className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" title="Download">
           <Download className="w-4 h-4" />
         </Button>
       </div>
 
       {/* Interactive Diagram */}
       <div className="w-full h-full">
-        <Diagram initialDiagram={diagram} />
+        <Diagram ref={diagramRef} initialDiagram={diagram} />
       </div>
 
       {/* Legend */}
@@ -118,6 +134,7 @@ export function EnhancedERDiagram() {
           <p>• Drag tables to reposition them</p>
           <p>• Scroll to pan around the diagram</p>
           <p>• Use toolbar buttons for zoom controls</p>
+          <p>• Mouse wheel to zoom in/out</p>
         </div>
       </Card>
     </div>

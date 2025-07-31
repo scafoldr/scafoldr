@@ -6,7 +6,13 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:check": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "prettier:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "prettier:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format": "npm run prettier:fix && npm run lint:fix",
+    "format:check": "npm run prettier:check && npm run lint:check"
   },
   "dependencies": {
     "@dbml/core": "^3.13.9",

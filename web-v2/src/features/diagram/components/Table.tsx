@@ -11,15 +11,35 @@ import {
   HEADER_COLUMN_HEIGHT
 } from '../constants';
 
-// Modern dark theme colors matching the design
-const TABLE_BACKGROUND = '#1e293b'; // slate-800
-const TABLE_BORDER = '#334155'; // slate-700
-const HEADER_BACKGROUND = '#0f172a'; // slate-900
-const HEADER_TEXT = '#e2e8f0'; // slate-200
-const TABLE_ICON_COLOR = '#a855f7'; // purple-500
+// Theme-aware colors
+const getThemeColors = () => {
+  const isDark = document.documentElement.classList.contains('dark');
+  
+  if (isDark) {
+    return {
+      TABLE_BACKGROUND: '#1e293b', // slate-800
+      TABLE_BORDER: '#334155', // slate-700
+      HEADER_BACKGROUND: '#0f172a', // slate-900
+      HEADER_TEXT: '#e2e8f0', // slate-200
+      FIELD_NAME_COLOR: '#f1f5f9', // slate-100
+      FIELD_TYPE_COLOR: '#94a3b8', // slate-400
+      PK_HIGHLIGHT: "rgba(245, 158, 11, 0.1)", // amber with opacity
+      FK_HIGHLIGHT: "rgba(59, 130, 246, 0.1)", // blue with opacity
+    };
+  } else {
+    return {
+      TABLE_BACKGROUND: '#ffffff', // white
+      TABLE_BORDER: '#d1d5db', // gray-300
+      HEADER_BACKGROUND: '#f8fafc', // slate-50
+      HEADER_TEXT: '#1e293b', // slate-800
+      FIELD_NAME_COLOR: '#374151', // gray-700
+      FIELD_TYPE_COLOR: '#6b7280', // gray-500
+      PK_HIGHLIGHT: "rgba(245, 158, 11, 0.15)", // amber with opacity
+      FK_HIGHLIGHT: "rgba(59, 130, 246, 0.15)", // blue with opacity
+    };
+  }
+};
 
-const FIELD_NAME_COLOR = '#f1f5f9'; // slate-100
-const FIELD_TYPE_COLOR = '#94a3b8'; // slate-400
 const PK_ICON_COLOR = '#f59e0b'; // amber-500
 const FK_ICON_COLOR = '#3b82f6'; // blue-500
 
@@ -32,6 +52,7 @@ const Table = ({
   onDragMove: (tableId: string, x: number, y: number) => void;
 }) => {
   const lastIdx = table.columns.length - 1;
+  const colors = getThemeColors();
 
   return (
     <Group
@@ -46,22 +67,22 @@ const Table = ({
       <Rect
         width={table.width}
         height={table.height}
-        fill={TABLE_BACKGROUND}
-        stroke={TABLE_BORDER}
+        fill={colors.TABLE_BACKGROUND}
+        stroke={colors.TABLE_BORDER}
         strokeWidth={1}
         cornerRadius={8}
-        shadowColor="rgba(0, 0, 0, 0.3)"
-        shadowBlur={10}
-        shadowOffset={{ x: 0, y: 4 }}
-        shadowOpacity={0.3}
+        shadowColor="rgba(0, 0, 0, 0.15)"
+        shadowBlur={8}
+        shadowOffset={{ x: 0, y: 2 }}
+        shadowOpacity={0.2}
       />
       
       {/* Header background */}
       <Rect
         width={table.width}
         height={HEADER_COLUMN_HEIGHT}
-        fill={HEADER_BACKGROUND}
-        stroke={TABLE_BORDER}
+        fill={colors.HEADER_BACKGROUND}
+        stroke={colors.TABLE_BORDER}
         strokeWidth={1}
         cornerRadius={[8, 8, 0, 0]}
       />
@@ -80,7 +101,7 @@ const Table = ({
         x={COLUMN_PADDING_LEFT + 25}
         y={HEADER_COLUMN_HEIGHT / 2 - 8}
         fontSize={FONT_SIZE}
-        fill={HEADER_TEXT}
+        fill={colors.HEADER_TEXT}
         fontStyle="bold"
         fontFamily="system-ui, -apple-system, sans-serif"
       />
@@ -100,7 +121,7 @@ const Table = ({
                 y={yPos}
                 width={table.width - COLUMN_PADDING_LEFT * 2}
                 height={0.5}
-                fill={TABLE_BORDER}
+                fill={colors.TABLE_BORDER}
               />
             )}
             
@@ -111,7 +132,7 @@ const Table = ({
                 y={yPos}
                 width={table.width}
                 height={COLUMN_HEIGHT}
-                fill={isPK ? "rgba(245, 158, 11, 0.1)" : "rgba(59, 130, 246, 0.1)"} // amber-500 or blue-500 with low opacity
+                fill={isPK ? colors.PK_HIGHLIGHT : colors.FK_HIGHLIGHT}
                 cornerRadius={idx === lastIdx ? [0, 0, 8, 8] : 0}
               />
             )}
@@ -130,7 +151,7 @@ const Table = ({
               x={COLUMN_PADDING_LEFT + (isPK || isFK ? 22 : 0)}
               y={yPos + COLUMN_HEIGHT / 2 - 7}
               fontSize={FONT_SIZE - 1}
-              fill={isPK ? "#f59e0b" : isFK ? "#3b82f6" : FIELD_NAME_COLOR} // amber-500 for PK, blue-500 for FK
+              fill={isPK ? PK_ICON_COLOR : isFK ? FK_ICON_COLOR : colors.FIELD_NAME_COLOR}
               fontFamily="system-ui, -apple-system, sans-serif"
               fontStyle={isPK ? 'bold' : 'normal'}
             />
@@ -153,7 +174,7 @@ const Table = ({
               x={table.width - COLUMN_PADDING_LEFT - col.dataType.length * 7}
               y={yPos + COLUMN_HEIGHT / 2 - 7}
               fontSize={FONT_SIZE - 3}
-              fill={FIELD_TYPE_COLOR}
+              fill={colors.FIELD_TYPE_COLOR}
               fontFamily="system-ui, -apple-system, monospace"
             />
           </Fragment>

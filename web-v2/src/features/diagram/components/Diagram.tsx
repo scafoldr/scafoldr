@@ -31,7 +31,7 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const MIN_SCALE = 0.25; // Prevent zooming out below 25%
+  const MIN_SCALE = 0.5; // Prevent zooming out below 50%
   const MAX_SCALE = 3;
   const SCALE_FACTOR = 1.2;
 
@@ -136,7 +136,7 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     });
   };
 
-  // Infinite grid background component with dark theme
+  // Infinite grid background component with theme support
   const GridBackground = () => {
     const gridSize = 20;
     const gridLines = [];
@@ -148,15 +148,20 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     const startY = -gridExtension;
     const endY = sceneHeight + gridExtension;
     
+    // Use lighter grid color for light mode, darker for dark mode
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? '#334155' : '#e2e8f0'; // slate-700 for dark, slate-200 for light
+    const gridOpacity = isDark ? 0.4 : 0.6;
+    
     // Vertical lines
     for (let i = startX; i <= endX; i += gridSize) {
       gridLines.push(
         <Line
           key={`v-${i}`}
           points={[i, startY, i, endY]}
-          stroke="#334155"
+          stroke={gridColor}
           strokeWidth={0.5}
-          opacity={0.4}
+          opacity={gridOpacity}
         />
       );
     }
@@ -167,9 +172,9 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
         <Line
           key={`h-${i}`}
           points={[startX, i, endX, i]}
-          stroke="#334155"
+          stroke={gridColor}
           strokeWidth={0.5}
-          opacity={0.4}
+          opacity={gridOpacity}
         />
       );
     }

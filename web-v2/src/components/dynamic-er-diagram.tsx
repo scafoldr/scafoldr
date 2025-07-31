@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, Maximize, Download } from "lucide-react"
@@ -51,12 +51,7 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
   const [diagram, setDiagram] = useState<any>({ tables: [], relationships: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [DiagramComponent, setDiagramComponent] = useState<any>(null);
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const MIN_SCALE = 0.25; // Prevent zooming out below 25%
-  const MAX_SCALE = 3;
-  const SCALE_FACTOR = 1.2;
+  const diagramRef = useRef<any>(null);
 
   useEffect(() => {
     // Load both the parser and component dynamically
@@ -80,47 +75,23 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
     });
   }, [dbmlCode]);
 
-  // Direct zoom handlers that manage state locally
+  // Zoom handlers that use the diagram's ref methods
   const handleZoomIn = () => {
-    const newScale = Math.min(scale * SCALE_FACTOR, MAX_SCALE);
-    setScale(newScale);
+    if (diagramRef.current) {
+      diagramRef.current.zoomIn();
+    }
   };
 
   const handleZoomOut = () => {
-    const newScale = Math.max(scale / SCALE_FACTOR, MIN_SCALE);
-    setScale(newScale);
+    if (diagramRef.current) {
+      diagramRef.current.zoomOut();
+    }
   };
 
   const handleFitToScreen = () => {
-    if (!diagram.tables.length) return;
-
-    // Calculate bounding box of all tables
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    
-    diagram.tables.forEach((table: any) => {
-      minX = Math.min(minX, table.position.x);
-      minY = Math.min(minY, table.position.y);
-      maxX = Math.max(maxX, table.position.x + table.width);
-      maxY = Math.max(maxY, table.position.y + table.height);
-    });
-
-    const contentWidth = maxX - minX;
-    const contentHeight = maxY - minY;
-    
-    // Add padding and calculate scale
-    const padding = 50;
-    const sceneWidth = 800; // Approximate viewport width
-    const sceneHeight = 600; // Approximate viewport height
-    const scaleX = (sceneWidth - padding * 2) / contentWidth;
-    const scaleY = (sceneHeight - padding * 2) / contentHeight;
-    const newScale = Math.min(scaleX, scaleY, MAX_SCALE);
-    
-    // Center the content
-    const centerX = (sceneWidth - contentWidth * newScale) / 2 - minX * newScale;
-    const centerY = (sceneHeight - contentHeight * newScale) / 2 - minY * newScale;
-    
-    setScale(newScale);
-    setPosition({ x: centerX, y: centerY });
+    if (diagramRef.current) {
+      diagramRef.current.fitToScreen();
+    }
   };
 
   if (isLoading || !DiagramComponent) {
@@ -132,7 +103,7 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
   }
 
   return (
-    <div className="h-full bg-slate-900 relative">
+    <div className="h-full bg-slate-50 dark:bg-slate-900 relative">
       {/* Toolbar */}
       <div className="absolute top-4 right-4 z-10 flex space-x-2">
         <Button 
@@ -164,47 +135,42 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
         </Button>
       </div>
 
-      {/* Interactive Diagram with controlled scale and position */}
-      <div className="w-full h-full" style={{ transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`, transformOrigin: 'top left' }}>
-        <DiagramComponent initialDiagram={diagram} />
-      </div>
-
-      {/* Scale indicator */}
-      <div className="absolute top-4 left-4 z-10 bg-slate-800/90 border-slate-700 backdrop-blur-sm rounded px-2 py-1 text-xs text-slate-300">
-        Zoom: {Math.round(scale * 100)}%
+      {/* Interactive Diagram */}
+      <div className="w-full h-full">
+        <DiagramComponent ref={diagramRef} initialDiagram={diagram} />
       </div>
 
       {/* Legend */}
-      <Card className="absolute bottom-4 left-4 p-3 bg-slate-800/90 border-slate-700 backdrop-blur-sm">
-        <h4 className="font-semibold text-sm mb-2 text-slate-200">Legend</h4>
+      <Card className="absolute bottom-4 left-4 p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+        <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">Legend</h4>
         <div className="space-y-1 text-xs">
           <div className="flex items-center space-x-2">
             <span className="text-sm">🔑</span>
-            <span className="text-slate-300">Primary Key</span>
+            <span className="text-slate-600 dark:text-slate-300">Primary Key</span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-sm">🔗</span>
-            <span className="text-slate-300">Foreign Key</span>
+            <span className="text-slate-600 dark:text-slate-300">Foreign Key</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-1 bg-slate-500 rounded" />
-            <span className="text-slate-300">Relationship Line</span>
+            <div className="w-3 h-1 bg-slate-400 dark:bg-slate-500 rounded" />
+            <span className="text-slate-600 dark:text-slate-300">Relationship Line</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-amber-500 rounded-full" />
-            <span className="text-slate-300">Source (PK)</span>
+            <span className="text-slate-600 dark:text-slate-300">Source (PK)</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full" />
-            <span className="text-slate-300">Target (FK)</span>
+            <span className="text-slate-600 dark:text-slate-300">Target (FK)</span>
           </div>
         </div>
       </Card>
 
       {/* Instructions */}
-      <Card className="absolute bottom-4 right-4 p-3 bg-slate-800/90 border-slate-700 backdrop-blur-sm max-w-xs">
-        <h4 className="font-semibold text-sm mb-2 text-slate-200">Instructions</h4>
-        <div className="space-y-1 text-xs text-slate-400">
+      <Card className="absolute bottom-4 right-4 p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm max-w-xs">
+        <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">Instructions</h4>
+        <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
           <p>• Drag tables to reposition them</p>
           <p>• Drag the canvas to pan around</p>
           <p>• Grid shows draggable area</p>

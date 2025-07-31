@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Plus, Folder, MoreHorizontal, Trash2, Edit3 } from "lucide-react"
+import { ProjectComingSoonModal } from "@/components/coming-soon-modal"
 
 interface ProjectSwitcherProps {
   currentProject: string
@@ -23,7 +25,16 @@ const projects = [
 ]
 
 export function ProjectSwitcher({ currentProject, onProjectChange }: ProjectSwitcherProps) {
+  const [showProjectModal, setShowProjectModal] = useState(false)
+
+  const handleProjectAction = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowProjectModal(true)
+  }
+
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center space-x-2 px-3 py-2 h-9">
@@ -35,7 +46,12 @@ export function ProjectSwitcher({ currentProject, onProjectChange }: ProjectSwit
       <DropdownMenuContent className="w-80" align="start">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Projects</span>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={handleProjectAction}
+          >
             <Plus className="w-4 h-4" />
           </Button>
         </DropdownMenuLabel>
@@ -45,7 +61,11 @@ export function ProjectSwitcher({ currentProject, onProjectChange }: ProjectSwit
           <DropdownMenuItem
             key={project.name}
             className="flex items-center justify-between p-3 cursor-pointer"
-            onClick={() => onProjectChange(project.name)}
+            onClick={(e) => {
+              if (project.name !== currentProject) {
+                handleProjectAction(e)
+              }
+            }}
           >
             <div className="flex items-center space-x-3 flex-1">
               <Folder className="w-4 h-4 text-slate-400" />
@@ -75,11 +95,11 @@ export function ProjectSwitcher({ currentProject, onProjectChange }: ProjectSwit
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleProjectAction}>
                   <Edit3 className="w-4 h-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">
+                <DropdownMenuItem className="text-red-600" onClick={handleProjectAction}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </DropdownMenuItem>
@@ -89,11 +109,18 @@ export function ProjectSwitcher({ currentProject, onProjectChange }: ProjectSwit
         ))}
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="p-3">
+        <DropdownMenuItem className="p-3" onClick={handleProjectAction}>
           <Plus className="w-4 h-4 mr-3" />
           <span>Create new project</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <ProjectComingSoonModal
+      open={showProjectModal}
+      onOpenChange={setShowProjectModal}
+      githubRepo="https://github.com/glibas/scafoldr"
+    />
+    </>
   )
 }

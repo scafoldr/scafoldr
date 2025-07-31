@@ -154,6 +154,10 @@ export const FEATURE_CONFIGS = {
     featureName: "Authentication",
     description: "User authentication and authorization system. For now, you can use any username and password to test the interface - no real authentication is required.",
   },
+  projectManagement: {
+    featureName: "Project Management",
+    description: "Advanced project management features including creating new projects, switching between projects, renaming, and deleting projects. Currently, you can view existing demo projects but cannot modify them.",
+  },
 } as const
 
 // Convenience components for specific features
@@ -179,4 +183,8 @@ export function ShareComingSoonModal(props: Omit<ComingSoonModalProps, 'featureN
 
 export function AuthComingSoonModal(props: Omit<ComingSoonModalProps, 'featureName' | 'description'>) {
   return <ComingSoonModal {...props} {...FEATURE_CONFIGS.auth} />
+}
+
+export function ProjectComingSoonModal(props: Omit<ComingSoonModalProps, 'featureName' | 'description'>) {
+  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.projectManagement} />
 }

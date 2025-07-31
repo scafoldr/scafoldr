@@ -115,7 +115,7 @@ export default function AppPage() {
           </Button>
           <Button
             size="sm"
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white hover:text-white"
             onClick={() => setShowDeployModal(true)}
           >
             <Play className="w-4 h-4 mr-2" />

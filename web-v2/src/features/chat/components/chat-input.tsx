@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
@@ -9,12 +9,23 @@ interface ChatInputProps {
   placeholder?: string;
 }
 
-export function ChatInput({ 
-  onSendMessage, 
-  disabled = false, 
-  placeholder = "Describe changes or ask questions..." 
-}: ChatInputProps) {
+export interface ChatInputRef {
+  focus: () => void;
+}
+
+export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
+  onSendMessage,
+  disabled = false,
+  placeholder = "Describe changes or ask questions..."
+}, ref) => {
   const [input, setInput] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    }
+  }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +39,7 @@ export function ChatInput({
     <div className="p-4 border-t border-slate-200 dark:border-slate-800">
       <form onSubmit={handleSubmit} className="flex space-x-2">
         <Input
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={placeholder}
@@ -46,4 +58,6 @@ export function ChatInput({
       </form>
     </div>
   );
-}
+});
+
+ChatInput.displayName = 'ChatInput';

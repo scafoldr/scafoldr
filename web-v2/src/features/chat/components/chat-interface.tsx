@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Sparkles } from "lucide-react";
 import { ChatHistory } from './chat-history';
-import { ChatInput } from './chat-input';
+import { ChatInput, ChatInputRef } from './chat-input';
 import { useChat } from '../hooks/use-chat';
 
 interface ChatInterfaceProps {
@@ -15,6 +15,7 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInteraction, onMessageReceived }: ChatInterfaceProps) {
+  const chatInputRef = useRef<ChatInputRef>(null);
   const {
     messages,
     isLoading,
@@ -30,12 +31,23 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInter
     initializeWithPrompt();
   }, [initializeWithPrompt]);
 
-  // Track message changes and notify parent
+  // Track message changes and notify parent + auto-focus input
   useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage.from === 'agent' && onMessageReceived) {
-        onMessageReceived(lastMessage.type, lastMessage.text);
+      if (lastMessage.from === 'agent') {
+        // Notify parent if callback provided
+        if (onMessageReceived) {
+          onMessageReceived(lastMessage.type, lastMessage.text);
+        }
+        
+        // Auto-focus input after agent message (with small delay to ensure rendering is complete)
+        // Only focus if the message is not a loading message
+        if (lastMessage.type !== 'loading') {
+          setTimeout(() => {
+            chatInputRef.current?.focus();
+          }, 100);
+        }
       }
     }
   }, [messages, onMessageReceived]);
@@ -83,11 +95,12 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInter
 
       {/* Input */}
       <ChatInput
+        ref={chatInputRef}
         onSendMessage={handleSendMessage}
         disabled={isLastMessageLoading}
         placeholder={
-          messages.length === 0 
-            ? "Describe your database or application idea..." 
+          messages.length === 0
+            ? "Describe your database or application idea..."
             : "Describe changes or ask questions..."
         }
       />

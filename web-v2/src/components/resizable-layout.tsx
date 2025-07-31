@@ -26,16 +26,19 @@ export function ResizableLayout({
     setIsResizing(true);
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing || !containerRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !containerRef.current) return;
 
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newWidth = e.clientX - containerRect.left;
-    
-    // Constrain the width within min and max bounds
-    const constrainedWidth = Math.max(minLeftWidth, Math.min(maxLeftWidth, newWidth));
-    setLeftWidth(constrainedWidth);
-  }, [isResizing, minLeftWidth, maxLeftWidth]);
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newWidth = e.clientX - containerRect.left;
+
+      // Constrain the width within min and max bounds
+      const constrainedWidth = Math.max(minLeftWidth, Math.min(maxLeftWidth, newWidth));
+      setLeftWidth(constrainedWidth);
+    },
+    [isResizing, minLeftWidth, maxLeftWidth]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
@@ -66,10 +69,9 @@ export function ResizableLayout({
   return (
     <div ref={containerRef} className="flex-1 flex overflow-hidden">
       {/* Left Panel */}
-      <div 
+      <div
         style={{ width: leftWidth }}
-        className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col"
-      >
+        className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col">
         {leftPanel}
       </div>
 
@@ -83,9 +85,7 @@ export function ResizableLayout({
       />
 
       {/* Right Panel */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {rightPanel}
-      </div>
+      <div className="flex-1 flex flex-col min-w-0">{rightPanel}</div>
     </div>
   );
 }

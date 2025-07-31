@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import React, { useEffect, useState, useRef } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ZoomIn, ZoomOut, Maximize, Download } from "lucide-react"
+import React, { useEffect, useState, useRef } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ZoomIn, ZoomOut, Maximize, Download } from 'lucide-react';
 
 // Sample DBML for demonstration
 const sampleDbml = `
@@ -55,9 +55,7 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
 
   useEffect(() => {
     // Load both the parser and component dynamically
-    Promise.all([
-      import('@/features/diagram')
-    ]).then(([diagramModule]) => {
+    Promise.all([import('@/features/diagram')]).then(([diagramModule]) => {
       try {
         // Use provided DBML code or fall back to sample
         const dbmlToUse = dbmlCode || sampleDbml;
@@ -106,28 +104,13 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
     <div className="h-full bg-slate-50 dark:bg-slate-900 relative">
       {/* Toolbar */}
       <div className="absolute top-4 right-4 z-10 flex space-x-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleZoomOut}
-          title="Zoom Out"
-        >
+        <Button variant="outline" size="sm" onClick={handleZoomOut} title="Zoom Out">
           <ZoomOut className="w-4 h-4" />
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleZoomIn}
-          title="Zoom In"
-        >
+        <Button variant="outline" size="sm" onClick={handleZoomIn} title="Zoom In">
           <ZoomIn className="w-4 h-4" />
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleFitToScreen}
-          title="Fit to Screen"
-        >
+        <Button variant="outline" size="sm" onClick={handleFitToScreen} title="Fit to Screen">
           <Maximize className="w-4 h-4" />
         </Button>
         <Button variant="outline" size="sm" title="Download">
@@ -169,7 +152,9 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
 
       {/* Instructions */}
       <Card className="absolute bottom-4 right-4 p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm max-w-xs">
-        <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">Instructions</h4>
+        <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">
+          Instructions
+        </h4>
         <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
           <p>• Drag tables to reposition them</p>
           <p>• Drag the canvas to pan around</p>
@@ -179,5 +164,5 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
         </div>
       </Card>
     </div>
-  )
+  );
 }

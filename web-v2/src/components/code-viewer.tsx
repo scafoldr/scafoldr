@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Copy, Download, FileText, Server, Database } from "lucide-react"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Copy, Download, FileText, Server, Database } from 'lucide-react';
 
 const codeFiles = {
   backend: {
-    "models/User.js": `const mongoose = require('mongoose');
+    'models/User.js': `const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('User', userSchema);`,
-    "routes/tasks.js": `const express = require('express');
+    'routes/tasks.js': `const express = require('express');
 const Task = require('../models/Task');
 const auth = require('../middleware/auth');
 
@@ -63,10 +63,10 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-module.exports = router;`,
+module.exports = router;`
   },
   frontend: {
-    "components/TaskList.jsx": `import React, { useState, useEffect } from 'react';
+    'components/TaskList.jsx': `import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -129,7 +129,7 @@ export function TaskList({ projectId }) {
     </div>
   );
 }`,
-    "pages/dashboard.jsx": `import React from 'react';
+    'pages/dashboard.jsx': `import React from 'react';
 import { TaskList } from '../components/TaskList';
 import { ProjectSidebar } from '../components/ProjectSidebar';
 
@@ -158,10 +158,10 @@ export default function Dashboard() {
       </main>
     </div>
   );
-}`,
+}`
   },
   database: {
-    "schema.sql": `-- Users table
+    'schema.sql': `-- Users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -212,7 +212,7 @@ CREATE INDEX idx_tasks_project_id ON tasks(project_id);
 CREATE INDEX idx_tasks_assignee_id ON tasks(assignee_id);
 CREATE INDEX idx_comments_task_id ON comments(task_id);
 CREATE INDEX idx_comments_parent_id ON comments(parent_id);`,
-    "seeds.sql": `-- Insert sample users
+    'seeds.sql': `-- Insert sample users
 INSERT INTO users (email, name, password_hash) VALUES
 ('john@example.com', 'John Doe', '$2b$10$hash1'),
 ('jane@example.com', 'Jane Smith', '$2b$10$hash2'),
@@ -229,16 +229,16 @@ INSERT INTO tasks (title, description, status, project_id, assignee_id, created_
 ('Design homepage mockup', 'Create initial design for new homepage', 'in-progress', 1, 2, 1),
 ('Set up development environment', 'Configure local dev environment', 'completed', 1, 1, 1),
 ('Research UI frameworks', 'Compare React vs Vue for mobile app', 'todo', 2, 3, 2),
-('API documentation review', 'Review third-party API documentation', 'in-progress', 3, 1, 1);`,
-  },
-}
+('API documentation review', 'Review third-party API documentation', 'in-progress', 3, 1, 1);`
+  }
+};
 
 export function CodeViewer() {
-  const [activeCategory, setActiveCategory] = useState("backend")
-  const [activeFile, setActiveFile] = useState("models/User.js")
+  const [activeCategory, setActiveCategory] = useState('backend');
+  const [activeFile, setActiveFile] = useState('models/User.js');
 
-  const currentFiles = codeFiles[activeCategory as keyof typeof codeFiles]
-  const currentCode = currentFiles[activeFile as keyof typeof currentFiles] || ""
+  const currentFiles = codeFiles[activeCategory as keyof typeof codeFiles];
+  const currentCode = currentFiles[activeFile as keyof typeof currentFiles] || '';
 
   return (
     <div className="h-full flex">
@@ -268,10 +268,9 @@ export function CodeViewer() {
             {Object.keys(currentFiles).map((filename) => (
               <Button
                 key={filename}
-                variant={activeFile === filename ? "secondary" : "ghost"}
+                variant={activeFile === filename ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-xs h-8 mb-1"
-                onClick={() => setActiveFile(filename)}
-              >
+                onClick={() => setActiveFile(filename)}>
                 <FileText className="w-3 h-3 mr-2" />
                 {filename}
               </Button>
@@ -308,5 +307,5 @@ export function CodeViewer() {
         </ScrollArea>
       </div>
     </div>
-  )
+  );
 }

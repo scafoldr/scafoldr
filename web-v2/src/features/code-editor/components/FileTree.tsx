@@ -66,12 +66,11 @@ const FileDiv = ({
     <Button
       variant="ghost"
       className={cn(
-        "w-full justify-start h-8 px-2 text-xs font-normal",
-        isSelected && "bg-secondary text-secondary-foreground"
+        'w-full justify-start h-8 px-2 text-xs font-normal',
+        isSelected && 'bg-secondary text-secondary-foreground'
       )}
       style={{ paddingLeft: `${depth * 16 + 8}px` }}
-      onClick={onClick}
-    >
+      onClick={onClick}>
       {icon === 'openDirectory' && <ChevronDown className="w-3 h-3 mr-1" />}
       {icon === 'closedDirectory' && <ChevronRight className="w-3 h-3 mr-1" />}
       <FileIcon name={icon} extension={file.name.split('.').pop() || ''} />

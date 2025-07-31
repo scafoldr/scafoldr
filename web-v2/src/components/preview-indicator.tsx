@@ -1,18 +1,19 @@
-"use client"
+'use client';
 
-import { MessageCircle, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { MessageCircle, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface PreviewIndicatorProps {
-  tabName: string
-  className?: string
-  show?: boolean
+  tabName: string;
+  className?: string;
+  show?: boolean;
 }
 
-export function PreviewIndicator({ tabName, className = "", show = true }: PreviewIndicatorProps) {
-  if (!show) return null
+export function PreviewIndicator({ tabName, className = '', show = true }: PreviewIndicatorProps) {
+  if (!show) return null;
   return (
-    <div className={`absolute top-4 left-4 right-4 z-50 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/80 dark:to-purple-950/80 backdrop-blur-md border border-blue-200/60 dark:border-blue-800/60 rounded-lg p-3 shadow-lg ${className}`}>
+    <div
+      className={`absolute top-4 left-4 right-4 z-50 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/80 dark:to-purple-950/80 backdrop-blur-md border border-blue-200/60 dark:border-blue-800/60 rounded-lg p-3 shadow-lg ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
@@ -35,13 +36,12 @@ export function PreviewIndicator({ tabName, className = "", show = true }: Previ
             if (chatInput) {
               chatInput.focus();
             }
-          }}
-        >
+          }}>
           <MessageCircle className="w-3 h-3 mr-1" />
           <span className="hidden sm:inline">Chat with AI</span>
           <span className="sm:hidden">Chat</span>
         </Button>
       </div>
     </div>
-  )
+  );
 }

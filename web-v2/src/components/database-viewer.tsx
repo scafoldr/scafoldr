@@ -1,107 +1,116 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Database, TableIcon } from "lucide-react"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Edit, Trash2, Database, TableIcon } from 'lucide-react';
 
 const tables = {
   users: {
-    name: "users",
+    name: 'users',
     columns: [
-      { name: "id", type: "SERIAL", isPrimary: true },
-      { name: "email", type: "VARCHAR(255)", isUnique: true },
-      { name: "name", type: "VARCHAR(255)", isRequired: true },
-      { name: "created_at", type: "TIMESTAMP", hasDefault: true },
+      { name: 'id', type: 'SERIAL', isPrimary: true },
+      { name: 'email', type: 'VARCHAR(255)', isUnique: true },
+      { name: 'name', type: 'VARCHAR(255)', isRequired: true },
+      { name: 'created_at', type: 'TIMESTAMP', hasDefault: true }
     ],
     data: [
-      { id: 1, email: "john@example.com", name: "John Doe", created_at: "2024-01-15 10:30:00" },
-      { id: 2, email: "jane@example.com", name: "Jane Smith", created_at: "2024-01-16 14:20:00" },
-      { id: 3, email: "bob@example.com", name: "Bob Johnson", created_at: "2024-01-17 09:15:00" },
-    ],
+      { id: 1, email: 'john@example.com', name: 'John Doe', created_at: '2024-01-15 10:30:00' },
+      { id: 2, email: 'jane@example.com', name: 'Jane Smith', created_at: '2024-01-16 14:20:00' },
+      { id: 3, email: 'bob@example.com', name: 'Bob Johnson', created_at: '2024-01-17 09:15:00' }
+    ]
   },
   projects: {
-    name: "projects",
+    name: 'projects',
     columns: [
-      { name: "id", type: "SERIAL", isPrimary: true },
-      { name: "name", type: "VARCHAR(255)", isRequired: true },
-      { name: "description", type: "TEXT" },
-      { name: "owner_id", type: "INTEGER", isForeignKey: true },
-      { name: "created_at", type: "TIMESTAMP", hasDefault: true },
+      { name: 'id', type: 'SERIAL', isPrimary: true },
+      { name: 'name', type: 'VARCHAR(255)', isRequired: true },
+      { name: 'description', type: 'TEXT' },
+      { name: 'owner_id', type: 'INTEGER', isForeignKey: true },
+      { name: 'created_at', type: 'TIMESTAMP', hasDefault: true }
     ],
     data: [
       {
         id: 1,
-        name: "Website Redesign",
-        description: "Complete redesign of company website",
+        name: 'Website Redesign',
+        description: 'Complete redesign of company website',
         owner_id: 1,
-        created_at: "2024-01-15 11:00:00",
+        created_at: '2024-01-15 11:00:00'
       },
       {
         id: 2,
-        name: "Mobile App",
-        description: "New mobile application development",
+        name: 'Mobile App',
+        description: 'New mobile application development',
         owner_id: 2,
-        created_at: "2024-01-16 15:30:00",
-      },
-    ],
+        created_at: '2024-01-16 15:30:00'
+      }
+    ]
   },
   tasks: {
-    name: "tasks",
+    name: 'tasks',
     columns: [
-      { name: "id", type: "SERIAL", isPrimary: true },
-      { name: "title", type: "VARCHAR(255)", isRequired: true },
-      { name: "description", type: "TEXT" },
-      { name: "status", type: "VARCHAR(50)", hasDefault: true },
-      { name: "project_id", type: "INTEGER", isForeignKey: true },
-      { name: "assignee_id", type: "INTEGER", isForeignKey: true },
-      { name: "created_at", type: "TIMESTAMP", hasDefault: true },
+      { name: 'id', type: 'SERIAL', isPrimary: true },
+      { name: 'title', type: 'VARCHAR(255)', isRequired: true },
+      { name: 'description', type: 'TEXT' },
+      { name: 'status', type: 'VARCHAR(50)', hasDefault: true },
+      { name: 'project_id', type: 'INTEGER', isForeignKey: true },
+      { name: 'assignee_id', type: 'INTEGER', isForeignKey: true },
+      { name: 'created_at', type: 'TIMESTAMP', hasDefault: true }
     ],
     data: [
       {
         id: 1,
-        title: "Design homepage mockup",
-        description: "Create initial design for new homepage",
-        status: "in-progress",
+        title: 'Design homepage mockup',
+        description: 'Create initial design for new homepage',
+        status: 'in-progress',
         project_id: 1,
         assignee_id: 2,
-        created_at: "2024-01-15 12:00:00",
+        created_at: '2024-01-15 12:00:00'
       },
       {
         id: 2,
-        title: "Set up development environment",
-        description: "Configure local dev environment",
-        status: "completed",
+        title: 'Set up development environment',
+        description: 'Configure local dev environment',
+        status: 'completed',
         project_id: 1,
         assignee_id: 1,
-        created_at: "2024-01-16 09:30:00",
+        created_at: '2024-01-16 09:30:00'
       },
       {
         id: 3,
-        title: "Research UI frameworks",
-        description: "Compare React vs Vue for mobile app",
-        status: "todo",
+        title: 'Research UI frameworks',
+        description: 'Compare React vs Vue for mobile app',
+        status: 'todo',
         project_id: 2,
         assignee_id: 3,
-        created_at: "2024-01-17 10:15:00",
-      },
-    ],
-  },
-}
+        created_at: '2024-01-17 10:15:00'
+      }
+    ]
+  }
+};
 
 export function DatabaseViewer() {
-  const [activeTable, setActiveTable] = useState("users")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState("data")
+  const [activeTable, setActiveTable] = useState('users');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('data');
 
-  const currentTable = tables[activeTable as keyof typeof tables]
+  const currentTable = tables[activeTable as keyof typeof tables];
   const filteredData = currentTable.data.filter((row) =>
-    Object.values(row).some((value) => value?.toString().toLowerCase().includes(searchTerm.toLowerCase())),
-  )
+    Object.values(row).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   return (
     <div className="h-full flex">
@@ -125,10 +134,9 @@ export function DatabaseViewer() {
             {Object.keys(tables).map((tableName) => (
               <Button
                 key={tableName}
-                variant={activeTable === tableName ? "secondary" : "ghost"}
+                variant={activeTable === tableName ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-xs h-8 mb-1"
-                onClick={() => setActiveTable(tableName)}
-              >
+                onClick={() => setActiveTable(tableName)}>
                 <TableIcon className="w-3 h-3 mr-2" />
                 {tableName}
                 <Badge variant="outline" className="ml-auto text-xs">
@@ -202,7 +210,7 @@ export function DatabaseViewer() {
                     <TableRow key={index}>
                       {currentTable.columns.map((column) => (
                         <TableCell key={column.name} className="text-xs">
-                          {row[column.name as keyof typeof row]?.toString() || "-"}
+                          {row[column.name as keyof typeof row]?.toString() || '-'}
                         </TableCell>
                       ))}
                       <TableCell>
@@ -277,5 +285,5 @@ export function DatabaseViewer() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

@@ -1,74 +1,76 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Smartphone, Monitor, Tablet, Plus, Search, Filter } from "lucide-react"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Smartphone, Monitor, Tablet, Plus, Search, Filter } from 'lucide-react';
 
 const mockTasks = [
   {
     id: 1,
-    title: "Design homepage mockup",
-    description: "Create initial design for new homepage",
-    status: "in-progress",
-    assignee: "Jane Smith",
-    project: "Website Redesign",
-    dueDate: "2024-01-20",
+    title: 'Design homepage mockup',
+    description: 'Create initial design for new homepage',
+    status: 'in-progress',
+    assignee: 'Jane Smith',
+    project: 'Website Redesign',
+    dueDate: '2024-01-20'
   },
   {
     id: 2,
-    title: "Set up development environment",
-    description: "Configure local dev environment",
-    status: "completed",
-    assignee: "John Doe",
-    project: "Website Redesign",
-    dueDate: "2024-01-18",
+    title: 'Set up development environment',
+    description: 'Configure local dev environment',
+    status: 'completed',
+    assignee: 'John Doe',
+    project: 'Website Redesign',
+    dueDate: '2024-01-18'
   },
   {
     id: 3,
-    title: "Research UI frameworks",
-    description: "Compare React vs Vue for mobile app",
-    status: "todo",
-    assignee: "Bob Johnson",
-    project: "Mobile App",
-    dueDate: "2024-01-25",
-  },
-]
+    title: 'Research UI frameworks',
+    description: 'Compare React vs Vue for mobile app',
+    status: 'todo',
+    assignee: 'Bob Johnson',
+    project: 'Mobile App',
+    dueDate: '2024-01-25'
+  }
+];
 
 export function AppPreview() {
-  const [viewMode, setViewMode] = useState("desktop")
-  const [showNewTaskForm, setShowNewTaskForm] = useState(false)
+  const [viewMode, setViewMode] = useState('desktop');
+  const [showNewTaskForm, setShowNewTaskForm] = useState(false);
 
-  const getStatusColor = (
-    
-    
-    
-    status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-      case "in-progress":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+      case 'completed':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
       default:
-        return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+        return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400';
     }
-  }
+  };
 
   const getViewportClass = () => {
     switch (viewMode) {
-      case "mobile":
-        return "max-w-sm mx-auto"
-      case "tablet":
-        return "max-w-2xl mx-auto"
+      case 'mobile':
+        return 'max-w-sm mx-auto';
+      case 'tablet':
+        return 'max-w-2xl mx-auto';
       default:
-        return "w-full"
+        return 'w-full';
     }
-  }
+  };
 
   return (
     <div className="h-full bg-slate-100 dark:bg-slate-900 flex flex-col">
@@ -84,27 +86,24 @@ export function AppPreview() {
         <div className="flex items-center space-x-2">
           <div className="flex border border-slate-200 dark:border-slate-700 rounded-md">
             <Button
-              variant={viewMode === "desktop" ? "default" : "ghost"}
+              variant={viewMode === 'desktop' ? 'default' : 'ghost'}
               size="sm"
               className="h-8 px-3 rounded-r-none"
-              onClick={() => setViewMode("desktop")}
-            >
+              onClick={() => setViewMode('desktop')}>
               <Monitor className="w-4 h-4" />
             </Button>
             <Button
-              variant={viewMode === "tablet" ? "default" : "ghost"}
+              variant={viewMode === 'tablet' ? 'default' : 'ghost'}
               size="sm"
               className="h-8 px-3 rounded-none border-x border-slate-200 dark:border-slate-700"
-              onClick={() => setViewMode("tablet")}
-            >
+              onClick={() => setViewMode('tablet')}>
               <Tablet className="w-4 h-4" />
             </Button>
             <Button
-              variant={viewMode === "mobile" ? "default" : "ghost"}
+              variant={viewMode === 'mobile' ? 'default' : 'ghost'}
               size="sm"
               className="h-8 px-3 rounded-l-none"
-              onClick={() => setViewMode("mobile")}
-            >
+              onClick={() => setViewMode('mobile')}>
               <Smartphone className="w-4 h-4" />
             </Button>
           </div>
@@ -118,7 +117,9 @@ export function AppPreview() {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-t-lg p-4">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold">Task Manager</h1>
-              <Button onClick={() => setShowNewTaskForm(!showNewTaskForm)} className="bg-blue-500 hover:bg-blue-600">
+              <Button
+                onClick={() => setShowNewTaskForm(!showNewTaskForm)}
+                className="bg-blue-500 hover:bg-blue-600">
                 <Plus className="w-4 h-4 mr-2" />
                 New Task
               </Button>
@@ -182,14 +183,20 @@ export function AppPreview() {
           <div className="bg-white dark:bg-slate-900 border-x border-b border-slate-200 dark:border-slate-800 rounded-b-lg">
             <div className="divide-y divide-slate-200 dark:divide-slate-800">
               {mockTasks.map((task) => (
-                <div key={task.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div
+                  key={task.id}
+                  className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="font-medium">{task.title}</h3>
-                        <Badge className={getStatusColor(task.status)}>{task.status.replace("-", " ")}</Badge>
+                        <Badge className={getStatusColor(task.status)}>
+                          {task.status.replace('-', ' ')}
+                        </Badge>
                       </div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{task.description}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                        {task.description}
+                      </p>
                       <div className="flex items-center space-x-4 text-xs text-slate-500">
                         <span>Project: {task.project}</span>
                         <span>Due: {task.dueDate}</span>
@@ -199,9 +206,9 @@ export function AppPreview() {
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="text-xs">
                           {task.assignee
-                            .split(" ")
+                            .split(' ')
                             .map((n) => n[0])
-                            .join("")}
+                            .join('')}
                         </AvatarFallback>
                       </Avatar>
                       <Button variant="ghost" size="sm">
@@ -221,7 +228,9 @@ export function AppPreview() {
                 <Plus className="w-8 h-8 text-slate-400" />
               </div>
               <h3 className="text-lg font-medium mb-2">No tasks yet</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">Get started by creating your first task</p>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
+                Get started by creating your first task
+              </p>
               <Button className="bg-blue-500 hover:bg-blue-600">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Task
@@ -231,5 +240,5 @@ export function AppPreview() {
         </div>
       </div>
     </div>
-  )
+  );
 }

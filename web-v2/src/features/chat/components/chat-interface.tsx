@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Sparkles } from "lucide-react";
+import { Sparkles } from 'lucide-react';
 import { ChatHistory } from './chat-history';
 import { ChatInput, ChatInputRef } from './chat-input';
 import { useChat } from '../hooks/use-chat';
@@ -14,7 +14,13 @@ interface ChatInterfaceProps {
   onMessageReceived?: (messageType: string, content?: string) => void;
 }
 
-export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInteraction, onMessageReceived }: ChatInterfaceProps) {
+export function ChatInterface({
+  initialPrompt,
+  onViewCode,
+  onViewDB,
+  onUserInteraction,
+  onMessageReceived
+}: ChatInterfaceProps) {
   const chatInputRef = useRef<ChatInputRef>(null);
   const {
     messages,
@@ -40,7 +46,7 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInter
         if (onMessageReceived) {
           onMessageReceived(lastMessage.type, lastMessage.text);
         }
-        
+
         // Auto-focus input after agent message (with small delay to ensure rendering is complete)
         // Only focus if the message is not a loading message
         if (lastMessage.type !== 'loading') {
@@ -57,7 +63,7 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInter
     if (onUserInteraction) {
       onUserInteraction();
     }
-    
+
     if (error) {
       clearError();
     }
@@ -87,9 +93,7 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInter
       {/* Error Display */}
       {error && (
         <div className="px-4 py-2 bg-red-50 dark:bg-red-950/30 border-t border-red-200 dark:border-red-800">
-          <p className="text-sm text-red-600 dark:text-red-400">
-            ⚠️ {error}
-          </p>
+          <p className="text-sm text-red-600 dark:text-red-400">⚠️ {error}</p>
         </div>
       )}
 
@@ -100,8 +104,8 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInter
         disabled={isLastMessageLoading}
         placeholder={
           messages.length === 0
-            ? "Describe your database or application idea..."
-            : "Describe changes or ask questions..."
+            ? 'Describe your database or application idea...'
+            : 'Describe changes or ask questions...'
         }
       />
     </div>

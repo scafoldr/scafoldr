@@ -28,7 +28,7 @@ export function useChat(options: UseChatOptions = {}) {
       timestamp: new Date()
     };
 
-    setChatState(prev => ({
+    setChatState((prev) => ({
       ...prev,
       messages: [...prev.messages, newMessage],
       error: undefined
@@ -36,10 +36,10 @@ export function useChat(options: UseChatOptions = {}) {
   }, []);
 
   const updateLastMessage = useCallback((content: string, type: MessageType) => {
-    setChatState(prev => {
+    setChatState((prev) => {
       const updatedMessages = [...prev.messages];
       const lastMessage = updatedMessages.pop();
-      
+
       if (lastMessage) {
         updatedMessages.push({
           ...lastMessage,
@@ -47,7 +47,7 @@ export function useChat(options: UseChatOptions = {}) {
           type
         });
       }
-      
+
       return {
         ...prev,
         messages: updatedMessages
@@ -56,7 +56,7 @@ export function useChat(options: UseChatOptions = {}) {
   }, []);
 
   const setError = useCallback((error: string) => {
-    setChatState(prev => ({
+    setChatState((prev) => ({
       ...prev,
       error,
       isLoading: false
@@ -64,49 +64,51 @@ export function useChat(options: UseChatOptions = {}) {
   }, []);
 
   const clearError = useCallback(() => {
-    setChatState(prev => ({
+    setChatState((prev) => ({
       ...prev,
       error: undefined
     }));
   }, []);
 
-  const sendMessage = useCallback(async (userInput: string) => {
-    if (!userInput.trim() || chatState.isLoading) return;
+  const sendMessage = useCallback(
+    async (userInput: string) => {
+      if (!userInput.trim() || chatState.isLoading) return;
 
-    // Add user message
-    addMessage(userInput, MessageType.TEXT, MessageFrom.USER);
-    
-    // Add loading message
-    addMessage('Thinking', MessageType.LOADING, MessageFrom.AGENT);
-    
-    setChatState(prev => ({ ...prev, isLoading: true }));
+      // Add user message
+      addMessage(userInput, MessageType.TEXT, MessageFrom.USER);
 
-    try {
-      const response = await sendChatMessage({
-        userInput,
-        conversationId: chatState.conversationId
-      });
+      // Add loading message
+      addMessage('Thinking', MessageType.LOADING, MessageFrom.AGENT);
 
-      if (response.response_type === 'question') {
-        updateLastMessage(response.response, MessageType.TEXT);
-      } else if (response.response_type === 'dbml') {
-        updateLastMessage(response.response, MessageType.RESULT);
-        
-        // Automatically add a code generation message after DBML result
-        setTimeout(() => {
-          addMessage(response.response, MessageType.CODE_GENERATION, MessageFrom.AGENT);
-        }, 500); // Small delay for better UX
+      setChatState((prev) => ({ ...prev, isLoading: true }));
+
+      try {
+        const response = await sendChatMessage({
+          userInput,
+          conversationId: chatState.conversationId
+        });
+
+        if (response.response_type === 'question') {
+          updateLastMessage(response.response, MessageType.TEXT);
+        } else if (response.response_type === 'dbml') {
+          updateLastMessage(response.response, MessageType.RESULT);
+
+          // Automatically add a code generation message after DBML result
+          setTimeout(() => {
+            addMessage(response.response, MessageType.CODE_GENERATION, MessageFrom.AGENT);
+          }, 500); // Small delay for better UX
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof ChatApiError ? error.message : 'An unexpected error occurred';
+        updateLastMessage(errorMessage, MessageType.ERROR);
+        setError(errorMessage);
+      } finally {
+        setChatState((prev) => ({ ...prev, isLoading: false }));
       }
-    } catch (error) {
-      const errorMessage = error instanceof ChatApiError 
-        ? error.message 
-        : 'An unexpected error occurred';
-      updateLastMessage(errorMessage, MessageType.ERROR);
-      setError(errorMessage);
-    } finally {
-      setChatState(prev => ({ ...prev, isLoading: false }));
-    }
-  }, [chatState.conversationId, chatState.isLoading, addMessage, updateLastMessage, setError]);
+    },
+    [chatState.conversationId, chatState.isLoading, addMessage, updateLastMessage, setError]
+  );
 
   const initializeWithPrompt = useCallback(async () => {
     if (options.initialPrompt && !hasInitialized && chatState.messages.length === 0) {

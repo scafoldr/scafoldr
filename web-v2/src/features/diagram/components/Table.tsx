@@ -3,18 +3,12 @@
 import React, { Fragment } from 'react';
 import { Group, Rect, Text } from 'react-konva';
 import { ITable } from '../types';
-import {
-  COLUMN_HEIGHT,
-  COLUMN_PADDING_LEFT,
-  COLUMN_PADDING_TOP,
-  FONT_SIZE,
-  HEADER_COLUMN_HEIGHT
-} from '../constants';
+import { COLUMN_HEIGHT, COLUMN_PADDING_LEFT, FONT_SIZE, HEADER_COLUMN_HEIGHT } from '../constants';
 
 // Theme-aware colors
 const getThemeColors = () => {
   const isDark = document.documentElement.classList.contains('dark');
-  
+
   if (isDark) {
     return {
       TABLE_BACKGROUND: '#1e293b', // slate-800
@@ -23,8 +17,8 @@ const getThemeColors = () => {
       HEADER_TEXT: '#e2e8f0', // slate-200
       FIELD_NAME_COLOR: '#f1f5f9', // slate-100
       FIELD_TYPE_COLOR: '#94a3b8', // slate-400
-      PK_HIGHLIGHT: "rgba(245, 158, 11, 0.1)", // amber with opacity
-      FK_HIGHLIGHT: "rgba(59, 130, 246, 0.1)", // blue with opacity
+      PK_HIGHLIGHT: 'rgba(245, 158, 11, 0.1)', // amber with opacity
+      FK_HIGHLIGHT: 'rgba(59, 130, 246, 0.1)' // blue with opacity
     };
   } else {
     return {
@@ -34,8 +28,8 @@ const getThemeColors = () => {
       HEADER_TEXT: '#1e293b', // slate-800
       FIELD_NAME_COLOR: '#374151', // gray-700
       FIELD_TYPE_COLOR: '#6b7280', // gray-500
-      PK_HIGHLIGHT: "rgba(245, 158, 11, 0.15)", // amber with opacity
-      FK_HIGHLIGHT: "rgba(59, 130, 246, 0.15)", // blue with opacity
+      PK_HIGHLIGHT: 'rgba(245, 158, 11, 0.15)', // amber with opacity
+      FK_HIGHLIGHT: 'rgba(59, 130, 246, 0.15)' // blue with opacity
     };
   }
 };
@@ -62,7 +56,6 @@ const Table = ({
       onDragMove={(e) => {
         onDragMove(table.id, e.target.x(), e.target.y());
       }}>
-      
       {/* Table container with shadow effect */}
       <Rect
         width={table.width}
@@ -76,7 +69,7 @@ const Table = ({
         shadowOffset={{ x: 0, y: 2 }}
         shadowOpacity={0.2}
       />
-      
+
       {/* Header background */}
       <Rect
         width={table.width}
@@ -86,15 +79,10 @@ const Table = ({
         strokeWidth={1}
         cornerRadius={[8, 8, 0, 0]}
       />
-      
+
       {/* Table icon (database symbol) */}
-      <Text
-        text="🗃️"
-        x={COLUMN_PADDING_LEFT}
-        y={HEADER_COLUMN_HEIGHT / 2 - 8}
-        fontSize={16}
-      />
-      
+      <Text text="🗃️" x={COLUMN_PADDING_LEFT} y={HEADER_COLUMN_HEIGHT / 2 - 8} fontSize={16} />
+
       {/* Table name */}
       <Text
         text={table.name}
@@ -105,7 +93,7 @@ const Table = ({
         fontStyle="bold"
         fontFamily="system-ui, -apple-system, sans-serif"
       />
-      
+
       {/* Column rows */}
       {table.columns.map((col, idx) => {
         const isPK = col.isPrimary;
@@ -124,7 +112,7 @@ const Table = ({
                 fill={colors.TABLE_BORDER}
               />
             )}
-            
+
             {/* Highlight background for PK/FK */}
             {(isPK || isFK) && (
               <Rect
@@ -136,15 +124,15 @@ const Table = ({
                 cornerRadius={idx === lastIdx ? [0, 0, 8, 8] : 0}
               />
             )}
-            
+
             {/* Key icon */}
             <Text
-              text={isPK ? "🔑" : isFK ? "🔗" : ""}
+              text={isPK ? '🔑' : isFK ? '🔗' : ''}
               x={COLUMN_PADDING_LEFT}
               y={yPos + COLUMN_HEIGHT / 2 - 6}
               fontSize={12}
             />
-            
+
             {/* Field name */}
             <Text
               text={col.name}
@@ -155,7 +143,7 @@ const Table = ({
               fontFamily="system-ui, -apple-system, sans-serif"
               fontStyle={isPK ? 'bold' : 'normal'}
             />
-            
+
             {/* Required indicator */}
             {(isPK || col.name.includes('_id')) && (
               <Text
@@ -167,7 +155,7 @@ const Table = ({
                 fontFamily="system-ui, -apple-system, sans-serif"
               />
             )}
-            
+
             {/* Data type */}
             <Text
               text={col.dataType.toUpperCase()}

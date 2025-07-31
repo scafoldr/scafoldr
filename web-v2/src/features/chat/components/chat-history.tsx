@@ -1,4 +1,4 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChatBubble } from './chat-bubble';
 import { Message } from '../types/chat.types';
 
@@ -13,7 +13,12 @@ export function ChatHistory({ messages, onViewCode, onViewDB }: ChatHistoryProps
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
         {messages.map((message) => (
-          <ChatBubble key={message.id} message={message} onViewCode={onViewCode} onViewDB={onViewDB} />
+          <ChatBubble
+            key={message.id}
+            message={message}
+            onViewCode={onViewCode}
+            onViewDB={onViewDB}
+          />
         ))}
       </div>
     </ScrollArea>

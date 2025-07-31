@@ -40,11 +40,7 @@ export default function CodeEditor({ files }: { files: FileMap }) {
 
         <ScrollArea className="h-[calc(100%-60px)]">
           <div className="p-2">
-            <FileTree
-              rootDir={filesTree}
-              onSelect={setSelectedFile}
-              selectedFile={selectedFile}
-            />
+            <FileTree rootDir={filesTree} onSelect={setSelectedFile} selectedFile={selectedFile} />
           </div>
         </ScrollArea>
       </div>

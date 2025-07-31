@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useEffect, useState, useRef } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ZoomIn, ZoomOut, Maximize, Download } from "lucide-react"
-import { Diagram, parseDbmlToDiagram, IERDiagram, type DiagramRef } from "@/features/diagram"
+import { useEffect, useState, useRef } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ZoomIn, ZoomOut, Maximize, Download } from 'lucide-react';
+import { Diagram, parseDbmlToDiagram, IERDiagram, type DiagramRef } from '@/features/diagram';
 
 // Sample DBML for demonstration
 const sampleDbml = `
@@ -78,24 +78,21 @@ export function EnhancedERDiagram() {
           variant="outline"
           size="sm"
           onClick={() => diagramRef.current?.zoomOut()}
-          title="Zoom Out"
-        >
+          title="Zoom Out">
           <ZoomOut className="w-4 h-4" />
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => diagramRef.current?.zoomIn()}
-          title="Zoom In"
-        >
+          title="Zoom In">
           <ZoomIn className="w-4 h-4" />
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => diagramRef.current?.fitToScreen()}
-          title="Fit to Screen"
-        >
+          title="Fit to Screen">
           <Maximize className="w-4 h-4" />
         </Button>
         <Button variant="outline" size="sm" title="Download">
@@ -138,5 +135,5 @@ export function EnhancedERDiagram() {
         </div>
       </Card>
     </div>
-  )
+  );
 }

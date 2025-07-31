@@ -28,7 +28,7 @@ function getIconHelper() {
   cache.set('py', <Code className="w-4 h-4 text-blue-600" />);
   cache.set('closedDirectory', <Folder className="w-4 h-4 text-blue-400" />);
   cache.set('openDirectory', <FolderOpen className="w-4 h-4 text-blue-400" />);
-  
+
   const getIcon = (extension: string, name: string): ReactNode => {
     if (cache.has(extension)) return cache.get(extension);
     else if (cache.has(name)) return cache.get(name);

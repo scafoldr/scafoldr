@@ -1,29 +1,29 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { ArrowRight, Code2, Database, Zap, Github, Star } from "lucide-react"
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function LandingPage() {
-  const [prompt, setPrompt] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [prompt, setPrompt] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!prompt.trim()) return
+    e.preventDefault();
+    if (!prompt.trim()) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     // Simulate transition delay
     setTimeout(() => {
-      window.location.href = "/app?prompt=" + encodeURIComponent(prompt)
-    }, 800)
-  }
+      window.location.href = '/app?prompt=' + encodeURIComponent(prompt);
+    }, 800);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -37,11 +37,14 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link href="https://github.com/scafoldr/scafoldr" target="_blank" className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
-              <Github className="w-4 h-4" />
-              <span>Star us</span>
-            </Button>
+            <Link
+              href="https://github.com/scafoldr/scafoldr"
+              target="_blank"
+              className="hidden md:flex items-center space-x-2">
+              <Button variant="ghost" size="sm">
+                <Github className="w-4 h-4" />
+                <span>Star us</span>
+              </Button>
             </Link>
             <ThemeToggle />
             <Button variant="outline" size="sm">
@@ -57,8 +60,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-4xl mx-auto"
->
+          className="text-center max-w-4xl mx-auto">
           <div className="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-8">
             <Zap className="w-4 h-4" />
             <span>Open Source AI App Generator</span>
@@ -69,8 +71,8 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Transform your ideas into full-stack applications with AI. Generate databases, APIs, and frontends from
-            simple descriptions.
+            Transform your ideas into full-stack applications with AI. Generate databases, APIs, and
+            frontends from simple descriptions.
           </p>
 
           {/* CTA Form */}
@@ -79,8 +81,7 @@ export default function LandingPage() {
             className="max-w-2xl mx-auto mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
+            transition={{ duration: 0.6, delay: 0.2 }}>
             <div className="relative">
               <Input
                 name="prompt-input"
@@ -95,12 +96,11 @@ export default function LandingPage() {
                 type="submit"
                 size="lg"
                 disabled={!prompt.trim() || isSubmitting}
-                className="absolute right-2 top-2 h-10 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg"
-              >
+                className="absolute right-2 top-2 h-10 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg">
                 {isSubmitting ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
                 ) : (
@@ -118,8 +118,7 @@ export default function LandingPage() {
             className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
+            transition={{ duration: 0.6, delay: 0.4 }}>
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
                 <Database className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -153,5 +152,5 @@ export default function LandingPage() {
         </motion.div>
       </main>
     </div>
-  )
+  );
 }

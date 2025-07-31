@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
@@ -9,7 +9,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 });
 
 export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
-  const { theme, resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const code = selectedFile?.content ?? '// Select a file to view its content';
   const fileName = selectedFile?.name ?? 'index.js';
 
@@ -31,11 +31,11 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
 
   return (
     <div className="h-full w-full">
-      <MonacoEditor 
-        height="100%" 
-        width="100%" 
-        language={language} 
-        value={code} 
+      <MonacoEditor
+        height="100%"
+        width="100%"
+        language={language}
+        value={code}
         theme={monacoTheme}
         options={{
           readOnly: true,
@@ -44,7 +44,7 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
           fontSize: 14,
           lineNumbers: 'on',
           wordWrap: 'on',
-          automaticLayout: true,
+          automaticLayout: true
         }}
       />
     </div>

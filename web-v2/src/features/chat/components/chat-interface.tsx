@@ -10,9 +10,11 @@ interface ChatInterfaceProps {
   initialPrompt?: string;
   onViewCode?: (files: any) => void;
   onViewDB?: (dbmlCode: string) => void;
+  onUserInteraction?: () => void;
+  onMessageReceived?: (messageType: string, content?: string) => void;
 }
 
-export function ChatInterface({ initialPrompt, onViewCode, onViewDB }: ChatInterfaceProps) {
+export function ChatInterface({ initialPrompt, onViewCode, onViewDB, onUserInteraction, onMessageReceived }: ChatInterfaceProps) {
   const {
     messages,
     isLoading,
@@ -28,7 +30,22 @@ export function ChatInterface({ initialPrompt, onViewCode, onViewDB }: ChatInter
     initializeWithPrompt();
   }, [initializeWithPrompt]);
 
+  // Track message changes and notify parent
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.from === 'agent' && onMessageReceived) {
+        onMessageReceived(lastMessage.type, lastMessage.text);
+      }
+    }
+  }, [messages, onMessageReceived]);
+
   const handleSendMessage = async (message: string) => {
+    // Notify parent that user has interacted
+    if (onUserInteraction) {
+      onUserInteraction();
+    }
+    
     if (error) {
       clearError();
     }

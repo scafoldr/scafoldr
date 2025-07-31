@@ -12,6 +12,7 @@ import { DatabaseViewer } from "@/components/database-viewer"
 import { AppPreview } from "@/components/app-preview"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
 import { ResizableLayout } from "@/components/resizable-layout"
+import { PreviewIndicator } from "@/components/preview-indicator"
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState("er-diagram")
@@ -19,6 +20,7 @@ export default function AppPage() {
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>()
   const [generatedFiles, setGeneratedFiles] = useState<any>({})
   const [currentDbml, setCurrentDbml] = useState<string | undefined>()
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
 
   useEffect(() => {
     // Get prompt from URL params (passed from auth page)
@@ -41,6 +43,24 @@ export default function AppPage() {
       setCurrentDbml(dbmlCode)
     }
     setActiveTab("er-diagram")
+  }
+
+  const handleUserInteraction = () => {
+    setHasUserInteracted(true)
+  }
+
+  const handleMessageReceived = (messageType: string, content?: string) => {
+    // Auto-switch tabs based on message type
+    if (messageType === 'RESULT' || messageType === 'DBML') {
+      // Database/DBML generated - switch to ER Diagram
+      if (content) {
+        setCurrentDbml(content)
+      }
+      setActiveTab("er-diagram")
+    } else if (messageType === 'CODE_GENERATION') {
+      // Code generated - switch to Code tab
+      setActiveTab("code")
+    }
   }
 
   return (
@@ -87,7 +107,7 @@ export default function AppPage() {
 
       {/* Main Content with Resizable Layout */}
       <ResizableLayout
-        leftPanel={<ChatInterface initialPrompt={initialPrompt} onViewCode={handleViewCode} onViewDB={handleViewDB} />}
+        leftPanel={<ChatInterface initialPrompt={initialPrompt} onViewCode={handleViewCode} onViewDB={handleViewDB} onUserInteraction={handleUserInteraction} onMessageReceived={handleMessageReceived} />}
         rightPanel={
           <>
             {/* Tab Navigation */}
@@ -117,10 +137,12 @@ export default function AppPage() {
             {/* Tab Content */}
             <div className="flex-1 overflow-hidden">
               <Tabs value={activeTab} className="h-full">
-                <TabsContent value="er-diagram" className="h-full m-0">
+                <TabsContent value="er-diagram" className="h-full m-0 relative">
+                  <PreviewIndicator tabName="ER Diagram" show={!hasUserInteracted} />
                   <DynamicERDiagram dbmlCode={currentDbml} />
                 </TabsContent>
-                <TabsContent value="code" className="h-full m-0">
+                <TabsContent value="code" className="h-full m-0 relative">
+                  <PreviewIndicator tabName="Code" show={!hasUserInteracted} />
                   <CodeEditor files={Object.keys(generatedFiles).length > 0 ? generatedFiles : {
                     "README.md": `# Generated Code
 
@@ -135,10 +157,12 @@ This tab will display:
 Start by asking the AI to generate a database schema, then the code will be automatically generated and displayed here.`
                   }} />
                 </TabsContent>
-                <TabsContent value="database" className="h-full m-0">
+                <TabsContent value="database" className="h-full m-0 relative">
+                  <PreviewIndicator tabName="Database" show={!hasUserInteracted} />
                   <DatabaseViewer />
                 </TabsContent>
-                <TabsContent value="preview" className="h-full m-0">
+                <TabsContent value="preview" className="h-full m-0 relative">
+                  <PreviewIndicator tabName="Preview" show={!hasUserInteracted} />
                   <AppPreview />
                 </TabsContent>
               </Tabs>

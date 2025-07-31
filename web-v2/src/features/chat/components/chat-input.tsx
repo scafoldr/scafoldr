@@ -33,6 +33,7 @@ export function ChatInput({
           placeholder={placeholder}
           className="flex-1"
           disabled={disabled}
+          data-chat-input
         />
         <Button 
           type="submit" 

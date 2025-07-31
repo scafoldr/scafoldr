@@ -41,8 +41,7 @@
     {
       "name": "app-layer",
       "pattern": "src/app/**/*",
-      "allowImportsFrom": ["shared-*", "feature-*"],
-      "allowImportsFromPatterns": ["src/app/**/*.css"]
+      "allowImportsFrom": ["shared-*", "feature-*"]
     },
     {
       "name": "restricted-root",
@@ -51,8 +50,4 @@
     }
   ],
   
-  "settings": {
-    "checkCircularDependencies": true,
-    "checkUnusedDependencies": false
-  }
 }

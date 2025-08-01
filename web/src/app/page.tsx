@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import Link from 'next/link';
 export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +51,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <ThemeToggle />
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowAuthModal(true)}>
               Sign In
             </Button>
           </div>
@@ -153,6 +155,12 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
       </main>
+
+      {/* Auth Coming Soon Modal */}
+      <AuthComingSoonModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+      />
     </div>
   );
 }

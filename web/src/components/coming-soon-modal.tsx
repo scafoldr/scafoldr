@@ -121,17 +121,20 @@ export const FEATURE_CONFIGS = {
   database: {
     featureName: 'Database Tab',
     description:
-      'Advanced database management and visualization tools to help you manage your data schemas more effectively.'
+      'Advanced database management and visualization tools to help you manage your data schemas more effectively.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/57',
   },
   preview: {
     featureName: 'Preview Tab',
     description:
-      'Live preview functionality to see your changes in real-time before applying them to your project.'
+      'Live preview functionality to see your changes in real-time before applying them to your project.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/56'
   },
   deploy: {
     featureName: 'Deploy Button',
     description:
-      'One-click deployment to various cloud platforms including AWS, Vercel, and Netlify.'
+      'One-click deployment to various cloud platforms including AWS, Vercel, and Netlify.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/11'
   },
   export: {
     featureName: 'Export Button',
@@ -141,17 +144,20 @@ export const FEATURE_CONFIGS = {
   share: {
     featureName: 'Share Button',
     description:
-      'Share your projects with team members and collaborate in real-time with advanced sharing options.'
+      'Share your projects with team members and collaborate in real-time with advanced sharing options.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/58'
   },
   auth: {
     featureName: 'Authentication',
     description:
-      'User authentication and authorization system. For now, you can use any username and password to test the interface - no real authentication is required.'
+      'User authentication and authorization system. For now, you can use any username and password to test the interface - no real authentication is required.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/7'
   },
   projectManagement: {
     featureName: 'Project Management',
     description:
-      'Advanced project management features including creating new projects, switching between projects, renaming, and deleting projects. Currently, you can view existing demo projects but cannot modify them.'
+      'Advanced project management features including creating new projects, switching between projects, renaming, and deleting projects. Currently, you can view existing demo projects but cannot modify them.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/10'
   }
 } as const;
 

@@ -1,6 +1,7 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+import projectStructure from "eslint-plugin-project-structure";
 import js from '@eslint/js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,9 +21,17 @@ const eslintConfig = [
     'plugin:prettier/recommended'
   ),
   {
+
+    plugins: {
+      "project-structure": projectStructure,
+    },
+    settings: {
+      "project-structure/independent-modules-config-path": "independentModules.jsonc"
+    },
     rules: {
       'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off'
+      'react/prop-types': 'off',
+      "project-structure/independent-modules": "off"
     }
   }
 ];

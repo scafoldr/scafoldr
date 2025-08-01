@@ -14,11 +14,11 @@ import { AppPreview } from '@/components/app-preview';
 import { UserProfileDropdown } from '@/components/user-profile-dropdown';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { PreviewIndicator } from '@/components/preview-indicator';
+import { downloadProjectAsZip } from '@/lib/export-utils';
 import {
   DatabaseComingSoonModal,
   PreviewComingSoonModal,
   DeployComingSoonModal,
-  ExportComingSoonModal,
   ShareComingSoonModal
 } from '@/components/coming-soon-modal';
 
@@ -34,8 +34,8 @@ export default function AppPage() {
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     // Get prompt from URL params (passed from auth page)
@@ -78,6 +78,25 @@ export default function AppPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      
+      // Check if there are files to export
+      if (!generatedFiles || Object.keys(generatedFiles).length === 0) {
+        alert('No files to export. Please generate some code first by chatting with the AI.');
+        return;
+      }
+      
+      await downloadProjectAsZip(generatedFiles, currentProject);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       {/* Top Bar */}
@@ -109,9 +128,10 @@ export default function AppPage() {
             variant="outline"
             size="sm"
             className="hidden md:flex bg-transparent"
-            onClick={() => setShowExportModal(true)}>
+            onClick={handleExport}
+            disabled={isExporting}>
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {isExporting ? 'Exporting...' : 'Export'}
           </Button>
           <Button
             size="sm"
@@ -238,12 +258,6 @@ Start by asking the AI to generate a database schema, then the code will be auto
       <DeployComingSoonModal
         open={showDeployModal}
         onOpenChange={setShowDeployModal}
-        githubRepo="https://github.com/scafoldr/scafoldr"
-      />
-
-      <ExportComingSoonModal
-        open={showExportModal}
-        onOpenChange={setShowExportModal}
         githubRepo="https://github.com/scafoldr/scafoldr"
       />
 

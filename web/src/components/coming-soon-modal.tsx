@@ -136,11 +136,6 @@ export const FEATURE_CONFIGS = {
       'One-click deployment to various cloud platforms including AWS, Vercel, and Netlify.',
     issueLink: 'https://github.com/scafoldr/scafoldr/issues/11'
   },
-  export: {
-    featureName: 'Export Button',
-    description:
-      'Export your projects in multiple formats including ZIP archives, Docker containers, and more.'
-  },
   share: {
     featureName: 'Share Button',
     description:
@@ -180,11 +175,6 @@ export function DeployComingSoonModal(
   return <ComingSoonModal {...props} {...FEATURE_CONFIGS.deploy} />;
 }
 
-export function ExportComingSoonModal(
-  props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
-) {
-  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.export} />;
-}
 
 export function ShareComingSoonModal(
   props: Omit<ComingSoonModalProps, 'featureName' | 'description'>

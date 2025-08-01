@@ -1,8 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
 import { convertToTree } from '../utils/fileManager';
 import { FileTree } from './FileTree';
 import { Code } from './Code';
@@ -10,18 +8,23 @@ import { File, FileMap } from '../types';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Download } from 'lucide-react';
+import { downloadProjectAsZip } from '@/lib/export-utils';
 
 export default function CodeEditor({ files }: { files: FileMap }) {
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+  const [isExporting, setIsExporting] = useState(false);
   const filesTree = useMemo(() => convertToTree(files), [files]);
 
   const handleDownload = async () => {
-    const zip = new JSZip();
-    for (const [path, content] of Object.entries(files)) {
-      zip.file(path, content);
+    try {
+      setIsExporting(true);
+      await downloadProjectAsZip(files, 'project');
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
-    const blob = await zip.generateAsync({ type: 'blob' });
-    saveAs(blob, 'project.zip');
   };
 
   return (
@@ -31,9 +34,9 @@ export default function CodeEditor({ files }: { files: FileMap }) {
         <div className="p-3 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">Files</h3>
-            <Button variant="outline" size="sm" onClick={handleDownload}>
+            <Button variant="outline" size="sm" onClick={handleDownload} disabled={isExporting}>
               <Download className="w-4 h-4 mr-2" />
-              ZIP
+              {isExporting ? 'Exporting...' : 'ZIP'}
             </Button>
           </div>
         </div>

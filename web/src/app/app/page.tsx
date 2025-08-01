@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Code2, Database, Eye, GitBranch, Play, Download, Share } from 'lucide-react';
+import Link from 'next/link';
 import { ProjectSwitcher } from '@/components/project-switcher';
 import { ChatInterface } from '@/features/chat';
 import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
@@ -83,9 +84,11 @@ export default function AppPage() {
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              🏗️ scafoldr
-            </span>
+            <Link href="/" className="hover:opacity-80 transition-opacity cursor-pointer">
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                🏗️ scafoldr
+              </span>
+            </Link>
           </div>
 
           <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />

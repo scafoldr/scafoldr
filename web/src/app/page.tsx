@@ -31,9 +31,11 @@ export default function LandingPage() {
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              🏗️ scafoldr
-            </span>
+            <Link href="/" className="hover:opacity-80 transition-opacity cursor-pointer">
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                🏗️ scafoldr
+              </span>
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4">

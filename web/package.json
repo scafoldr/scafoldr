@@ -1,5 +1,5 @@
 {
-  "name": "scafoldr-mockup",
+  "name": "scafoldr",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -19,7 +19,6 @@
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-tabs": "^1.0.4",
-    "canvas": "^3.1.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "file-saver": "^2.0.5",

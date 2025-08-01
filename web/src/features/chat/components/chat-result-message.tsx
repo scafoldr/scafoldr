@@ -74,7 +74,7 @@ export function ChatResultMessage({
           <div className="mt-3">
             <Button
               onClick={() => onViewDB?.(dbmlCode)}
-              className="bg-blue-600 hover:bg-blue-700 text-dark dark:text-white shadow-sm dark:shadow-md transition-all duration-200">
+              className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-100 dark:text-white shadow-lg hover:shadow-xl transition-all duration-200">
               <GitBranch className="w-4 h-4 mr-2" />
               View DB
             </Button>

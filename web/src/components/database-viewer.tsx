@@ -194,7 +194,7 @@ export function DatabaseViewer() {
                               PK
                             </Badge>
                           )}
-                          {column.isForeignKey && (
+                          {'isForeignKey' in column && column.isForeignKey && (
                             <Badge variant="outline" className="text-xs">
                               FK
                             </Badge>
@@ -253,22 +253,22 @@ export function DatabaseViewer() {
                                 PRIMARY KEY
                               </Badge>
                             )}
-                            {column.isForeignKey && (
+                            {'isForeignKey' in column && column.isForeignKey && (
                               <Badge variant="outline" className="text-xs">
                                 FOREIGN KEY
                               </Badge>
                             )}
-                            {column.isUnique && (
+                            {'isUnique' in column && column.isUnique && (
                               <Badge variant="outline" className="text-xs">
                                 UNIQUE
                               </Badge>
                             )}
-                            {column.isRequired && (
+                            {'isRequired' in column && column.isRequired && (
                               <Badge variant="outline" className="text-xs">
                                 NOT NULL
                               </Badge>
                             )}
-                            {column.hasDefault && (
+                            {'hasDefault' in column && column.hasDefault && (
                               <Badge variant="outline" className="text-xs">
                                 DEFAULT
                               </Badge>

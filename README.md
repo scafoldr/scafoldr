@@ -51,7 +51,7 @@ This two-step approach gives you the benefits of automated assistance for databa
 *Note: Some features are still in development and will show a "Coming Soon" modal when accessed. We're actively working on expanding our capabilities.*
 
 <div align="center">
-  <img src="coming-soon.png" alt="Coming Soon Modal" width="400">
+  <img src="coming-soon.png" alt="Coming Soon Modal" width="800">
   <p><em>Example of our "Coming Soon" modal for features under development</em></p>
 </div>
 

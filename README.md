@@ -86,10 +86,10 @@ A project management tool with teams, projects, tasks, and user assignments"
 
 ## Tech Stack
 
-**Frontend**: Next.js, React, TailwindCSS, TypeScript
-**Backend**: Python, FastAPI, Jinja2 templating
-**Database Support**: PostgreSQL, MySQL, SQLite (COMING SOON)
-**Deployment**: Docker, Docker Compose
+- **Frontend**: Next.js, React, TailwindCSS, TypeScript
+- **Backend**: Python, FastAPI, Jinja2 templating
+- **Database Support**: PostgreSQL, MySQL, SQLite (COMING SOON)
+- **Deployment**: Docker, Docker Compose
 
 ## Supported Frameworks
 

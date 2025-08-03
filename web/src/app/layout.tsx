@@ -1,23 +1,23 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
+import { ThemeProvider } from '@/components/theme-provider';
 import { ReactNode } from 'react';
-import Header from '@/components/layout/Header/Header';
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: './fonts/GeistVF.woff',
   variable: '--font-geist-sans',
-  subsets: ['latin']
+  weight: '100 900'
 });
-
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: './fonts/GeistMonoVF.woff',
   variable: '--font-geist-mono',
-  subsets: ['latin']
+  weight: '100 900'
 });
 
 export const metadata: Metadata = {
-  title: 'Scafoldr - AI-Powered Backend Scaffolding & Code Generator',
-  description:
-    'Scafoldr is an AI-powered tool that converts DBML schemas into production-ready backend code for Node.js, Spring Boot, Python, and more—accelerate your development workflow.'
+  title: 'Scafoldr - Open Source AI App Generator',
+  description: 'Generate full-stack applications with modern frameworks and best practices.'
 };
 
 export default function RootLayout({
@@ -26,10 +26,9 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="scafoldr-dark">
+    <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Header />
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

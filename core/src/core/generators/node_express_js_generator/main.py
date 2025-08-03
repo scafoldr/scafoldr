@@ -1,8 +1,6 @@
 from core.generators.base_generator import BaseGenerator
-from core.generators.helpers.main import model_name, to_camel_case
-from core.src.core.scafoldr_schema.dbml_scafoldr_schema_maker import from_dbml
-from models.generate import GenerateRequest, GenerateResponse
-from models.scafoldr_schema import DatabaseSchema
+from models.generate import GenerateResponse
+from models.scafoldr_schema import ScafoldrSchema, DatabaseSchema, Entity, Attribute
 import os
 
 from jinja2 import Environment, FileSystemLoader, Template
@@ -44,20 +42,20 @@ class NodeExpressJSGenerator(BaseGenerator):
         if "float" in t:   return "FLOAT"
         return "STRING"
 
-    def generate_models(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_models(self, entities: list[Entity]) -> dict[str, str]:
         model_tpl = env.get_template("/src/models/model_formula.j2")
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            Model = model_name(tbl.name)
-            table_name = tbl.name.lower()
+        for entity in entities:
+            Model = entity.names.pascal_case.singular
+            table_name = entity.names.snake_case.singular
             # build a list of simple dicts for Jinja
             columns = []
-            for col in tbl.columns:
+            for attr in entity.attributes:
                 columns.append({
-                    "name":       col.name,
-                    "mapped_type": self._map_type(col.type),
-                    "allowNull":  not col.not_null,
-                    "pk":         col.pk,
+                    "name":       attr.names.snake_case.singular,
+                    "mapped_type": self._map_type(attr.type),
+                    "allowNull":  not attr.not_null,
+                    "pk":         attr.pk,
                 })
 
             content = model_tpl.render(
@@ -69,17 +67,17 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/models/{Model}.js"] = content
         return out
 
-    def generate_models_index(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_models_index(self, entities: list[Entity], database_schema: DatabaseSchema) -> dict[str, str]:
         models_index_tpl = env.get_template("/src/models/models_index_formula.j2")
         # 1) prepare table list
         tables = [
-            {"Model": model_name(tbl.name)}
-            for tbl in schema.tables
+            {"Model": entity.names.pascal_case.singular}
+            for entity in entities
         ]
 
         # 2) build association lines
         associations: list[str] = []
-        for ref in schema.refs:
+        for ref in database_schema.refs:
             if ref.type not in ('>', '<'):
                 continue
 
@@ -89,16 +87,21 @@ class NodeExpressJSGenerator(BaseGenerator):
             else:
                 many_col, one_col = ref.col2, ref.col1
 
-            ManyModel = model_name(many_col.table)
-            OneModel  = model_name(one_col.table)
-            fk         = many_col.name
+            # Find entities by table name
+            many_entity = next((e for e in entities if e.names.snake_case.singular == many_col.table), None)
+            one_entity = next((e for e in entities if e.names.snake_case.singular == one_col.table), None)
+            
+            if many_entity and one_entity:
+                ManyModel = many_entity.names.pascal_case.singular
+                OneModel = one_entity.names.pascal_case.singular
+                fk = many_col.name
 
-            associations.append(
-                f"{ManyModel}.belongsTo({OneModel}, {{ foreignKey: '{fk}' }});"
-            )
-            associations.append(
-                f"{OneModel}.hasMany({ManyModel}, {{ foreignKey: '{fk}' }});"
-            )
+                associations.append(
+                    f"{ManyModel}.belongsTo({OneModel}, {{ foreignKey: '{fk}' }});"
+                )
+                associations.append(
+                    f"{OneModel}.hasMany({ManyModel}, {{ foreignKey: '{fk}' }});"
+                )
 
         # 3) render template
         content = models_index_tpl.render(
@@ -111,11 +114,11 @@ class NodeExpressJSGenerator(BaseGenerator):
 
 
     
-    def generate_repositories(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_repositories(self, entities: list[Entity]) -> dict[str, str]:
         repo_tpl = env.get_template("/src/repositories/repository_formula.j2")
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            Model = model_name(tbl.name)
+        for entity in entities:
+            Model = entity.names.pascal_case.singular
 
             content = repo_tpl.render(
                 Model=Model
@@ -126,12 +129,12 @@ class NodeExpressJSGenerator(BaseGenerator):
 
 
 
-    def generate_services(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_services(self, entities: list[Entity]) -> dict[str, str]:
         service_tpl = env.get_template("/src/services/service_formula.j2")
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            Model = model_name(tbl.name)
-            variable_name = to_camel_case(tbl.name) + "Repository"
+        for entity in entities:
+            Model = entity.names.pascal_case.singular
+            variable_name = entity.names.camel_case.singular + "Repository"
 
             # render the external template
             content = service_tpl.render(
@@ -142,11 +145,11 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/services/{Model}Service.js"] = content
         return out
 
-    def generate_controllers(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_controllers(self, entities: list[Entity]) -> dict[str, str]:
         controller_tpl = env.get_template("/src/controllers/controller_formula.j2")
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            Model = model_name(tbl.name)
+        for entity in entities:
+            Model = entity.names.pascal_case.singular
 
             content = controller_tpl.render(
                 Model=Model
@@ -155,13 +158,13 @@ class NodeExpressJSGenerator(BaseGenerator):
             out[f"src/controllers/{Model}Controller.js"] = content
         return out
 
-    def generate_routes(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_routes(self, entities: list[Entity]) -> dict[str, str]:
         route_tpl = env.get_template("/src/routes/route_formula.j2")
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            Model = model_name(tbl.name)
-            var = to_camel_case(tbl.name) + "Controller"
-            route_file = f"{tbl.name.lower()}.js"
+        for entity in entities:
+            Model = entity.names.pascal_case.singular
+            var = entity.names.camel_case.singular + "Controller"
+            route_file = f"{entity.names.snake_case.singular}.js"
 
             content = route_tpl.render(
                 Model=Model,
@@ -172,35 +175,34 @@ class NodeExpressJSGenerator(BaseGenerator):
         return out
 
         
-    def generate_app_file(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_app_file(self, entities: list[Entity]) -> dict[str, str]:
         app_tpl = env.get_template("/src/app_formula.j2")
         # prepare a list of route imports & mounts
         tables = [
             {
-                "var": to_camel_case(tbl.name) + "Routes",
-                "plural": tbl.name.lower()
+                "var": entity.names.camel_case.singular + "Routes",
+                "plural": entity.names.snake_case.plural
             }
-            for tbl in schema.tables
+            for entity in entities
         ]
 
         content = app_tpl.render(tables=tables)
         return {"src/app.js": content}
 
 
-    def generate(self, request: GenerateRequest) -> GenerateResponse:
+    def generate(self, schema: ScafoldrSchema) -> GenerateResponse:
         print("Generating Node.js Express code")
-        schema = from_dbml(request.user_input)
+        entities = schema.backend_schema.entities if schema.backend_schema else []
         files: dict[str,str] = {
             **self.get_static_files(),
-            **self.generate_models(schema),
-            **self.generate_models_index(schema),
-            **self.generate_repositories(schema),
-            **self.generate_services(schema),
-            **self.generate_controllers(schema),
-            **self.generate_routes(schema),
-            **self.generate_app_file(schema),
+            **self.generate_models(entities),
+            **self.generate_models_index(entities, schema.database_schema),
+            **self.generate_repositories(entities),
+            **self.generate_services(entities),
+            **self.generate_controllers(entities),
+            **self.generate_routes(entities),
+            **self.generate_app_file(entities),
         }
-
 
         return GenerateResponse(files=files, commands=[])
 

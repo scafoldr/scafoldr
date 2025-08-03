@@ -9,8 +9,8 @@ class DbmlScafoldrSchemaMaker(ScafoldrSchemaMaker):
         super().__init__()
         
     def make_schema(__self, request: GenerateRequest) -> ScafoldrSchema:
-        """Generate files and return a dict of {path: content}"""
-        dbml = request.dbml
+        """Generate ScafoldrSchema from GenerateRequest"""
+        dbml = request.user_input
         project_name = request.project_name
         description = request.description
         version = request.version

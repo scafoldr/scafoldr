@@ -1,8 +1,6 @@
 from core.generators.base_generator import BaseGenerator
-from core.generators.helpers.main import model_name, to_camel_case
-from core.src.core.scafoldr_schema.dbml_scafoldr_schema_maker import from_dbml
-from models.generate import GenerateRequest, GenerateResponse
-from models.scafoldr_schema import DatabaseSchema
+from models.generate import GenerateResponse
+from models.scafoldr_schema import ScafoldrSchema, Entity, Attribute
 import os
 
 from jinja2 import Environment, FileSystemLoader
@@ -53,15 +51,15 @@ class JavaSpringGenerator(BaseGenerator):
             return 'Double'
         return 'String'
 
-    def generate_entities(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_entities(self, entities: list[Entity]) -> dict[str, str]:
         entity_tpl = env.get_template('src/main/java/com.example.demo/models/model_formula.j2')
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            ClassName = model_name(tbl.name)
+        for entity in entities:
+            ClassName = entity.names.pascal_case.singular
             imports = {'jakarta.persistence.*', 'lombok.*'}
             fields = []
-            for col in tbl.columns:
-                java_type = self._map_type(col.type)
+            for attr in entity.attributes:
+                java_type = self._map_type(attr.type)
                 # add type-specific imports
                 if java_type == 'Timestamp':
                     imports.add('java.sql.Timestamp')
@@ -72,37 +70,37 @@ class JavaSpringGenerator(BaseGenerator):
                 elif java_type == 'BigDecimal':
                     imports.add('java.math.BigDecimal')
                 fields.append({
-                    'name': col.name,
+                    'name': attr.names.snake_case.singular,
                     'type': java_type,
-                    'primaryKey': col.pk,
-                    'nullable': not col.not_null,
+                    'primaryKey': attr.pk,
+                    'nullable': not attr.not_null,
                 })
             content = entity_tpl.render(
                 ClassName=ClassName,
-                table_name=tbl.name.lower(),
+                table_name=entity.names.snake_case.singular,
                 fields=fields,
                 imports=sorted(imports)
             )
             out[f'src/main/java/com/example/models/{ClassName}.java'] = content
         return out
 
-    def generate_repositories(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_repositories(self, entities: list[Entity]) -> dict[str, str]:
         repo_tpl = env.get_template('src/main/java/com.example.demo/repositories/repository_formula.j2')
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            ClassName = model_name(tbl.name)
+        for entity in entities:
+            ClassName = entity.names.pascal_case.singular
             content = repo_tpl.render(
                 ClassName=ClassName,
             )
             out[f'src/main/java/com/example/repositories/{ClassName}Repository.java'] = content
         return out
 
-    def generate_services(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_services(self, entities: list[Entity]) -> dict[str, str]:
         service_tpl = env.get_template('src/main/java/com.example.demo/services/service_formula.j2')
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            ClassName = model_name(tbl.name)
-            var_name = to_camel_case(tbl.name) + 'Repository'
+        for entity in entities:
+            ClassName = entity.names.pascal_case.singular
+            var_name = entity.names.camel_case.singular + 'Repository'
             content = service_tpl.render(
                 ClassName=ClassName,
                 var_name=var_name
@@ -110,48 +108,48 @@ class JavaSpringGenerator(BaseGenerator):
             out[f'src/main/java/com/example/services/{ClassName}Service.java'] = content
         return out
 
-    def generate_controllers(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_controllers(self, entities: list[Entity]) -> dict[str, str]:
         ctrl_tpl = env.get_template('src/main/java/com.example.demo/controllers/controller_formula.j2')
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            ClassName = model_name(tbl.name)
-            var_name = to_camel_case(tbl.name) + 'Service'
+        for entity in entities:
+            ClassName = entity.names.pascal_case.singular
+            var_name = entity.names.camel_case.singular + 'Service'
             content = ctrl_tpl.render(
                 ClassName=ClassName,
                 var_name=var_name,
-                path=tbl.name.lower()
+                path=entity.names.snake_case.plural
             )
             out[f'src/main/java/com/example/controllers/{ClassName}Controller.java'] = content
         return out
 
-    def generate_dtos(self, schema: DatabaseSchema) -> dict[str, str]:
+    def generate_dtos(self, entities: list[Entity]) -> dict[str, str]:
         tpl = env.get_template('src/main/java/com.example.demo/dtos/dto_formula.j2')
         out: dict[str, str] = {}
-        for tbl in schema.tables:
-            ClassName = model_name(tbl.name)
-            modelVar = to_camel_case(tbl.name)
+        for entity in entities:
+            ClassName = entity.names.pascal_case.singular
+            modelVar = entity.names.camel_case.singular
             imports = {f'com.example.models.{ClassName}'}
             fields = []
-            for col in tbl.columns:
-                java_type = self._map_type(col.type)
+            for attr in entity.attributes:
+                java_type = self._map_type(attr.type)
                 if java_type == 'Timestamp': imports.add('java.sql.Timestamp')
                 if java_type == 'LocalDate': imports.add('java.time.LocalDate')
                 if java_type == 'LocalDateTime': imports.add('java.time.LocalDateTime')
                 if java_type == 'BigDecimal': imports.add('java.math.BigDecimal')
-                fields.append({'name': col.name, 'type': java_type})
+                fields.append({'name': attr.names.snake_case.singular, 'type': java_type})
             content = tpl.render(ClassName=ClassName, model_var=modelVar, fields=fields, imports=sorted(imports))
             out[f'src/main/java/com/example/dtos/{ClassName}DTO.java'] = content
         return out
 
-    def generate(self, request: GenerateRequest) -> GenerateResponse:
+    def generate(self, schema: ScafoldrSchema) -> GenerateResponse:
         print('Generating Java Spring Boot code')
-        schema = from_dbml(request.user_input)
+        entities = schema.backend_schema.entities if schema.backend_schema else []
         files: dict[str, str] = {
             **self.get_static_files(),
-            **self.generate_entities(schema),
-            **self.generate_repositories(schema),
-            **self.generate_services(schema),
-            **self.generate_controllers(schema),
-            **self.generate_dtos(schema)
+            **self.generate_entities(entities),
+            **self.generate_repositories(entities),
+            **self.generate_services(entities),
+            **self.generate_controllers(entities),
+            **self.generate_dtos(entities)
         }
         return GenerateResponse(files=files, commands=[])

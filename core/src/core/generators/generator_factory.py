@@ -13,7 +13,7 @@ GENERATOR_MAP = {
 
 
 def get_generator(backend_option: str) -> BaseGenerator:
-    key = (backend_option)
+    key = backend_option
     generator_class = GENERATOR_MAP.get(key)
 
     if not generator_class:

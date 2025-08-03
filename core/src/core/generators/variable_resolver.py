@@ -61,11 +61,23 @@ class VariableResolver:
         """Resolve rule-specific variables"""
         resolved = {}
         
+        # First resolve computed variables if we have an entity
+        computed_vars = {}
+        if entity:
+            computed_config = self.variables_config.get("computed", {})
+            for key, config in computed_config.items():
+                computed_vars[key] = self._resolve_computed_variable(config, entity, {
+                    "entity": entity,
+                    "schema": schema,
+                    "type_mappings": self.type_mapper
+                })
+        
         context = {
             "entity": entity,
             "schema": schema,
             "entities": entities,
-            "type_mappings": self.type_mapper
+            "type_mappings": self.type_mapper,
+            "computed": computed_vars
         }
         
         # Handle case where variables might be a string instead of dict
@@ -103,15 +115,15 @@ class VariableResolver:
         # Get source data
         source_data = self._get_source_data(source, entity, context, entities)
         
-        # Apply filter if specified
-        if filter_expr:
-            source_data = self._apply_filter(source_data, filter_expr, context)
-        
         # Apply transformation
         if transform:
             result = self._apply_transformation(source_data, transform, context)
         else:
             result = source_data
+        
+        # Apply filter if specified (after transformation)
+        if filter_expr and isinstance(result, list):
+            result = self._apply_filter_to_results(result, filter_expr, context)
         
         # Add additional items
         if additional:
@@ -155,8 +167,34 @@ class VariableResolver:
                 filtered_data.append(item)
         return filtered_data
     
-    def _apply_transformation(self, source_data: List[Any], transform: Any, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _apply_filter_to_results(self, result_data: List[Any], filter_expr: str, context: Dict[str, Any]) -> List[Any]:
+        """Apply filter expression to transformed results"""
+        filtered_data = []
+        for item in result_data:
+            item_context = {**context, "result": item, "item": item}
+            if self._evaluate_filter(filter_expr, item_context):
+                filtered_data.append(item)
+        return filtered_data
+    
+    def _apply_transformation(self, source_data: List[Any], transform: Any, context: Dict[str, Any]) -> List[Any]:
         """Apply transformation to source data"""
+        # Handle case where transform is a simple string template
+        if isinstance(transform, str):
+            transformed_data = []
+            for item in source_data:
+                item_context = {**context, "attr": item, "item": item}
+                if "{{" in transform:
+                    try:
+                        template = self.jinja_env.from_string(transform)
+                        result = template.render(item_context)
+                        transformed_data.append(result)
+                    except Exception as e:
+                        print(f"Warning: Failed to transform item with template '{transform}': {e}")
+                        transformed_data.append(str(item))
+                else:
+                    transformed_data.append(transform)
+            return transformed_data
+        
         # Handle case where transform is not a dictionary
         if not isinstance(transform, dict):
             return source_data
@@ -198,6 +236,8 @@ class VariableResolver:
             
             # Handle boolean conversion
             if isinstance(result, str):
+                if result.lower() in ['false', '0', 'no', 'none']:
+                    return False
                 return result.lower() in ['true', '1', 'yes']
             return bool(result)
         except Exception as e:

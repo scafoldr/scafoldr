@@ -142,7 +142,7 @@
         "name": "routes",
         "description": "Express.js route definitions",
         "template": "src/routes/route_formula.j2",
-        "output_path": "src/routes/{{ entity.names.snake_case.singular }}.js",
+        "output_path": "src/routes/{{ entity.names.snake_case.plural }}.js",
         "context": "entity",
         "enabled": true,
         "variables": {

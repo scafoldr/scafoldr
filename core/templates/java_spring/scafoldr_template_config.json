@@ -12,6 +12,8 @@
     "sql_to_framework": {
       "int": "Integer",
       "integer": "Integer",
+      "serial": "Integer",
+      "bigserial": "Long",
       "bigint": "Long",
       "varchar": "String",
       "char": "String",
@@ -37,6 +39,14 @@
     },
     "default_type": "String",
     "custom_mappings": [
+      {
+        "condition": "type.lower() == 'serial'",
+        "result": "Integer"
+      },
+      {
+        "condition": "type.lower() == 'bigserial'",
+        "result": "Long"
+      },
       {
         "condition": "type.lower().contains('int') and not type.lower().contains('bigint')",
         "result": "Integer"
@@ -98,11 +108,11 @@
     "computed": {
       "fields": {
         "source": "entity.attributes",
-        "filter": "attr.names.snake_case.singular != 'id'",
         "transform": {
-          "name": "{{ attr.names.snake_case.singular }}",
+          "name": "{{ attr.names.camel_case.singular }}",
+          "columnName": "{{ attr.names.snake_case.singular }}",
           "type": "{{ type_mappings.resolve(attr.type) }}",
-          "primaryKey": "{{ attr.pk }}",
+          "primaryKey": "{{ attr.pk == true }}",
           "nullable": "{{ not attr.not_null }}",
           "unique": "{{ attr.unique }}",
           "default": "{{ attr.default }}"
@@ -111,7 +121,7 @@
       "imports": {
         "source": "entity.attributes",
         "transform": "{{ type_mappings.get_imports(attr.type) }}",
-        "filter": "import_name is not none",
+        "filter": "result != None and result != 'None'",
         "unique": true,
         "sort": true,
         "additional": [
@@ -175,10 +185,7 @@
         "context": "entity",
         "enabled": true,
         "variables": {
-          "ClassName": "{{ entity.names.pascal_case.singular }}",
-          "model_var": "{{ entity.names.camel_case.singular }}",
-          "fields": "{{ computed.fields }}",
-          "imports": "{{ computed.imports }}"
+          "model_var": "{{ entity.names.camel_case.singular }}"
         }
       }
     ],

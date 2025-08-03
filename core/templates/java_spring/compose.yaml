@@ -12,10 +12,7 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_SHOW_SQL=true
     depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - app-network
+      - db
     restart: unless-stopped
 
   db:
@@ -35,13 +32,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    networks:
-      - app-network
     restart: unless-stopped
 
 volumes:
   postgres_data:
-
-networks:
-  app-network:
-    driver: bridge

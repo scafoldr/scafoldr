@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Dict
 
 class Column(BaseModel):
     name: str
@@ -26,14 +26,36 @@ class DatabaseSchema(BaseModel):
     tables: List[Table]
     refs: List[Reference] = []
 
+class NameVariations(BaseModel):
+    singular: str
+    plural: str
+
+class Names(BaseModel):
+    camel_case: NameVariations
+    pascal_case: NameVariations
+    kebab_case: NameVariations
+    snake_case: NameVariations
+
+class Attribute(BaseModel):
+    names: Names
+    type: str
+    not_null: bool = False
+    default: str = None
+    unique: bool = False
+    pk: bool = False
+
+class Entity(BaseModel):
+    names: Names
+    attributes: List[Attribute] = []
+
 
 # TODO: Figure out what we need for BackendSchema
-# class BackendSchema(BaseModel):
-#     port: int = 8080
-#     project_name: str = "scafoldr-project"
-#     container_name: str = "api"
-#     database_connection_string: str = "postgresql://user:password@localhost:5432/scafoldr_app_dbsqlite:///./test.db"
-#     entities: Entities[]
+class BackendSchema(BaseModel):
+    port: int = 8080
+    project_name: str = "scafoldr-project"
+    container_name: str = "api"
+    database_connection_string: str = "postgresql://user:password@localhost:5432/scafoldr_app_dbsqlite:///./test.db"
+    entities: List[Entity] = []
 
 # TODO: Figure out what we need for FrontendSchema
 # class FrontendSchema(BaseModel):
@@ -47,9 +69,7 @@ class ScafoldrSchema(BaseModel):
     description: str = None
     version: str = "1.0"
     database_schema: DatabaseSchema
-
-    # TODO: Create backend logic, maps DatabaseSchema to structure more adaptable for backend templating
-    # backend_schema: BackendSchema
+    backend_schema: BackendSchema = None
 
     # TODO: Create frontend schema model, part of frontend code generation: issue #51
     # frontend_schema: FrontendSchema

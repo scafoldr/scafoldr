@@ -1,6 +1,6 @@
 from core.generators.base_generator import BaseGenerator
 from core.generators.helpers.main import model_name, to_camel_case
-from core.scafoldr_schema_maker.schema_adapter import from_dbml
+from core.src.core.scafoldr_schema.dbml_scafoldr_schema_maker import from_dbml
 from models.generate import GenerateRequest, GenerateResponse
 from models.scafoldr_schema import DatabaseSchema
 import os

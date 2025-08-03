@@ -5,6 +5,8 @@ services:
     build:
       context: ./core
       target: app_dev
+    ports:
+      - "8000:8000"
     volumes:
       - ./core:/srv/www
     environment:

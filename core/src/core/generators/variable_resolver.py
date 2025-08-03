@@ -68,6 +68,13 @@ class VariableResolver:
             "type_mappings": self.type_mapper
         }
         
+        # Handle case where variables might be a string instead of dict
+        if isinstance(variables, str):
+            return {}
+        
+        if not isinstance(variables, dict):
+            return {}
+            
         for key, config in variables.items():
             if isinstance(config, dict) and "source" in config:
                 # Handle computed variables
@@ -148,8 +155,12 @@ class VariableResolver:
                 filtered_data.append(item)
         return filtered_data
     
-    def _apply_transformation(self, source_data: List[Any], transform: Dict[str, str], context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _apply_transformation(self, source_data: List[Any], transform: Any, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Apply transformation to source data"""
+        # Handle case where transform is not a dictionary
+        if not isinstance(transform, dict):
+            return source_data
+            
         transformed_data = []
         for item in source_data:
             item_context = {**context, "attr": item, "item": item}

@@ -118,7 +118,8 @@ class ConfigurableGenerator(BaseGenerator):
                 # Add rule-specific variables
                 if rule.variables:
                     rule_vars = self.variable_resolver.resolve_rule_variables(rule.variables, entity, schema)
-                    variables.update(rule_vars)
+                    if isinstance(rule_vars, dict):
+                        variables.update(rule_vars)
                 
                 # Combine all variables
                 context = {
@@ -140,6 +141,8 @@ class ConfigurableGenerator(BaseGenerator):
                 
             except Exception as e:
                 print(f"Error generating file for entity '{entity.names.pascal_case.singular}' with rule '{rule.name}': {e}")
+                import traceback
+                traceback.print_exc()
                 continue
         
         return files

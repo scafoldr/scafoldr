@@ -1,0 +1,241 @@
+{
+  "template": {
+    "name": "java-spring-boot",
+    "version": "1.0.0",
+    "description": "Java Spring Boot REST API generator with JPA/Hibernate",
+    "author": "Scafoldr Team",
+    "framework": "spring-boot",
+    "language": "java",
+    "orm": "jpa-hibernate"
+  },
+  "type_mappings": {
+    "sql_to_framework": {
+      "int": "Integer",
+      "integer": "Integer",
+      "bigint": "Long",
+      "varchar": "String",
+      "char": "String",
+      "text": "String",
+      "longtext": "String",
+      "boolean": "Boolean",
+      "bool": "Boolean",
+      "date": "LocalDate",
+      "timestamp": "Timestamp",
+      "datetime": "LocalDateTime",
+      "decimal": "BigDecimal",
+      "numeric": "BigDecimal",
+      "float": "Float",
+      "double": "Double",
+      "json": "String"
+    },
+    "import_mappings": {
+      "Timestamp": "java.sql.Timestamp",
+      "LocalDate": "java.time.LocalDate",
+      "LocalDateTime": "java.time.LocalDateTime",
+      "BigDecimal": "java.math.BigDecimal",
+      "Long": "java.lang.Long"
+    },
+    "default_type": "String",
+    "custom_mappings": [
+      {
+        "condition": "type.lower().contains('int') and not type.lower().contains('bigint')",
+        "result": "Integer"
+      },
+      {
+        "condition": "type.lower().contains('bigint')",
+        "result": "Long"
+      },
+      {
+        "condition": "type.lower().contains('char') or type.lower().contains('text')",
+        "result": "String"
+      },
+      {
+        "condition": "type.lower().contains('bool')",
+        "result": "Boolean"
+      },
+      {
+        "condition": "type.lower() == 'date'",
+        "result": "LocalDate"
+      },
+      {
+        "condition": "type.lower().contains('timestamp')",
+        "result": "Timestamp"
+      },
+      {
+        "condition": "type.lower().contains('datetime')",
+        "result": "LocalDateTime"
+      },
+      {
+        "condition": "type.lower().contains('decimal') or type.lower().contains('numeric')",
+        "result": "BigDecimal"
+      },
+      {
+        "condition": "type.lower().contains('float')",
+        "result": "Float"
+      },
+      {
+        "condition": "type.lower().contains('double')",
+        "result": "Double"
+      }
+    ]
+  },
+  "variables": {
+    "global": {
+      "base_package": "com.example",
+      "project_name": "{{ schema.project_name }}",
+      "group_id": "com.example",
+      "artifact_id": "{{ schema.project_name | lower | replace('_', '-') }}",
+      "java_version": "17"
+    },
+    "entity_context": {
+      "ClassName": "{{ entity.names.pascal_case.singular }}",
+      "className": "{{ entity.names.camel_case.singular }}",
+      "table_name": "{{ entity.names.snake_case.singular }}",
+      "repository_var": "{{ entity.names.camel_case.singular }}Repository",
+      "service_var": "{{ entity.names.camel_case.singular }}Service",
+      "path": "{{ entity.names.snake_case.plural }}"
+    },
+    "computed": {
+      "fields": {
+        "source": "entity.attributes",
+        "filter": "attr.names.snake_case.singular != 'id'",
+        "transform": {
+          "name": "{{ attr.names.snake_case.singular }}",
+          "type": "{{ type_mappings.resolve(attr.type) }}",
+          "primaryKey": "{{ attr.pk }}",
+          "nullable": "{{ not attr.not_null }}",
+          "unique": "{{ attr.unique }}",
+          "default": "{{ attr.default }}"
+        }
+      },
+      "imports": {
+        "source": "entity.attributes",
+        "transform": "{{ type_mappings.get_imports(attr.type) }}",
+        "filter": "import_name is not none",
+        "unique": true,
+        "sort": true,
+        "additional": [
+          "jakarta.persistence.*",
+          "lombok.*"
+        ]
+      }
+    }
+  },
+  "generation_rules": {
+    "static_files": {
+      "enabled": true,
+      "exclude_patterns": ["*.j2", "*.jinja2", "*.template"],
+      "include_patterns": ["*"],
+      "path_transformations": {
+        "com.example.demo": "com/example"
+      }
+    },
+    "entity_based": [
+      {
+        "name": "entities",
+        "description": "JPA Entity classes",
+        "template": "src/main/java/com.example.demo/models/model_formula.j2",
+        "output_path": "src/main/java/com/example/models/{{ ClassName }}.java",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "repositories",
+        "description": "Spring Data JPA repositories",
+        "template": "src/main/java/com.example.demo/repositories/repository_formula.j2",
+        "output_path": "src/main/java/com/example/repositories/{{ ClassName }}Repository.java",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "services",
+        "description": "Business logic service classes",
+        "template": "src/main/java/com.example.demo/services/service_formula.j2",
+        "output_path": "src/main/java/com/example/services/{{ ClassName }}Service.java",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "controllers",
+        "description": "REST API controllers",
+        "template": "src/main/java/com.example.demo/controllers/controller_formula.j2",
+        "output_path": "src/main/java/com/example/controllers/{{ ClassName }}Controller.java",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "dtos",
+        "description": "Data Transfer Objects",
+        "template": "src/main/java/com.example.demo/dtos/dto_formula.j2",
+        "output_path": "src/main/java/com/example/dtos/{{ ClassName }}DTO.java",
+        "context": "entity",
+        "enabled": true,
+        "variables": {
+          "ClassName": "{{ entity.names.pascal_case.singular }}",
+          "model_var": "{{ entity.names.camel_case.singular }}",
+          "fields": "{{ computed.fields }}",
+          "imports": "{{ computed.imports }}"
+        }
+      }
+    ],
+    "aggregate": []
+  },
+  "relationships": {
+    "association_patterns": {
+      "one_to_many": {
+        "condition": "ref.type == '>'",
+        "many_side": "ref.col1",
+        "one_side": "ref.col2",
+        "templates": [
+          "@ManyToOne\n@JoinColumn(name = \"{{ many_col.name }}\")\nprivate {{ one_entity.names.pascal_case.singular }} {{ one_entity.names.camel_case.singular }};",
+          "@OneToMany(mappedBy = \"{{ one_entity.names.camel_case.singular }}\")\nprivate List<{{ many_entity.names.pascal_case.singular }}> {{ many_entity.names.camel_case.plural }};"
+        ]
+      },
+      "many_to_one": {
+        "condition": "ref.type == '<'",
+        "many_side": "ref.col2",
+        "one_side": "ref.col1",
+        "templates": [
+          "@ManyToOne\n@JoinColumn(name = \"{{ many_col.name }}\")\nprivate {{ one_entity.names.pascal_case.singular }} {{ one_entity.names.camel_case.singular }};",
+          "@OneToMany(mappedBy = \"{{ one_entity.names.camel_case.singular }}\")\nprivate List<{{ many_entity.names.pascal_case.singular }}> {{ many_entity.names.camel_case.plural }};"
+        ]
+      }
+    }
+  },
+  "plugins": {
+    "custom_functions": [],
+    "filters": [],
+    "tests": []
+  },
+  "validation": {
+    "required_templates": [
+      "src/main/java/com.example.demo/models/model_formula.j2",
+      "src/main/java/com.example.demo/repositories/repository_formula.j2",
+      "src/main/java/com.example.demo/services/service_formula.j2",
+      "src/main/java/com.example.demo/controllers/controller_formula.j2",
+      "src/main/java/com.example.demo/dtos/dto_formula.j2"
+    ],
+    "required_variables": ["ClassName", "table_name"],
+    "template_syntax": "jinja2",
+    "schema_version": "1.0"
+  },
+  "commands": {
+    "post_generation": [
+      "./mvnw clean compile"
+    ],
+    "development": [
+      "./mvnw spring-boot:run"
+    ],
+    "production": [
+      "./mvnw clean package",
+      "java -jar target/*.jar"
+    ],
+    "test": [
+      "./mvnw test"
+    ]
+  }
+}

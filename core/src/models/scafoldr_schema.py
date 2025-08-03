@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class Column(BaseModel):
     name: str
     type: str
     not_null: bool = False
-    default: str = None
+    default: Optional[str] = None
     unique: bool = False
     pk: bool = False
 
@@ -40,7 +40,7 @@ class Attribute(BaseModel):
     names: Names
     type: str
     not_null: bool = False
-    default: str = None
+    default: Optional[str] = None
     unique: bool = False
     pk: bool = False
 
@@ -66,10 +66,10 @@ class BackendSchema(BaseModel):
 
 class ScafoldrSchema(BaseModel):
     project_name: str
-    description: str = None
+    description: Optional[str] = None
     version: str = "1.0"
     database_schema: DatabaseSchema
-    backend_schema: BackendSchema = None
+    backend_schema: Optional[BackendSchema] = None
 
     # TODO: Create frontend schema model, part of frontend code generation: issue #51
     # frontend_schema: FrontendSchema

@@ -1,7 +1,7 @@
 from pydbml import PyDBML
 
 from models.scafoldr_schema import DatabaseSchema, Table, Column, Reference, RefColumn, ScafoldrSchema, BackendSchema, Entity, Attribute
-from core.src.core.scafoldr_schema.base_scafoldr_schema_maker import ScafoldrSchemaMaker
+from core.scafoldr_schema.base_scafoldr_schema_maker import ScafoldrSchemaMaker
 from models.generate import GenerateRequest
 
 class DbmlScafoldrSchemaMaker(ScafoldrSchemaMaker):

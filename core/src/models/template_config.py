@@ -40,7 +40,7 @@ class GenerationRule(BaseModel):
 
 class StaticFilesConfig(BaseModel):
     enabled: bool = True
-    exclude_patterns: List[str] = ["*.j2", "*.jinja2"]
+    exclude_patterns: List[str] = ["*.j2", "*.jinja2", "scafoldr_template_config.json"]
     include_patterns: List[str] = ["*"]
     transformations: Optional[Dict[str, str]] = {}
     path_transformations: Optional[Dict[str, str]] = {}

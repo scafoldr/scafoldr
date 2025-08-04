@@ -85,7 +85,7 @@
   "generation_rules": {
     "static_files": {
       "enabled": true,
-      "exclude_patterns": ["*.j2", "*.jinja2", "*.template"],
+      "exclude_patterns": ["*.j2", "*.jinja2", "scafoldr_template_config.json"],
       "include_patterns": ["*"],
       "transformations": {
         ".env.example": ".env"

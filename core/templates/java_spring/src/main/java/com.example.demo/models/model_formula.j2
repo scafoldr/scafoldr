@@ -12,15 +12,14 @@ import {{ imp }};
 @AllArgsConstructor
 @Builder
 public class {{ ClassName }} extends BaseModel {
-
+    
     {%- for field in fields %}
     {%- if field.name != 'id' %}
-    {%- if field.primaryKey %}
+    {%- if field.primaryKey == 'True' %}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     {%- endif %}
-    @Column(name="{{ field.name }}")
     private {{ field.type }} {{ field.name }};
     {%- endif %}
-    {% endfor %}
+    {%- endfor %}
 }

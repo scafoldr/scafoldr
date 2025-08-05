@@ -9,8 +9,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    {% set id_column = drizzle_columns | selectattr('primary_key') | first %}
-    {% if id_column.drizzle_type in ['integer', 'serial', 'bigint', 'bigserial'] %}
+    {% set id_column = entity.attributes | selectattr('pk') | first %}
+    {% if 'int' in id_column.type.lower() or 'serial' in id_column.type.lower() %}
     const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function GET(
     const [{{ entityName }}] = await db
       .select()
       .from({{ entity_name }})
-      .where(eq({{ entity_name }}.{{ id_column.name }}, id));
+      .where(eq({{ entity_name }}.{{ id_column.names.snake_case.singular }}, id));
 
     if (!{{ entityName }}) {
       return NextResponse.json(
@@ -55,7 +55,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    {% if id_column.drizzle_type in ['integer', 'serial', 'bigint', 'bigserial'] %}
+    {% if 'int' in id_column.type.lower() or 'serial' in id_column.type.lower() %}
     const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
@@ -79,7 +79,7 @@ export async function PUT(
     const [updated{{ EntityName }}] = await db
       .update({{ entity_name }})
       .set(validatedData)
-      .where(eq({{ entity_name }}.{{ id_column.name }}, id))
+      .where(eq({{ entity_name }}.{{ id_column.names.snake_case.singular }}, id))
       .returning();
 
     if (!updated{{ EntityName }}) {
@@ -104,7 +104,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    {% if id_column.drizzle_type in ['integer', 'serial', 'bigint', 'bigserial'] %}
+    {% if 'int' in id_column.type.lower() or 'serial' in id_column.type.lower() %}
     const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
@@ -124,7 +124,7 @@ export async function DELETE(
 
     const [deleted{{ EntityName }}] = await db
       .delete({{ entity_name }})
-      .where(eq({{ entity_name }}.{{ id_column.name }}, id))
+      .where(eq({{ entity_name }}.{{ id_column.names.snake_case.singular }}, id))
       .returning();
 
     if (!deleted{{ EntityName }}) {

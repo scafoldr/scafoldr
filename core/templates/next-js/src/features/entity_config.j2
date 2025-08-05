@@ -8,27 +8,31 @@ import { {{ entityName }}Schema } from '@/lib/validations';
 // {{ EntityName }}-specific column configuration
 const {{ entityName }}TableConfig = {
   columns: [
-{% for column in table_columns %}
-    {% if column.type == 'text' %}
-    commonColumns.text('{{ column.key }}', '{{ column.header }}'),
-    {% elif column.type == 'number' %}
-    commonColumns.number('{{ column.key }}', '{{ column.header }}'),
-    {% elif column.type == 'boolean' %}
-    commonColumns.boolean('{{ column.key }}', '{{ column.header }}'),
-    {% elif column.type == 'date' %}
-    commonColumns.{% if column.key == 'createdAt' %}createdAt(){% else %}date('{{ column.key }}', '{{ column.header }}'){% endif %},
-    {% elif column.type == 'badge' %}
-    {
-      key: '{{ column.key }}' as keyof {{ EntityName }}WithStats,
-      header: '{{ column.header }}',
-      type: 'badge' as const,
-    },
+{% for attr in entity.attributes %}
+  {% if not attr.pk or attr.names.snake_case.singular == 'id' %}
+    {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
+    commonColumns.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
+    commonColumns.number('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'bool' in attr.type.lower() %}
+    commonColumns.boolean('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
+      {% if attr.names.snake_case.singular == 'created_at' %}
+    commonColumns.createdAt(),
+      {% elif attr.names.snake_case.singular == 'updated_at' %}
+    commonColumns.updatedAt(),
+      {% else %}
+    commonColumns.date('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+      {% endif %}
     {% else %}
-    commonColumns.text('{{ column.key }}', '{{ column.header }}'),
+    commonColumns.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
     {% endif %}
+  {% endif %}
 {% endfor %}
+    // Add relationship count columns here if needed
+    // commonColumns.number('relatedEntityCount', 'Related Entity Count'),
   ],
-  searchKey: '{% for column in table_columns %}{% if column.type == 'text' %}{{ column.key }}{% endif %}{% endfor %}' as keyof {{ EntityName }}WithStats,
+  searchKey: {% set search_key = 'id' %}{% for attr in entity.attributes %}{% if ('varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower()) and search_key == 'id' %}{% set search_key = attr.names.camel_case.singular %}{% endif %}{% endfor %}'{{ search_key }}' as keyof {{ EntityName }}WithStats,
   searchPlaceholder: 'Search {{ entityNamePlural }}...',
   entityName: '{{ entityName }}',
 };
@@ -36,22 +40,20 @@ const {{ entityName }}TableConfig = {
 // {{ EntityName }} form configuration
 const {{ entityName }}FormConfig = {
   fields: [
-{% for field in form_fields %}
-    {% if field.type == 'text' %}
-    commonFields.text('{{ field.name }}', '{{ field.label }}'),
-    {% elif field.type == 'number' %}
-    commonFields.number('{{ field.name }}', '{{ field.label }}'),
-    {% elif field.type == 'checkbox' %}
-    commonFields.checkbox('{{ field.name }}', '{{ field.label }}'),
-    {% elif field.type == 'date' %}
-    commonFields.date('{{ field.name }}', '{{ field.label }}'),
-    {% elif field.type == 'select' %}
-    commonFields.select('{{ field.name }}', '{{ field.label }}', [
-      // Add your options here
-    ]),
+{% for attr in entity.attributes %}
+  {% if not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at'] %}
+    {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
+    commonFields.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
+    commonFields.number('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'bool' in attr.type.lower() %}
+    commonFields.checkbox('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
+    commonFields.date('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
     {% else %}
-    commonFields.text('{{ field.name }}', '{{ field.label }}'),
+    commonFields.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
     {% endif %}
+  {% endif %}
 {% endfor %}
   ],
   schema: {{ entityName }}Schema,

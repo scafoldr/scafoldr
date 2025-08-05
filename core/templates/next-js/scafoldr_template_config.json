@@ -130,51 +130,7 @@
       "api_route": "{{ entity.names.snake_case.plural }}",
       "feature_path": "{{ entity.names.snake_case.plural }}"
     },
-    "computed": {
-      "drizzle_columns": {
-        "source": "entity.attributes",
-        "transform": {
-          "name": "{{ attr.names.snake_case.singular }}",
-          "drizzle_type": "{{ type_mappings.resolve(attr.type) }}",
-          "typescript_type": "{{ type_mappings.get_typescript_type(attr.type) }}",
-          "primary_key": "{{ attr.pk == true }}",
-          "not_null": "{{ attr.not_null == true }}",
-          "unique": "{{ attr.unique == true }}",
-          "default": "{{ attr.default }}",
-          "length": "{{ attr.length if attr.type.lower().contains('varchar') else none }}"
-        }
-      },
-      "form_fields": {
-        "source": "entity.attributes",
-        "transform": {
-          "name": "{{ attr.names.camel_case.singular }}",
-          "label": "{{ attr.names.title_case.singular }}",
-          "type": "{{ 'select' if attr.type.lower().contains('enum') else 'text' if attr.type.lower().contains('char') or attr.type.lower().contains('text') else 'number' if attr.type.lower().contains('int') or attr.type.lower().contains('decimal') or attr.type.lower().contains('float') else 'checkbox' if attr.type.lower().contains('bool') else 'date' if attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') else 'text' }}",
-          "required": "{{ attr.not_null == true and not attr.pk }}",
-          "validation": "{{ 'z.string().min(1)' if attr.type.lower().contains('char') or attr.type.lower().contains('text') else 'z.number()' if attr.type.lower().contains('int') or attr.type.lower().contains('decimal') or attr.type.lower().contains('float') else 'z.boolean()' if attr.type.lower().contains('bool') else 'z.date()' if attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') else 'z.string()' }}"
-        },
-        "filter": "not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at']"
-      },
-      "table_columns": {
-        "source": "entity.attributes",
-        "transform": {
-          "key": "{{ attr.names.camel_case.singular }}",
-          "header": "{{ attr.names.title_case.singular }}",
-          "type": "{{ 'badge' if attr.type.lower().contains('enum') else 'text' if attr.type.lower().contains('char') or attr.type.lower().contains('text') else 'number' if attr.type.lower().contains('int') or attr.type.lower().contains('decimal') or attr.type.lower().contains('float') else 'boolean' if attr.type.lower().contains('bool') else 'date' if attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') else 'text' }}"
-        }
-      },
-      "imports": {
-        "source": "entity.attributes",
-        "transform": "{{ type_mappings.get_imports(attr.type) }}",
-        "filter": "result != None and result != 'None'",
-        "unique": true,
-        "sort": true,
-        "additional": [
-          "import { relations } from 'drizzle-orm';",
-          "import { pgTable } from 'drizzle-orm/pg-core';"
-        ]
-      }
-    }
+    "computed": {}
   },
   "generation_rules": {
     "static_files": {

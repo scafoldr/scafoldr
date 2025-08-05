@@ -7,11 +7,12 @@ import { ChatCodeGenerationMessage } from './chat-code-generation-message';
 
 interface ChatBubbleProps {
   message: Message;
+  selectedFramework?: string;
   onViewCode?: (files: any) => void;
   onViewDB?: (dbmlCode: string) => void;
 }
 
-export function ChatBubble({ message, onViewCode, onViewDB }: ChatBubbleProps) {
+export function ChatBubble({ message, selectedFramework, onViewCode, onViewDB }: ChatBubbleProps) {
   const isUser = message.from === MessageFrom.USER;
 
   // Handle RESULT messages - new combined widget for DBML + action
@@ -32,6 +33,7 @@ export function ChatBubble({ message, onViewCode, onViewDB }: ChatBubbleProps) {
       <ChatCodeGenerationMessage
         dbmlCode={message.text}
         timestamp={message.timestamp}
+        selectedFramework={selectedFramework}
         onViewCode={onViewCode}
       />
     );

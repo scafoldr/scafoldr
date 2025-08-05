@@ -4,11 +4,12 @@ import { Message } from '../types/chat.types';
 
 interface ChatHistoryProps {
   messages: Message[];
+  selectedFramework?: string;
   onViewCode?: (files: any) => void;
   onViewDB?: (dbmlCode: string) => void;
 }
 
-export function ChatHistory({ messages, onViewCode, onViewDB }: ChatHistoryProps) {
+export function ChatHistory({ messages, selectedFramework, onViewCode, onViewDB }: ChatHistoryProps) {
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
@@ -16,6 +17,7 @@ export function ChatHistory({ messages, onViewCode, onViewDB }: ChatHistoryProps
           <ChatBubble
             key={message.id}
             message={message}
+            selectedFramework={selectedFramework}
             onViewCode={onViewCode}
             onViewDB={onViewDB}
           />

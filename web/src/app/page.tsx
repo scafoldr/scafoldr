@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthComingSoonModal } from '@/components/coming-soon-modal';
+import { FrameworkSelector } from '@/features/framework-selector';
 import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -15,6 +16,7 @@ export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [selectedFramework, setSelectedFramework] = useState('nodejs-express-js');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +25,11 @@ export default function LandingPage() {
     setIsSubmitting(true);
     // Simulate transition delay
     setTimeout(() => {
-      window.location.href = '/app?prompt=' + encodeURIComponent(prompt);
+      const params = new URLSearchParams({
+        prompt: prompt,
+        framework: selectedFramework
+      });
+      window.location.href = '/app?' + params.toString();
     }, 800);
   };
 
@@ -82,7 +88,7 @@ export default function LandingPage() {
           {/* CTA Form */}
           <motion.form
             onSubmit={handleSubmit}
-            className="max-w-2xl mx-auto mb-16"
+            className="max-w-2xl mx-auto mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}>
@@ -116,6 +122,23 @@ export default function LandingPage() {
               </Button>
             </div>
           </motion.form>
+
+          {/* Framework Selector - Subtle placement below form */}
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}>
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                Framework:
+              </span>
+              <FrameworkSelector 
+                value={selectedFramework} 
+                onValueChange={setSelectedFramework}
+              />
+            </div>
+          </motion.div>
 
           {/* Feature Cards */}
           <motion.div

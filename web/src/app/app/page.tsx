@@ -26,6 +26,7 @@ export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');
   const [currentProject, setCurrentProject] = useState('Task Manager App');
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>();
+  const [selectedFramework, setSelectedFramework] = useState<string>('nodejs-express-js');
   const [generatedFiles, setGeneratedFiles] = useState<any>({});
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
@@ -38,12 +39,21 @@ export default function AppPage() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    // Get prompt from URL params (passed from auth page)
+    // Get parameters from URL (passed from home page)
     const urlParams = new URLSearchParams(window.location.search);
     const promptParam = urlParams.get('prompt');
+    const frameworkParam = urlParams.get('framework');
+    
     if (promptParam) {
       setInitialPrompt(decodeURIComponent(promptParam));
-      // Clean up URL after extracting prompt
+    }
+    
+    if (frameworkParam) {
+      setSelectedFramework(frameworkParam);
+    }
+    
+    // Clean up URL after extracting parameters
+    if (promptParam || frameworkParam) {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
@@ -152,6 +162,7 @@ export default function AppPage() {
         leftPanel={
           <ChatInterface
             initialPrompt={initialPrompt}
+            selectedFramework={selectedFramework}
             onViewCode={handleViewCode}
             onViewDB={handleViewDB}
             onUserInteraction={handleUserInteraction}

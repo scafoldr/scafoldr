@@ -5,9 +5,22 @@ import { Bot, Code, Loader2, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FileMap } from '@/features/code-editor/types';
 
+// Helper function to get framework display name
+const getFrameworkDisplayName = (framework: string): string => {
+  switch (framework) {
+    case 'nodejs-express-js':
+      return 'Node.js Express';
+    case 'java-spring':
+      return 'Java Spring Boot';
+    default:
+      return 'Backend';
+  }
+};
+
 interface ChatCodeGenerationMessageProps {
   dbmlCode: string;
   timestamp: Date;
+  selectedFramework?: string;
   title?: string;
   // eslint-disable-next-line no-unused-vars
   onViewCode?: (files: FileMap) => void;
@@ -16,12 +29,16 @@ interface ChatCodeGenerationMessageProps {
 export function ChatCodeGenerationMessage({
   dbmlCode,
   timestamp,
-  title = "I've generated your Node.js Express application:",
+  selectedFramework = 'nodejs-express-js',
+  title,
   onViewCode
 }: ChatCodeGenerationMessageProps) {
   const [isGenerating, setIsGenerating] = useState(true);
   const [generatedFiles, setGeneratedFiles] = useState<FileMap | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  
+  // Generate dynamic title if not provided
+  const displayTitle = title || `I've generated your ${getFrameworkDisplayName(selectedFramework)} application:`;
 
   // Automatically trigger code generation when component mounts
   useEffect(() => {
@@ -34,7 +51,7 @@ export function ChatCodeGenerationMessage({
 
       const requestData = {
         project_name: randomProjectName,
-        backend_option: 'nodejs-express-js', // Default to Node.js as requested
+        backend_option: selectedFramework,
         features: [], // No additional features for now
         user_input: dbmlCode
       };
@@ -121,7 +138,7 @@ export function ChatCodeGenerationMessage({
             <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center">
               <Code className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
-            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{title}</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{displayTitle}</span>
           </div>
 
           {/* Code Generation Content */}
@@ -130,7 +147,7 @@ export function ChatCodeGenerationMessage({
               <div className="flex items-center space-x-2 p-3 bg-slate-50 dark:bg-slate-900 rounded border">
                 <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                 <span className="text-sm text-slate-600 dark:text-slate-400">
-                  Generating your Node.js Express application...
+                  Generating your {getFrameworkDisplayName(selectedFramework)} application...
                 </span>
               </div>
             )}

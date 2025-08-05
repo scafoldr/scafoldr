@@ -8,6 +8,7 @@ import { useChat } from '../hooks/use-chat';
 
 interface ChatInterfaceProps {
   initialPrompt?: string;
+  selectedFramework?: string;
   onViewCode?: (files: any) => void;
   onViewDB?: (dbmlCode: string) => void;
   onUserInteraction?: () => void;
@@ -16,6 +17,7 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({
   initialPrompt,
+  selectedFramework,
   onViewCode,
   onViewDB,
   onUserInteraction,
@@ -88,7 +90,7 @@ export function ChatInterface({
       </div>
 
       {/* Messages */}
-      <ChatHistory messages={messages} onViewCode={onViewCode} onViewDB={onViewDB} />
+      <ChatHistory messages={messages} selectedFramework={selectedFramework} onViewCode={onViewCode} onViewDB={onViewDB} />
 
       {/* Error Display */}
       {error && (

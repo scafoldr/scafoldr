@@ -1,0 +1,6 @@
+# Testing infrastructure requirements
+requests>=2.31.0
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+docker>=6.1.0
+psycopg2-binary>=2.9.7

@@ -122,7 +122,7 @@ export const FEATURE_CONFIGS = {
     featureName: 'Database Tab',
     description:
       'Advanced database management and visualization tools to help you manage your data schemas more effectively.',
-    issueLink: 'https://github.com/scafoldr/scafoldr/issues/57',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/57'
   },
   preview: {
     featureName: 'Preview Tab',
@@ -174,7 +174,6 @@ export function DeployComingSoonModal(
 ) {
   return <ComingSoonModal {...props} {...FEATURE_CONFIGS.deploy} />;
 }
-
 
 export function ShareComingSoonModal(
   props: Omit<ComingSoonModalProps, 'featureName' | 'description'>

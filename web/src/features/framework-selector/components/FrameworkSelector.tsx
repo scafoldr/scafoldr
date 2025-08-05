@@ -31,6 +31,18 @@ const frameworks: Framework[] = [
     name: 'Next.js',
     icon: '⚫',
     comingSoon: true
+  },
+  {
+    id: 'php-laravel',
+    name: 'PHP + Laravel',
+    icon: '🐘',
+    comingSoon: true
+  },
+  {
+    id: 'python-fastapi',
+    name: 'Python + FastAPI',
+    icon: '🐍',
+    comingSoon: true
   }
 ];
 
@@ -42,17 +54,50 @@ interface FrameworkSelectorProps {
 
 export function FrameworkSelector({ value, onValueChange, className }: FrameworkSelectorProps) {
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
+  const [selectedComingSoonFramework, setSelectedComingSoonFramework] = useState<Framework | null>(null);
   
   const handleValueChange = (newValue: string) => {
     const selectedFramework = frameworks.find(f => f.id === newValue);
     
     if (selectedFramework?.comingSoon) {
+      setSelectedComingSoonFramework(selectedFramework);
       setShowComingSoonModal(true);
       return;
     }
     
     onValueChange?.(newValue);
   };
+
+  const getFrameworkModalContent = (framework: Framework) => {
+    switch (framework.id) {
+      case 'nextjs':
+        return {
+          featureName: 'Next.js Framework Support',
+          description: 'Full-stack Next.js application generation with TypeScript, API routes, and modern React patterns.',
+          issueLink: 'https://github.com/scafoldr/scafoldr/issues/64'
+        };
+      case 'php-laravel':
+        return {
+          featureName: 'PHP Laravel Framework Support',
+          description: 'PHP Laravel application generation with Eloquent ORM, Artisan commands, and modern PHP patterns.',
+          issueLink: 'https://github.com/scafoldr/scafoldr/issues/66'
+        };
+      case 'python-fastapi':
+        return {
+          featureName: 'Python FastAPI Framework Support',
+          description: 'Modern Python FastAPI application generation with async support, Pydantic models, and automatic OpenAPI documentation.',
+          issueLink: 'https://github.com/scafoldr/scafoldr/issues/65'
+        };
+      default:
+        return {
+          featureName: 'Framework Support',
+          description: 'This framework is coming soon!',
+          issueLink: 'https://github.com/scafoldr/scafoldr/issues'
+        };
+    }
+  };
+
+  const modalContent = selectedComingSoonFramework ? getFrameworkModalContent(selectedComingSoonFramework) : null;
 
   return (
     <>
@@ -75,14 +120,16 @@ export function FrameworkSelector({ value, onValueChange, className }: Framework
         </SelectContent>
       </Select>
 
-      <ComingSoonModal
-        open={showComingSoonModal}
-        onOpenChange={setShowComingSoonModal}
-        featureName="Next.js Framework Support"
-        description="Full-stack Next.js application generation with TypeScript, API routes, and modern React patterns."
-        issueLink="https://github.com/scafoldr/scafoldr/issues/64"
-        githubRepo="https://github.com/scafoldr/scafoldr"
-      />
+      {modalContent && (
+        <ComingSoonModal
+          open={showComingSoonModal}
+          onOpenChange={setShowComingSoonModal}
+          featureName={modalContent.featureName}
+          description={modalContent.description}
+          issueLink={modalContent.issueLink}
+          githubRepo="https://github.com/scafoldr/scafoldr"
+        />
+      )}
     </>
   );
 }

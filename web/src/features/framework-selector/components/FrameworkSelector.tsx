@@ -9,6 +9,9 @@ export interface Framework {
   icon: string;
 }
 
+// TODO: Replace hardcoded frameworks with dynamic fetching from backend API
+// See GitHub issue: #63 Implement Dynamic Framework Fetching from Backend
+// This should fetch from GET /frameworks endpoint to automatically support new frameworks
 const frameworks: Framework[] = [
   {
     id: 'nodejs-express-js',

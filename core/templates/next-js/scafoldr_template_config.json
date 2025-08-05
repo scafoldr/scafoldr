@@ -1,0 +1,374 @@
+{
+  "template": {
+    "name": "next-js-typescript",
+    "version": "1.0.0",
+    "description": "Next.js TypeScript full-stack application with Drizzle ORM",
+    "author": "Scafoldr Team",
+    "framework": "next-js",
+    "language": "typescript",
+    "orm": "drizzle"
+  },
+  "type_mappings": {
+    "sql_to_framework": {
+      "int": "integer",
+      "integer": "integer",
+      "serial": "serial",
+      "bigserial": "bigserial",
+      "bigint": "bigint",
+      "varchar": "varchar",
+      "char": "varchar",
+      "text": "text",
+      "longtext": "text",
+      "boolean": "boolean",
+      "bool": "boolean",
+      "date": "date",
+      "timestamp": "timestamp",
+      "datetime": "timestamp",
+      "decimal": "decimal",
+      "numeric": "decimal",
+      "float": "real",
+      "double": "doublePrecision",
+      "json": "json",
+      "jsonb": "jsonb"
+    },
+    "import_mappings": {
+      "integer": "pgTable, integer",
+      "serial": "pgTable, serial",
+      "bigserial": "pgTable, bigserial",
+      "bigint": "pgTable, bigint",
+      "varchar": "pgTable, varchar",
+      "text": "pgTable, text",
+      "boolean": "pgTable, boolean",
+      "date": "pgTable, date",
+      "timestamp": "pgTable, timestamp",
+      "decimal": "pgTable, decimal",
+      "real": "pgTable, real",
+      "doublePrecision": "pgTable, doublePrecision",
+      "json": "pgTable, json",
+      "jsonb": "pgTable, jsonb"
+    },
+    "typescript_mappings": {
+      "integer": "number",
+      "serial": "number",
+      "bigserial": "number",
+      "bigint": "number",
+      "varchar": "string",
+      "text": "string",
+      "boolean": "boolean",
+      "date": "Date",
+      "timestamp": "Date",
+      "decimal": "number",
+      "real": "number",
+      "doublePrecision": "number",
+      "json": "any",
+      "jsonb": "any"
+    },
+    "default_type": "varchar",
+    "custom_mappings": [
+      {
+        "condition": "type.lower() == 'serial'",
+        "result": "serial"
+      },
+      {
+        "condition": "type.lower() == 'bigserial'",
+        "result": "bigserial"
+      },
+      {
+        "condition": "type.lower().contains('int') and not type.lower().contains('bigint')",
+        "result": "integer"
+      },
+      {
+        "condition": "type.lower().contains('bigint')",
+        "result": "bigint"
+      },
+      {
+        "condition": "type.lower().contains('char') or type.lower().contains('text')",
+        "result": "varchar"
+      },
+      {
+        "condition": "type.lower().contains('bool')",
+        "result": "boolean"
+      },
+      {
+        "condition": "type.lower() == 'date'",
+        "result": "date"
+      },
+      {
+        "condition": "type.lower().contains('timestamp') or type.lower().contains('datetime')",
+        "result": "timestamp"
+      },
+      {
+        "condition": "type.lower().contains('decimal') or type.lower().contains('numeric')",
+        "result": "decimal"
+      },
+      {
+        "condition": "type.lower().contains('float')",
+        "result": "real"
+      },
+      {
+        "condition": "type.lower().contains('double')",
+        "result": "doublePrecision"
+      }
+    ]
+  },
+  "variables": {
+    "global": {
+      "project_name": "{{ schema.project_name }}",
+      "database_name": "{{ schema.database_schema.name | default('app_db') }}",
+      "package_name": "{{ schema.project_name | lower | replace('_', '-') }}",
+      "next_version": "15.4.1",
+      "react_version": "19.1.0"
+    },
+    "entity_context": {
+      "EntityName": "{{ entity.names.pascal_case.singular }}",
+      "entityName": "{{ entity.names.camel_case.singular }}",
+      "entity_name": "{{ entity.names.snake_case.singular }}",
+      "entityNamePlural": "{{ entity.names.camel_case.plural }}",
+      "entity_name_plural": "{{ entity.names.snake_case.plural }}",
+      "EntityNamePlural": "{{ entity.names.pascal_case.plural }}",
+      "table_name": "{{ entity.names.snake_case.singular }}",
+      "api_route": "{{ entity.names.snake_case.plural }}",
+      "feature_path": "{{ entity.names.snake_case.plural }}"
+    },
+    "computed": {
+      "drizzle_columns": {
+        "source": "entity.attributes",
+        "transform": {
+          "name": "{{ attr.names.snake_case.singular }}",
+          "drizzle_type": "{{ type_mappings.resolve(attr.type) }}",
+          "typescript_type": "{{ type_mappings.get_typescript_type(attr.type) }}",
+          "primary_key": "{{ attr.pk == true }}",
+          "not_null": "{{ attr.not_null == true }}",
+          "unique": "{{ attr.unique == true }}",
+          "default": "{{ attr.default }}",
+          "length": "{{ attr.length if attr.type.lower().contains('varchar') else none }}"
+        }
+      },
+      "form_fields": {
+        "source": "entity.attributes",
+        "transform": {
+          "name": "{{ attr.names.camel_case.singular }}",
+          "label": "{{ attr.names.title_case.singular }}",
+          "type": "{{ 'select' if attr.type.lower().contains('enum') else 'text' if attr.type.lower().contains('char') or attr.type.lower().contains('text') else 'number' if attr.type.lower().contains('int') or attr.type.lower().contains('decimal') or attr.type.lower().contains('float') else 'checkbox' if attr.type.lower().contains('bool') else 'date' if attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') else 'text' }}",
+          "required": "{{ attr.not_null == true and not attr.pk }}",
+          "validation": "{{ 'z.string().min(1)' if attr.type.lower().contains('char') or attr.type.lower().contains('text') else 'z.number()' if attr.type.lower().contains('int') or attr.type.lower().contains('decimal') or attr.type.lower().contains('float') else 'z.boolean()' if attr.type.lower().contains('bool') else 'z.date()' if attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') else 'z.string()' }}"
+        },
+        "filter": "not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at']"
+      },
+      "table_columns": {
+        "source": "entity.attributes",
+        "transform": {
+          "key": "{{ attr.names.camel_case.singular }}",
+          "header": "{{ attr.names.title_case.singular }}",
+          "type": "{{ 'badge' if attr.type.lower().contains('enum') else 'text' if attr.type.lower().contains('char') or attr.type.lower().contains('text') else 'number' if attr.type.lower().contains('int') or attr.type.lower().contains('decimal') or attr.type.lower().contains('float') else 'boolean' if attr.type.lower().contains('bool') else 'date' if attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') else 'text' }}"
+        }
+      },
+      "imports": {
+        "source": "entity.attributes",
+        "transform": "{{ type_mappings.get_imports(attr.type) }}",
+        "filter": "result != None and result != 'None'",
+        "unique": true,
+        "sort": true,
+        "additional": [
+          "import { relations } from 'drizzle-orm';",
+          "import { pgTable } from 'drizzle-orm/pg-core';"
+        ]
+      }
+    }
+  },
+  "generation_rules": {
+    "static_files": {
+      "enabled": true,
+      "exclude_patterns": ["*.j2", "*.jinja2", "scafoldr_template_config.json", "*.ico", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.woff", "*.woff2", "*.ttf", "*.eot"],
+      "include_patterns": ["*"],
+      "transformations": {
+        ".env.example": ".env.local"
+      }
+    },
+    "entity_based": [
+      {
+        "name": "drizzle_schema",
+        "description": "Drizzle ORM table definitions",
+        "template": "src/drizzle/schema_entity.j2",
+        "output_path": "src/drizzle/tables/{{ entity_name }}.ts",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "api_routes",
+        "description": "Next.js API route handlers",
+        "template": "src/app/api/entity_route.j2",
+        "output_path": "src/app/api/{{ api_route }}/route.ts",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "api_routes_by_id",
+        "description": "Next.js API route handlers for single entity",
+        "template": "src/app/api/entity_id_route.j2",
+        "output_path": "src/app/api/{{ api_route }}/[id]/route.ts",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "dashboard_pages",
+        "description": "Dashboard pages for entity management",
+        "template": "src/app/dashboard/entity_page.j2",
+        "output_path": "src/app/dashboard/{{ feature_path }}/page.tsx",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "feature_config",
+        "description": "Feature configuration for CRUD operations",
+        "template": "src/features/entity_config.j2",
+        "output_path": "src/features/{{ feature_path }}/config.ts",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "feature_types",
+        "description": "TypeScript types for entity features",
+        "template": "src/features/entity_types.j2",
+        "output_path": "src/features/{{ feature_path }}/types.ts",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      }
+    ],
+    "aggregate": [
+      {
+        "name": "main_schema",
+        "description": "Main Drizzle schema with all tables and relations",
+        "template": "src/drizzle/schema_main.j2",
+        "output_path": "src/drizzle/schema.ts",
+        "context": "all_entities",
+        "enabled": true,
+        "variables": {
+          "entities": {
+            "source": "entities",
+            "transform": {
+              "table_name": "{{ item.names.snake_case.singular }}",
+              "EntityName": "{{ item.names.pascal_case.singular }}"
+            }
+          },
+          "relationships": {
+            "source": "database_schema.refs",
+            "transform": "{{ relationships.generate_drizzle_relations(item) }}",
+            "filter": "item.type in ['>', '<']"
+          }
+        }
+      },
+      {
+        "name": "validations",
+        "description": "Zod validation schemas for all entities",
+        "template": "src/lib/validations_main.j2",
+        "output_path": "src/lib/validations.ts",
+        "context": "all_entities",
+        "enabled": true,
+        "variables": {
+          "schemas": {
+            "source": "entities",
+            "transform": {
+              "schema_name": "{{ item.names.camel_case.singular }}Schema",
+              "EntityName": "{{ item.names.pascal_case.singular }}"
+            }
+          }
+        }
+      },
+      {
+        "name": "package_json",
+        "description": "Package.json with project-specific name",
+        "template": "package.j2",
+        "output_path": "package.json",
+        "context": "global",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "compose_yaml",
+        "description": "Docker Compose configuration with database setup",
+        "template": "compose.j2",
+        "output_path": "compose.yaml",
+        "context": "global",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "env_local",
+        "description": "Environment variables for local development",
+        "template": ".env.local.j2",
+        "output_path": ".env.local",
+        "context": "global",
+        "enabled": true,
+        "variables": {}
+      }
+    ]
+  },
+  "relationships": {
+    "association_patterns": {
+      "one_to_many": {
+        "condition": "ref.type == '>'",
+        "many_side": "ref.col1",
+        "one_side": "ref.col2",
+        "templates": [
+          "export const {{ many_entity.names.camel_case.singular }}Relations = relations({{ many_entity.names.camel_case.singular }}, ({ one }) => ({ {{ one_entity.names.camel_case.singular }}: one({{ one_entity.names.camel_case.singular }}, { fields: [{{ many_entity.names.camel_case.singular }}.{{ many_col.name }}], references: [{{ one_entity.names.camel_case.singular }}.id] }) }));",
+          "export const {{ one_entity.names.camel_case.singular }}Relations = relations({{ one_entity.names.camel_case.singular }}, ({ many }) => ({ {{ many_entity.names.camel_case.plural }}: many({{ many_entity.names.camel_case.singular }}) }));"
+        ]
+      },
+      "many_to_one": {
+        "condition": "ref.type == '<'",
+        "many_side": "ref.col2",
+        "one_side": "ref.col1",
+        "templates": [
+          "export const {{ many_entity.names.camel_case.singular }}Relations = relations({{ many_entity.names.camel_case.singular }}, ({ one }) => ({ {{ one_entity.names.camel_case.singular }}: one({{ one_entity.names.camel_case.singular }}, { fields: [{{ many_entity.names.camel_case.singular }}.{{ many_col.name }}], references: [{{ one_entity.names.camel_case.singular }}.id] }) }));",
+          "export const {{ one_entity.names.camel_case.singular }}Relations = relations({{ one_entity.names.camel_case.singular }}, ({ many }) => ({ {{ many_entity.names.camel_case.plural }}: many({{ many_entity.names.camel_case.singular }}) }));"
+        ]
+      }
+    }
+  },
+  "plugins": {
+    "custom_functions": [],
+    "filters": [],
+    "tests": []
+  },
+  "validation": {
+    "required_templates": [
+      "src/drizzle/schema_entity.j2",
+      "src/app/api/entity_route.j2",
+      "src/app/api/entity_id_route.j2",
+      "src/app/dashboard/entity_page.j2",
+      "src/features/entity_config.j2",
+      "src/features/entity_types.j2",
+      "src/drizzle/schema_main.j2",
+      "src/lib/validations_main.j2",
+      "package.j2",
+      "compose.j2",
+      ".env.local.j2"
+    ],
+    "required_variables": ["EntityName", "entity_name", "table_name"],
+    "template_syntax": "jinja2",
+    "schema_version": "1.0"
+  },
+  "commands": {
+    "post_generation": [
+      "npm install",
+      "npm run db:generate"
+    ],
+    "development": [
+      "docker compose up -d"
+    ],
+    "production": [
+      "npm run build",
+      "npm start"
+    ],
+    "test": [
+      "npm run lint"
+    ]
+  }
+}

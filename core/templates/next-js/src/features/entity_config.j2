@@ -1,0 +1,80 @@
+import { z } from 'zod';
+import { createCrudPageConfig } from '@/lib/crud-config';
+import { commonColumns } from '@/lib/column-configs';
+import { commonFields } from '@/lib/field-configs';
+import { {{ EntityName }}WithStats } from './types';
+import { {{ entityName }}Schema } from '@/lib/validations';
+
+// {{ EntityName }}-specific column configuration
+const {{ entityName }}TableConfig = {
+  columns: [
+{% for column in table_columns %}
+    {% if column.type == 'text' %}
+    commonColumns.text('{{ column.key }}', '{{ column.header }}'),
+    {% elif column.type == 'number' %}
+    commonColumns.number('{{ column.key }}', '{{ column.header }}'),
+    {% elif column.type == 'boolean' %}
+    commonColumns.boolean('{{ column.key }}', '{{ column.header }}'),
+    {% elif column.type == 'date' %}
+    commonColumns.{% if column.key == 'createdAt' %}createdAt(){% else %}date('{{ column.key }}', '{{ column.header }}'){% endif %},
+    {% elif column.type == 'badge' %}
+    {
+      key: '{{ column.key }}' as keyof {{ EntityName }}WithStats,
+      header: '{{ column.header }}',
+      type: 'badge' as const,
+    },
+    {% else %}
+    commonColumns.text('{{ column.key }}', '{{ column.header }}'),
+    {% endif %}
+{% endfor %}
+  ],
+  searchKey: '{% for column in table_columns %}{% if column.type == 'text' %}{{ column.key }}{% endif %}{% endfor %}' as keyof {{ EntityName }}WithStats,
+  searchPlaceholder: 'Search {{ entityNamePlural }}...',
+  entityName: '{{ entityName }}',
+};
+
+// {{ EntityName }} form configuration
+const {{ entityName }}FormConfig = {
+  fields: [
+{% for field in form_fields %}
+    {% if field.type == 'text' %}
+    commonFields.text('{{ field.name }}', '{{ field.label }}'),
+    {% elif field.type == 'number' %}
+    commonFields.number('{{ field.name }}', '{{ field.label }}'),
+    {% elif field.type == 'checkbox' %}
+    commonFields.checkbox('{{ field.name }}', '{{ field.label }}'),
+    {% elif field.type == 'date' %}
+    commonFields.date('{{ field.name }}', '{{ field.label }}'),
+    {% elif field.type == 'select' %}
+    commonFields.select('{{ field.name }}', '{{ field.label }}', [
+      // Add your options here
+    ]),
+    {% else %}
+    commonFields.text('{{ field.name }}', '{{ field.label }}'),
+    {% endif %}
+{% endfor %}
+  ],
+  schema: {{ entityName }}Schema,
+  entityName: '{{ EntityName }}',
+};
+
+// Complete {{ entityName }} CRUD configuration
+export const {{ entityName }}CrudConfig = createCrudPageConfig<{{ EntityName }}WithStats>({
+  entityName: '{{ EntityName }}',
+  entityNamePlural: '{{ EntityNamePlural }}',
+  description: 'Manage {{ entityNamePlural | lower }} and their information',
+  
+  crudConfig: {
+    entityName: '{{ entityName }}',
+    entityNamePlural: '{{ entityNamePlural }}',
+    apiEndpoint: '/api/{{ api_route }}',
+  },
+  
+  tableConfig: {{ entityName }}TableConfig,
+  formConfig: {{ entityName }}FormConfig,
+  
+  defaultFilters: {
+    limit: 10,
+    page: 1,
+  },
+});

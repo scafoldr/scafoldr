@@ -130,13 +130,8 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-sm text-slate-500 dark:text-slate-400">
-                Framework:
-              </span>
-              <FrameworkSelector 
-                value={selectedFramework} 
-                onValueChange={setSelectedFramework}
-              />
+              <span className="text-sm text-slate-500 dark:text-slate-400">Framework:</span>
+              <FrameworkSelector value={selectedFramework} onValueChange={setSelectedFramework} />
             </div>
           </motion.div>
 
@@ -180,10 +175,7 @@ export default function LandingPage() {
       </main>
 
       {/* Auth Coming Soon Modal */}
-      <AuthComingSoonModal
-        open={showAuthModal}
-        onOpenChange={setShowAuthModal}
-      />
+      <AuthComingSoonModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </div>
   );
 }

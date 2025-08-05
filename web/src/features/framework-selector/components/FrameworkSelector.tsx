@@ -2,7 +2,13 @@
 
 import * as React from 'react';
 import { useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { ComingSoonModal } from '@/components/coming-soon-modal';
 
 export interface Framework {
@@ -54,17 +60,19 @@ interface FrameworkSelectorProps {
 
 export function FrameworkSelector({ value, onValueChange, className }: FrameworkSelectorProps) {
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
-  const [selectedComingSoonFramework, setSelectedComingSoonFramework] = useState<Framework | null>(null);
-  
+  const [selectedComingSoonFramework, setSelectedComingSoonFramework] = useState<Framework | null>(
+    null
+  );
+
   const handleValueChange = (newValue: string) => {
-    const selectedFramework = frameworks.find(f => f.id === newValue);
-    
+    const selectedFramework = frameworks.find((f) => f.id === newValue);
+
     if (selectedFramework?.comingSoon) {
       setSelectedComingSoonFramework(selectedFramework);
       setShowComingSoonModal(true);
       return;
     }
-    
+
     onValueChange?.(newValue);
   };
 
@@ -73,19 +81,22 @@ export function FrameworkSelector({ value, onValueChange, className }: Framework
       case 'nextjs':
         return {
           featureName: 'Next.js Framework Support',
-          description: 'Full-stack Next.js application generation with TypeScript, API routes, and modern React patterns.',
+          description:
+            'Full-stack Next.js application generation with TypeScript, API routes, and modern React patterns.',
           issueLink: 'https://github.com/scafoldr/scafoldr/issues/64'
         };
       case 'php-laravel':
         return {
           featureName: 'PHP Laravel Framework Support',
-          description: 'PHP Laravel application generation with Eloquent ORM, Artisan commands, and modern PHP patterns.',
+          description:
+            'PHP Laravel application generation with Eloquent ORM, Artisan commands, and modern PHP patterns.',
           issueLink: 'https://github.com/scafoldr/scafoldr/issues/66'
         };
       case 'python-fastapi':
         return {
           featureName: 'Python FastAPI Framework Support',
-          description: 'Modern Python FastAPI application generation with async support, Pydantic models, and automatic OpenAPI documentation.',
+          description:
+            'Modern Python FastAPI application generation with async support, Pydantic models, and automatic OpenAPI documentation.',
           issueLink: 'https://github.com/scafoldr/scafoldr/issues/65'
         };
       default:
@@ -97,7 +108,9 @@ export function FrameworkSelector({ value, onValueChange, className }: Framework
     }
   };
 
-  const modalContent = selectedComingSoonFramework ? getFrameworkModalContent(selectedComingSoonFramework) : null;
+  const modalContent = selectedComingSoonFramework
+    ? getFrameworkModalContent(selectedComingSoonFramework)
+    : null;
 
   return (
     <>

@@ -36,9 +36,10 @@ export function ChatCodeGenerationMessage({
   const [isGenerating, setIsGenerating] = useState(true);
   const [generatedFiles, setGeneratedFiles] = useState<FileMap | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
-  
+
   // Generate dynamic title if not provided
-  const displayTitle = title || `I've generated your ${getFrameworkDisplayName(selectedFramework)} application:`;
+  const displayTitle =
+    title || `I've generated your ${getFrameworkDisplayName(selectedFramework)} application:`;
 
   // Automatically trigger code generation when component mounts
   useEffect(() => {
@@ -138,7 +139,9 @@ export function ChatCodeGenerationMessage({
             <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center">
               <Code className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
-            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{displayTitle}</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              {displayTitle}
+            </span>
           </div>
 
           {/* Code Generation Content */}

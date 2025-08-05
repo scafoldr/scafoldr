@@ -9,7 +9,12 @@ interface ChatHistoryProps {
   onViewDB?: (dbmlCode: string) => void;
 }
 
-export function ChatHistory({ messages, selectedFramework, onViewCode, onViewDB }: ChatHistoryProps) {
+export function ChatHistory({
+  messages,
+  selectedFramework,
+  onViewCode,
+  onViewDB
+}: ChatHistoryProps) {
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">

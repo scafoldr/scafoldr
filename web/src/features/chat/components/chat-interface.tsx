@@ -90,7 +90,12 @@ export function ChatInterface({
       </div>
 
       {/* Messages */}
-      <ChatHistory messages={messages} selectedFramework={selectedFramework} onViewCode={onViewCode} onViewDB={onViewDB} />
+      <ChatHistory
+        messages={messages}
+        selectedFramework={selectedFramework}
+        onViewCode={onViewCode}
+        onViewDB={onViewDB}
+      />
 
       {/* Error Display */}
       {error && (

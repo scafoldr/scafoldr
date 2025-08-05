@@ -43,15 +43,15 @@ export default function AppPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const promptParam = urlParams.get('prompt');
     const frameworkParam = urlParams.get('framework');
-    
+
     if (promptParam) {
       setInitialPrompt(decodeURIComponent(promptParam));
     }
-    
+
     if (frameworkParam) {
       setSelectedFramework(frameworkParam);
     }
-    
+
     // Clean up URL after extracting parameters
     if (promptParam || frameworkParam) {
       window.history.replaceState({}, '', window.location.pathname);
@@ -91,13 +91,13 @@ export default function AppPage() {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      
+
       // Check if there are files to export
       if (!generatedFiles || Object.keys(generatedFiles).length === 0) {
         alert('No files to export. Please generate some code first by chatting with the AI.');
         return;
       }
-      
+
       await downloadProjectAsZip(generatedFiles, currentProject);
     } catch (error) {
       console.error('Export failed:', error);

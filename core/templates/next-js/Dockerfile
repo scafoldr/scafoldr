@@ -22,11 +22,20 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Development image
 FROM base AS app_dev
 
+# Copy package files for npm install
+COPY --link package.json package-lock.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code (for development, volumes will override this)
+COPY --link . .
+
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=localhost
 
-CMD ["sh", "-c", "npm install; npm run dev"]
+CMD ["npm", "run", "dev"]
 
 
 FROM base AS node_builder

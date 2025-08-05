@@ -114,7 +114,7 @@
   "variables": {
     "global": {
       "project_name": "{{ schema.project_name }}",
-      "database_name": "{{ schema.database_schema.name | default('app_db') }}",
+      "database_name": "{{ database_name | default('app_db') }}",
       "package_name": "{{ schema.project_name | lower | replace('_', '-') }}",
       "next_version": "15.4.1",
       "react_version": "19.1.0"

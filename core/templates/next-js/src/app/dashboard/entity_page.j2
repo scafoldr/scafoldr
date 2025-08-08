@@ -1,0 +1,8 @@
+"use client";
+
+import { CrudPage } from '@/components/crud-page';
+import { {{ entityName }}CrudConfig } from '@/features/{{ feature_path }}/config';
+
+export default function {{ EntityNamePlural }}Page() {
+  return <CrudPage config={ {{ entityName }}CrudConfig } />;
+}

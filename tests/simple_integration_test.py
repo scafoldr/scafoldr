@@ -30,13 +30,14 @@ class SimpleIntegrationTest:
         self.logger = logging.getLogger(__name__)
         
         # Test configuration
-        self.templates = ['java_spring', 'node_express_js']
+        self.templates = ['java_spring', 'node_express_js', 'next-js-typescript']
         self.dbml_files = ['example.dbml', 'flowers.dbml']
         
         # Health check endpoints
         self.health_endpoints = {
             'java_spring': 'http://localhost:8080/actuator/health',
-            'node_express_js': 'http://localhost:3000/health'
+            'node_express_js': 'http://localhost:3000/health',
+            'next-js-typescript': 'http://localhost:3000/'
         }
 
     def read_dbml_file(self, dbml_file: str) -> str:
@@ -128,10 +129,33 @@ class SimpleIntegrationTest:
         for i in range(max_wait):
             try:
                 response = requests.get(health_url, timeout=5)
-                if response.status_code == 200:
-                    self.logger.info(f"Application is ready! (took {i+1} seconds)")
-                    return True
-            except requests.exceptions.RequestException:
+                
+                # Different success criteria for different templates
+                if template == 'next-js-typescript':
+                    # For Next.js, we expect the main page to load (200 status)
+                    # and contain typical Next.js content
+                    if response.status_code == 200:
+                        self.logger.info(f"Next.js application is ready! (took {i+1} seconds)")
+                        return True
+                elif template == 'java_spring':
+                    # Spring Boot health actuator returns JSON with status
+                    if response.status_code == 200:
+                        try:
+                            health_data = response.json()
+                            if health_data.get('status') == 'UP':
+                                self.logger.info(f"Spring Boot application is ready! (took {i+1} seconds)")
+                                return True
+                        except:
+                            pass
+                else:
+                    # Node.js and other templates
+                    if response.status_code == 200:
+                        self.logger.info(f"{template} application is ready! (took {i+1} seconds)")
+                        return True
+                        
+            except requests.exceptions.RequestException as e:
+                if i % 10 == 0:  # Log every 10 seconds
+                    self.logger.debug(f"Waiting for {template}... ({str(e)})")
                 pass
             
             time.sleep(1)

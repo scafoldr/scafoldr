@@ -8,6 +8,7 @@ from core.generators.configurable_generator import ConfigurableGenerator
 BACKEND_TO_TEMPLATE_DIR = {
     "nodejs-express-js": "node_express_js",
     "java-spring": "java_spring",
+    "next-js-typescript": "next-js",
 }
 
 def get_generator(backend_option: str) -> BaseGenerator:

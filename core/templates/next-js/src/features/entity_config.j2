@@ -1,0 +1,82 @@
+import { z } from 'zod';
+import { createCrudPageConfig } from '@/lib/crud-config';
+import { commonColumns } from '@/lib/column-configs';
+import { commonFields } from '@/lib/field-configs';
+import { {{ EntityName }}WithStats } from './types';
+import { {{ entityName }}Schema } from '@/lib/validations';
+
+// {{ EntityName }}-specific column configuration
+const {{ entityName }}TableConfig = {
+  columns: [
+{% for attr in entity.attributes %}
+  {% if not attr.pk or attr.names.snake_case.singular == 'id' %}
+    {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
+    commonColumns.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
+    commonColumns.number('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'bool' in attr.type.lower() %}
+    commonColumns.boolean('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
+      {% if attr.names.snake_case.singular == 'created_at' %}
+    commonColumns.createdAt(),
+      {% elif attr.names.snake_case.singular == 'updated_at' %}
+    commonColumns.updatedAt(),
+      {% else %}
+    commonColumns.date('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+      {% endif %}
+    {% else %}
+    commonColumns.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% endif %}
+  {% endif %}
+{% endfor %}
+    // Add relationship count columns here if needed
+    // commonColumns.number('relatedEntityCount', 'Related Entity Count'),
+  ],
+  searchKey: {% set search_key = 'id' %}{% for attr in entity.attributes %}{% if ('varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower()) and search_key == 'id' %}{% set search_key = attr.names.camel_case.singular %}{% endif %}{% endfor %}'{{ search_key }}' as keyof {{ EntityName }}WithStats,
+  searchPlaceholder: 'Search {{ entityNamePlural }}...',
+  entityName: '{{ entityName }}',
+};
+
+// {{ EntityName }} form configuration
+const {{ entityName }}FormConfig = {
+  fields: [
+{% for attr in entity.attributes %}
+  {% if not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at'] %}
+    {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
+    commonFields.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
+    commonFields.number('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'bool' in attr.type.lower() %}
+    commonFields.checkbox('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
+    commonFields.date('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% else %}
+    commonFields.text('{{ attr.names.camel_case.singular }}', '{{ attr.names.snake_case.singular | replace('_', ' ') | title }}'),
+    {% endif %}
+  {% endif %}
+{% endfor %}
+  ],
+  schema: {{ entityName }}Schema,
+  entityName: '{{ EntityName }}',
+};
+
+// Complete {{ entityName }} CRUD configuration
+export const {{ entityName }}CrudConfig = createCrudPageConfig<{{ EntityName }}WithStats>({
+  entityName: '{{ EntityName }}',
+  entityNamePlural: '{{ EntityNamePlural }}',
+  description: 'Manage {{ entityNamePlural | lower }} and their information',
+  
+  crudConfig: {
+    entityName: '{{ entityName }}',
+    entityNamePlural: '{{ entityNamePlural }}',
+    apiEndpoint: '/api/{{ api_route }}',
+  },
+  
+  tableConfig: {{ entityName }}TableConfig,
+  formConfig: {{ entityName }}FormConfig,
+  
+  defaultFilters: {
+    limit: 10,
+    page: 1,
+  },
+});

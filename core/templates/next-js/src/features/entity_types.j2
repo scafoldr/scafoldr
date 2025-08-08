@@ -1,0 +1,37 @@
+import { {{ EntityName }}, New{{ EntityName }} } from '@/drizzle/schema';
+
+export type { {{ EntityName }}, New{{ EntityName }} };
+
+// Extended type with additional stats or computed fields
+export interface {{ EntityName }}WithStats extends {{ EntityName }} {
+  // Add computed fields such as relationship counts here
+  // Example: relatedEntityCount?: number;
+}
+
+// Response type for paginated {{ entityNamePlural }} list
+export interface {{ EntityNamePlural }}Response {
+  {{ entityNamePlural }}: {{ EntityName }}WithStats[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// Filter type for {{ entityNamePlural }} queries
+export interface {{ EntityName }}Filters {
+  query?: string;
+{% for attr in entity.attributes %}
+  {% if not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at'] %}
+    {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
+  {{ attr.names.camel_case.singular }}?: string;
+    {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
+  {{ attr.names.camel_case.singular }}?: number;
+    {% elif 'bool' in attr.type.lower() %}
+  {{ attr.names.camel_case.singular }}?: boolean;
+    {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
+  {{ attr.names.camel_case.singular }}?: Date | string;
+    {% endif %}
+  {% endif %}
+{% endfor %}
+  page?: number;
+  limit?: number;
+}

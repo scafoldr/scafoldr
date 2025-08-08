@@ -10,6 +10,7 @@ app = typer.Typer()
 BACKEND_OPTIONS = [
     {"name": "Node.js Express (JavaScript)", "value": "nodejs-express-js"},
     {"name": "Java Spring", "value": "java-spring"},
+    {"name": "Next.js TypeScript", "value": "next-js-typescript"},
 ]
 
 # TODO: Need to implement these features

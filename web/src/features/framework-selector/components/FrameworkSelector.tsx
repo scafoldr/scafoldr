@@ -33,10 +33,9 @@ const frameworks: Framework[] = [
     icon: '☕'
   },
   {
-    id: 'nextjs',
-    name: 'Next.js',
-    icon: '⚫',
-    comingSoon: true
+    id: 'next-js-typescript',
+    name: 'Next.js + TypeScript',
+    icon: '⚫'
   },
   {
     id: 'php-laravel',
@@ -78,13 +77,6 @@ export function FrameworkSelector({ value, onValueChange, className }: Framework
 
   const getFrameworkModalContent = (framework: Framework) => {
     switch (framework.id) {
-      case 'nextjs':
-        return {
-          featureName: 'Next.js Framework Support',
-          description:
-            'Full-stack Next.js application generation with TypeScript, API routes, and modern React patterns.',
-          issueLink: 'https://github.com/scafoldr/scafoldr/issues/64'
-        };
       case 'php-laravel':
         return {
           featureName: 'PHP Laravel Framework Support',

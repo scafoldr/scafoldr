@@ -34,7 +34,7 @@ const frameworks: Framework[] = [
   },
   {
     id: 'next-js-typescript',
-    name: 'Next.js + TypeScript',
+    name: 'Next.js + Drizzle',
     icon: '⚫'
   },
   {

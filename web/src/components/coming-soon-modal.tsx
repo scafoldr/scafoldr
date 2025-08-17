@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Construction, Star, ExternalLink, Heart, Code } from 'lucide-react';
+import { Construction, Star, ExternalLink, Heart, Eye, ThumbsUp } from 'lucide-react';
 
 export interface ComingSoonModalProps {
   /** Whether the modal is open */
@@ -52,9 +52,9 @@ export function ComingSoonModal({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
             <Construction className="h-8 w-8 text-orange-600 dark:text-orange-400" />
           </div>
-          <DialogTitle className="text-xl font-semibold">{finalTitle}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-center">{finalTitle}</DialogTitle>
           <DialogDescription className="text-center">
-            This feature is currently under development and will be available soon.
+            This feature is planned for a future release. We'd love to hear from you about it!
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +65,7 @@ export function ComingSoonModal({
               variant="outline"
               className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800">
               <Construction className="w-3 h-3 mr-1" />
-              In Development
+              Planned
             </Badge>
           </div>
 
@@ -79,18 +79,18 @@ export function ComingSoonModal({
           {/* Call to Action */}
           <div className="text-center space-y-3">
             <p className="text-sm text-muted-foreground">
-              Want to help us build this feature faster?
+              Want to see this feature prioritized? You can help shape our roadmap!
             </p>
 
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              {/* Contribute Button */}
+              {/* See Issue Button */}
               <Button
                 variant="default"
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => window.open(finalIssueLink, '_blank')}>
-                <Code className="w-4 h-4 mr-2" />
-                Contribute
+                <Eye className="w-4 h-4 mr-2" />
+                See Issue
                 <ExternalLink className="w-3 h-3 ml-1" />
               </Button>
 
@@ -106,8 +106,8 @@ export function ComingSoonModal({
           {/* Support Message */}
           <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-800">
             <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-              <Heart className="w-3 h-3 text-red-500" />
-              Support us by contributing or starring our repository
+              <ThumbsUp className="w-3 h-3 text-blue-500" />
+              Like the issue to help us prioritize this feature
             </p>
           </div>
         </div>

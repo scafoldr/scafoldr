@@ -1,7 +1,6 @@
 export async function POST(req: Request) {
   const { userInput, conversationId } = await req.json();
   const externalUrl = `${process.env.CORE_API_BASE_URL}/generate-dbml-chat`;
-
   try {
     const res = await fetch(externalUrl, {
       method: 'POST',
@@ -23,6 +22,7 @@ export async function POST(req: Request) {
 
     return Response.json(responseData);
   } catch (error) {
+    console.error('Error in chat route:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }

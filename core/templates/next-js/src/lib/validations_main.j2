@@ -1,22 +1,22 @@
 import { z } from 'zod';
 
-{% for entity in schemas %}
-// {{ entity.EntityName }} validation schemas
-export const {{ entity.schema_name }} = z.object({
-{% for attr in schema.entities[loop.index0].attributes %}
+{% for entity in schema.backend_schema.entities %}
+// {{ entity.names.pascal_case.singular }} validation schemas
+export const {{ entity.names.camel_case.singular }}Schema = z.object({
+{% for attr in entity.attributes %}
   {% if not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at'] %}
   {% set field_name = attr.names.camel_case.singular %}
-  {% if attr.type.lower().contains('varchar') or attr.type.lower().contains('char') or attr.type.lower().contains('text') %}
+  {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
   {{ field_name }}: z.string(){% if attr.not_null %}.min(1, '{{ attr.names.title_case.singular }} is required'){% endif %}{% if attr.length %}.max({{ attr.length }}, '{{ attr.names.title_case.singular }} too long'){% endif %},
-  {% elif attr.type.lower().contains('int') or attr.type.lower().contains('serial') %}
+  {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
   {{ field_name }}: z.number().int(){% if attr.not_null %}.positive('{{ attr.names.title_case.singular }} must be a positive integer'){% endif %},
-  {% elif attr.type.lower().contains('decimal') or attr.type.lower().contains('float') or attr.type.lower().contains('double') %}
+  {% elif 'decimal' in attr.type.lower() or 'float' in attr.type.lower() or 'double' in attr.type.lower() %}
   {{ field_name }}: z.number(){% if attr.not_null %}.positive('{{ attr.names.title_case.singular }} must be a positive number'){% endif %},
-  {% elif attr.type.lower().contains('bool') %}
+  {% elif 'bool' in attr.type.lower() %}
   {{ field_name }}: z.boolean(),
-  {% elif attr.type.lower().contains('date') or attr.type.lower().contains('timestamp') %}
+  {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
   {{ field_name }}: z.date(){% if not attr.not_null %}.optional(){% endif %},
-  {% elif attr.type.lower().contains('json') %}
+  {% elif 'json' in attr.type.lower() %}
   {{ field_name }}: z.any(){% if not attr.not_null %}.optional(){% endif %},
   {% else %}
   {{ field_name }}: z.string(){% if attr.not_null %}.min(1, '{{ attr.names.title_case.singular }} is required'){% endif %},
@@ -25,7 +25,7 @@ export const {{ entity.schema_name }} = z.object({
 {% endfor %}
 });
 
-export const update{{ entity.EntityName }}Schema = {{ entity.schema_name }}.partial();
+export const update{{ entity.names.pascal_case.singular }}Schema = {{ entity.names.camel_case.singular }}Schema.partial();
 
 {% endfor %}
 
@@ -36,17 +36,17 @@ export const searchSchema = z.object({
   limit: z.number().int().positive().max(100).default(10),
 });
 
-{% for entity in schemas %}
-export const {{ entity.schema_name | replace('Schema', 'FilterSchema') }} = searchSchema.extend({
+{% for entity in schema.backend_schema.entities %}
+export const {{ entity.names.camel_case.singular }}FilterSchema = searchSchema.extend({
   // Add entity-specific filters here
 });
 
 {% endfor %}
 
 // Type exports
-{% for entity in schemas %}
-export type {{ entity.EntityName }}Input = z.infer<typeof {{ entity.schema_name }}>;
-export type Update{{ entity.EntityName }}Input = z.infer<typeof update{{ entity.EntityName }}Schema>;
-export type {{ entity.EntityName }}FilterInput = z.infer<typeof {{ entity.schema_name | replace('Schema', 'FilterSchema') }}>;
+{% for entity in schema.backend_schema.entities %}
+export type {{ entity.names.pascal_case.singular }}Input = z.infer<typeof {{ entity.names.camel_case.singular }}Schema>;
+export type Update{{ entity.names.pascal_case.singular }}Input = z.infer<typeof update{{ entity.names.pascal_case.singular }}Schema>;
+export type {{ entity.names.pascal_case.singular }}FilterInput = z.infer<typeof {{ entity.names.camel_case.singular }}FilterSchema>;
 {% endfor %}
 export type SearchInput = z.infer<typeof searchSchema>;

@@ -14,19 +14,19 @@ NC='\033[0m' # No Color
 
 # Function to print colored output
 print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}ℹ️  [INFO]${NC} $1"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}✅ [SUCCESS]${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}⚠️  [WARNING]${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}❌ [ERROR]${NC} $1"
 }
 
 # Function to show usage
@@ -46,11 +46,35 @@ This script will:
 7. Clean up and repeat for next combination
 
 OPTIONS:
-    -h, --help     Show this help message
+    -h, --help                      Show this help message
+    -f, --framework FRAMEWORK       Test only specific framework (can be used multiple times)
+    -d, --dbml DBML_FILE            Test only specific DBML file (can be used multiple times)
+    --api-url URL                   Custom API URL (default: http://localhost:8000)
+    --no-color                      Disable colored output
+    --list-frameworks               List available frameworks and exit
+    -v, --verbose                   Enable verbose output
 
 EXAMPLES:
     # Run all tests
     $0
+
+    # Test only Java Spring Boot
+    $0 --framework java_spring
+
+    # Test multiple specific frameworks
+    $0 --framework java_spring --framework node_express_js
+
+    # Test only with example.dbml
+    $0 --dbml example.dbml
+
+    # Test Java Spring with example.dbml only
+    $0 --framework java_spring --dbml example.dbml
+
+    # List available frameworks
+    $0 --list-frameworks
+
+    # Disable colors
+    $0 --no-color
 
 PREREQUISITES:
     - Scafoldr API server running at http://localhost:8000
@@ -103,12 +127,51 @@ check_prerequisites() {
     print_success "All prerequisites are available"
 }
 
+# Initialize variables for storing arguments to pass to Python script
+PYTHON_ARGS=()
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
             show_usage
             exit 0
+            ;;
+        -f|--framework)
+            if [[ -z "$2" || "$2" == -* ]]; then
+                print_error "Framework argument requires a value"
+                exit 1
+            fi
+            PYTHON_ARGS+=("--framework" "$2")
+            shift 2
+            ;;
+        -d|--dbml)
+            if [[ -z "$2" || "$2" == -* ]]; then
+                print_error "DBML argument requires a value"
+                exit 1
+            fi
+            PYTHON_ARGS+=("--dbml" "$2")
+            shift 2
+            ;;
+        --api-url)
+            if [[ -z "$2" || "$2" == -* ]]; then
+                print_error "API URL argument requires a value"
+                exit 1
+            fi
+            PYTHON_ARGS+=("--api-url" "$2")
+            shift 2
+            ;;
+        --no-color)
+            PYTHON_ARGS+=("--no-color")
+            shift
+            ;;
+        --list-frameworks)
+            PYTHON_ARGS+=("--list-frameworks")
+            shift
+            ;;
+        -v|--verbose)
+            PYTHON_ARGS+=("--verbose")
+            shift
             ;;
         *)
             print_error "Unknown option: $1"
@@ -130,9 +193,12 @@ main() {
     # Get script directory
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
-    # Run the Python test script
+    # Run the Python test script with arguments
     print_info "Running integration tests..."
-    python3 "$SCRIPT_DIR/simple_integration_test.py"
+    if [[ ${#PYTHON_ARGS[@]} -gt 0 ]]; then
+        print_info "Arguments: ${PYTHON_ARGS[*]}"
+    fi
+    python3 "$SCRIPT_DIR/simple_integration_test.py" "${PYTHON_ARGS[@]}"
     
     if [ $? -eq 0 ]; then
         echo

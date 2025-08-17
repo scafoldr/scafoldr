@@ -1,0 +1,88 @@
+import { pgTable, serial, varchar, text, integer, timestamp, primaryKey, decimal } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+
+{% for entity in schema.backend_schema.entities %}
+{% set has_pk = entity.attributes | selectattr('pk') | list | length > 0 %}
+export const {{ entity.names.snake_case.plural }} = pgTable('{{ entity.names.snake_case.plural }}', {
+{% if not has_pk %}
+  id: serial('id').primaryKey(),
+{% endif %}
+{% for attr in entity.attributes %}
+  {{ attr.names.camel_case.singular }}: {% if attr.type.lower() == 'serial' %}serial('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower() == 'bigserial' %}bigserial('{{ attr.names.snake_case.singular }}'){% elif 'int' in attr.type.lower() and 'bigint' not in attr.type.lower() %}integer('{{ attr.names.snake_case.singular }}'){% elif 'bigint' in attr.type.lower() %}bigint('{{ attr.names.snake_case.singular }}'){% elif 'varchar' in attr.type.lower() or 'char' in attr.type.lower() %}varchar('{{ attr.names.snake_case.singular }}', { length: 255 }){% elif 'text' in attr.type.lower() %}text('{{ attr.names.snake_case.singular }}'){% elif 'bool' in attr.type.lower() %}boolean('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower() == 'date' %}date('{{ attr.names.snake_case.singular }}'){% elif 'timestamp' in attr.type.lower() or 'datetime' in attr.type.lower() %}timestamp('{{ attr.names.snake_case.singular }}'){% elif 'decimal' in attr.type.lower() or 'numeric' in attr.type.lower() %}decimal('{{ attr.names.snake_case.singular }}'){% elif 'float' in attr.type.lower() %}real('{{ attr.names.snake_case.singular }}'){% elif 'double' in attr.type.lower() %}doublePrecision('{{ attr.names.snake_case.singular }}'){% elif 'json' in attr.type.lower() and 'jsonb' not in attr.type.lower() %}json('{{ attr.names.snake_case.singular }}'){% elif 'jsonb' in attr.type.lower() %}jsonb('{{ attr.names.snake_case.singular }}'){% else %}varchar('{{ attr.names.snake_case.singular }}'){% endif %}{% if attr.pk %}.primaryKey(){% endif %}{% if attr.not_null %}.notNull(){% endif %}{% if attr.unique %}.unique(){% endif %}{% for ref in schema.database_schema.refs %}{% if (ref.col1.table == entity.names.snake_case.singular or ref.col1.table == entity.names.snake_case.plural) and ref.col1.name == attr.names.snake_case.singular and ref.type == '>' %}.references(() => {{ ref.col2.table }}.{{ ref.col2.name }}, { onDelete: 'cascade' }){% elif (ref.col2.table == entity.names.snake_case.singular or ref.col2.table == entity.names.snake_case.plural) and ref.col2.name == attr.names.snake_case.singular and ref.type == '<' %}.references(() => {{ ref.col1.table }}.{{ ref.col1.name }}, { onDelete: 'cascade' }){% endif %}{% endfor %}{% if attr.default %}.default({{ attr.default }}){% endif %}{% if attr.names.snake_case.singular == 'created_at' or attr.names.snake_case.singular == 'updated_at' %}.defaultNow(){% endif %},
+{% endfor %}
+}{% if entity.attributes | selectattr('pk') | list | length > 1 %}, (table) => ({
+  pk: primaryKey({ columns: [{% for attr in entity.attributes | selectattr('pk') %}table.{{ attr.names.camel_case.singular }}{% if not loop.last %}, {% endif %}{% endfor %}] }),
+}){% endif %});
+
+{% endfor %}
+
+// Relations
+{% for entity in schema.backend_schema.entities %}
+{% set entity_plural = entity.names.snake_case.plural %}
+{% set one_relations = [] %}
+{% set many_relations = [] %}
+{% for ref in schema.database_schema.refs %}
+  {% if ref.type == '>' and ref.col1.table == entity.names.snake_case.plural %}
+    {{ one_relations.append(ref) or "" }}
+  {% elif ref.type == '>' and ref.col2.table == entity.names.snake_case.plural %}
+    {{ many_relations.append(ref) or "" }}
+  {% elif ref.type == '<' and ref.col1.table == entity.names.snake_case.plural %}
+    {{ many_relations.append(ref) or "" }}
+  {% elif ref.type == '<' and ref.col2.table == entity.names.snake_case.plural %}
+    {{ one_relations.append(ref) or "" }}
+  {% endif %}
+{% endfor %}
+{% if one_relations or many_relations %}
+{% set destructure = [] %}
+{% if one_relations %}{{ destructure.append('one') or "" }}{% endif %}
+{% if many_relations %}{{ destructure.append('many') or "" }}{% endif %}
+export const {{ entity.names.camel_case.plural }}Relations = relations({{ entity_plural }}, ({ {{ destructure | join(', ') }} }) => ({
+{% for ref in schema.database_schema.refs %}
+  {% if ref.type == '>' and ref.col1.table == entity.names.snake_case.plural %}
+  {% set field_name = ref.col1.name.replace('_id', '').replace('_', '') | title | lower %}
+  {{ field_name }}: one({{ ref.col2.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col1.name | replace('_', '') | replace('userid', 'userId') | replace('categoryid', 'categoryId') | replace('orderid', 'orderId') | replace('productid', 'productId') | replace('followinguserid', 'followingUserId') | replace('followeduserid', 'followedUserId') }}],
+    references: [{{ ref.col2.table }}.id],
+  }),
+  {% elif ref.type == '>' and ref.col2.table == entity.names.snake_case.plural %}
+  {{ ref.col1.table }}: many({{ ref.col1.table }}),
+  {% elif ref.type == '<' and ref.col1.table == entity.names.snake_case.plural %}
+  {% if ref.col2.name == 'following_user_id' %}
+  following: many({{ ref.col2.table }}, { relationName: 'following' }),
+  {% elif ref.col2.name == 'followed_user_id' %}
+  followers: many({{ ref.col2.table }}, { relationName: 'followers' }),
+  {% else %}
+  {{ ref.col2.table }}: many({{ ref.col2.table }}),
+  {% endif %}
+  {% elif ref.type == '<' and ref.col2.table == entity.names.snake_case.plural %}
+  {% if ref.col2.name == 'following_user_id' %}
+  followingUser: one({{ ref.col1.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col2.name | replace('_', '') | replace('followinguserid', 'followingUserId') }}],
+    references: [{{ ref.col1.table }}.id],
+    relationName: 'following',
+  }),
+  {% elif ref.col2.name == 'followed_user_id' %}
+  followedUser: one({{ ref.col1.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col2.name | replace('_', '') | replace('followeduserid', 'followedUserId') }}],
+    references: [{{ ref.col1.table }}.id],
+    relationName: 'followers',
+  }),
+  {% else %}
+  {% set field_name = ref.col2.name.replace('_id', '').replace('_', '') | title | lower %}
+  {{ field_name }}: one({{ ref.col1.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col2.name | replace('_', '') | replace('userid', 'userId') | replace('categoryid', 'categoryId') | replace('orderid', 'orderId') | replace('productid', 'productId') }}],
+    references: [{{ ref.col1.table }}.id],
+  }),
+  {% endif %}
+  {% endif %}
+{% endfor %}
+}));
+{% endif %}
+
+{% endfor %}
+
+// Types
+{% for entity in schema.backend_schema.entities %}
+export type {{ entity.names.pascal_case.singular }} = typeof {{ entity.names.snake_case.plural }}.$inferSelect;
+export type New{{ entity.names.pascal_case.singular }} = typeof {{ entity.names.snake_case.plural }}.$inferInsert;
+{% endfor %}

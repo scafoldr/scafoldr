@@ -1,0 +1,16 @@
+// Generated schema file
+import { pgTable, serial, varchar, text, integer } from 'drizzle-orm/pg-core';
+
+{% for entity in schema.backend_schema.entities %}
+export const {{ entity.names.snake_case.singular }} = pgTable('{{ entity.names.snake_case.singular }}', {
+{% for attr in entity.attributes %}
+  {{ attr.names.snake_case.singular }}: {% if 'int' in attr.type.lower() %}integer('{{ attr.names.snake_case.singular }}'){% else %}varchar('{{ attr.names.snake_case.singular }}'){% endif %}{% if attr.pk %}.primaryKey(){% endif %}{% if attr.not_null %}.notNull(){% endif %}{% if not loop.last %},{% endif %}
+{% endfor %}
+});
+
+{% endfor %}
+
+// Types
+{% for entity in schema.backend_schema.entities %}
+export type {{ entity.names.pascal_case.singular }} = typeof {{ entity.names.snake_case.singular }}.$inferSelect;
+{% endfor %}

@@ -1,0 +1,58 @@
+{
+  // ESLint Plugin Project Structure Configuration
+  // Equivalent to the original boundaries plugin rules
+  
+  "modules": [
+    {
+      "name": "shared-components",
+      "pattern": "src/components/**/*",
+      "allowImportsFrom": ["shared-*"]
+    },
+    {
+      "name": "shared-data", 
+      "pattern": "src/data/**/*",
+      "allowImportsFrom": ["shared-*"]
+    },
+    {
+      "name": "shared-drizzle",
+      "pattern": "src/drizzle/**/*", 
+      "allowImportsFrom": ["shared-*"]
+    },
+    {
+      "name": "shared-hooks",
+      "pattern": "src/hooks/**/*",
+      "allowImportsFrom": ["shared-*"]
+    },
+    {
+      "name": "shared-lib",
+      "pattern": "src/lib/**/*",
+      "allowImportsFrom": ["shared-*"]
+    },
+    {
+      "name": "shared-server",
+      "pattern": "src/server/**/*",
+      "allowImportsFrom": ["shared-*"]
+    },
+    {
+      "name": "entity-{entityName}",
+      "pattern": "src/entities/{entityName}/**/*",
+      "allowImportsFrom": ["shared-*", "entity-{entityName}"]
+    },
+    {
+      "name": "app-layer",
+      "pattern": "src/app/**/*",
+      "allowImportsFrom": ["shared-*", "entity-*"],
+      "allowImportsFromPatterns": ["src/app/**/*.css"]
+    },
+    {
+      "name": "restricted-root",
+      "pattern": ["src/*", "src/tasks/**/*"],
+      "allowImportsFrom": ["shared-*", "entity-*"]
+    }
+  ],
+  
+  "settings": {
+    "checkCircularDependencies": true,
+    "checkUnusedDependencies": false
+  }
+}

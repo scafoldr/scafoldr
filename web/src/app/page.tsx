@@ -16,7 +16,7 @@ export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [selectedFramework, setSelectedFramework] = useState('nodejs-express-js');
+  const [selectedFramework, setSelectedFramework] = useState('next-js-typescript');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

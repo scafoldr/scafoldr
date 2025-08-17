@@ -1,0 +1,32 @@
+// Debug template to check what data is available
+// Entities count: {{ schema.backend_schema.entities | length }}
+// Refs count: {{ schema.database_schema.refs | length }}
+
+{% for entity in schema.backend_schema.entities %}
+// Entity: {{ entity.names.snake_case.singular }} (plural: {{ entity.names.snake_case.plural }})
+{% endfor %}
+
+{% for ref in schema.database_schema.refs %}
+// Ref: {{ ref.col1.table }}.{{ ref.col1.name }} {{ ref.type }} {{ ref.col2.table }}.{{ ref.col2.name }}
+{% endfor %}
+
+// Checking relation matching for each entity:
+{% for entity in schema.backend_schema.entities %}
+// Entity {{ entity.names.snake_case.plural }}:
+  {% for ref in schema.database_schema.refs %}
+    {% if ref.col1.table == entity.names.snake_case.singular or ref.col1.table == entity.names.snake_case.plural or ref.col2.table == entity.names.snake_case.singular or ref.col2.table == entity.names.snake_case.plural %}
+    // - Has relation: {{ ref.col1.table }}.{{ ref.col1.name }} {{ ref.type }} {{ ref.col2.table }}.{{ ref.col2.name }}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+import { pgTable, serial, varchar, text, integer } from 'drizzle-orm/pg-core';
+
+{% for entity in schema.backend_schema.entities %}
+export const {{ entity.names.snake_case.singular }} = pgTable('{{ entity.names.snake_case.singular }}', {
+{% for attr in entity.attributes %}
+  {{ attr.names.snake_case.singular }}: {% if 'int' in attr.type.lower() %}integer('{{ attr.names.snake_case.singular }}'){% else %}varchar('{{ attr.names.snake_case.singular }}'){% endif %}{% if attr.pk %}.primaryKey(){% endif %},
+{% endfor %}
+});
+
+{% endfor %}

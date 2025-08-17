@@ -6,6 +6,7 @@
   **Generate full-stack applications**
   
   [![Website](https://img.shields.io/static/v1?label=Website&message=scafoldr.com&color=blue)](https://scafoldr.com)
+  [![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/jZPTchaUFB)
   ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
   [![GitHub Stars](https://img.shields.io/github/stars/scafoldr/scafoldr?style=social)](https://github.com/scafoldr/scafoldr)
   
@@ -135,6 +136,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - **Website**: [scafoldr.com](https://scafoldr.com)
 - **Documentation**: [Coming Soon]
 - **Community**: [GitHub Discussions](https://github.com/scafoldr/scafoldr/discussions)
+- **Discord**: [Join our Discord](https://discord.gg/jZPTchaUFB)
 - **Issues**: [GitHub Issues](https://github.com/scafoldr/scafoldr/issues)
 
 ---

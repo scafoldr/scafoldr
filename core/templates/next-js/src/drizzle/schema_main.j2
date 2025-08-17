@@ -15,7 +15,24 @@ export const {{ entity.names.snake_case.plural }} = pgTable('{{ entity.names.sna
 // Relations
 {% for entity in schema.backend_schema.entities %}
 {% set entity_plural = entity.names.snake_case.plural %}
-export const {{ entity.names.camel_case.plural }}Relations = relations({{ entity_plural }}, ({ one, many }) => ({
+{% set one_relations = [] %}
+{% set many_relations = [] %}
+{% for ref in schema.database_schema.refs %}
+  {% if ref.type == '>' and ref.col1.table == entity.names.snake_case.plural %}
+    {{ one_relations.append(ref) or "" }}
+  {% elif ref.type == '>' and ref.col2.table == entity.names.snake_case.plural %}
+    {{ many_relations.append(ref) or "" }}
+  {% elif ref.type == '<' and ref.col1.table == entity.names.snake_case.plural %}
+    {{ many_relations.append(ref) or "" }}
+  {% elif ref.type == '<' and ref.col2.table == entity.names.snake_case.plural %}
+    {{ one_relations.append(ref) or "" }}
+  {% endif %}
+{% endfor %}
+{% if one_relations or many_relations %}
+{% set destructure = [] %}
+{% if one_relations %}{{ destructure.append('one') or "" }}{% endif %}
+{% if many_relations %}{{ destructure.append('many') or "" }}{% endif %}
+export const {{ entity.names.camel_case.plural }}Relations = relations({{ entity_plural }}, ({ {{ destructure | join(', ') }} }) => ({
 {% for ref in schema.database_schema.refs %}
   {% if ref.type == '>' and ref.col1.table == entity.names.snake_case.plural %}
   {% set field_name = ref.col1.name.replace('_id', '').replace('_', '') | title | lower %}
@@ -56,6 +73,7 @@ export const {{ entity.names.camel_case.plural }}Relations = relations({{ entity
   {% endif %}
 {% endfor %}
 }));
+{% endif %}
 
 {% endfor %}
 

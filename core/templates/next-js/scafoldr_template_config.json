@@ -161,15 +161,6 @@
         "variables": {}
       },
       {
-        "name": "api_routes_by_id",
-        "description": "Next.js API route handlers for single entity",
-        "template": "src/app/api/entity_id_route.j2",
-        "output_path": "src/app/api/{{ api_route }}/[id]/route.ts",
-        "context": "entity",
-        "enabled": true,
-        "variables": {}
-      },
-      {
         "name": "dashboard_pages",
         "description": "Dashboard pages for entity management",
         "template": "src/app/dashboard/entity_page.j2",
@@ -297,7 +288,6 @@
     "required_templates": [
       "src/drizzle/schema_entity.j2",
       "src/app/api/entity_route.j2",
-      "src/app/api/entity_id_route.j2",
       "src/app/dashboard/entity_page.j2",
       "src/features/entity_config.j2",
       "src/features/entity_types.j2",

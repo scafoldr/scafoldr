@@ -36,26 +36,43 @@ class ScafoldrSchemaMaker(ABC):
     def _create_names(self, original_name: str) -> Names:
         """Create Names object with all case variations"""
         snake_name = self._to_snake_case(original_name)
-        camel_name = self._to_camel_case(snake_name)
-        pascal_name = self._to_camel_case_capitalized(snake_name)
-        kebab_name = self._to_kebab_case(snake_name)
+        
+        # Get the singular form first - if input is plural, convert to singular
+        singular_noun = self.inflect_engine.singular_noun(snake_name)
+        if singular_noun:
+            # Input was plural, use the singular form
+            snake_singular = singular_noun
+        else:
+            # Input was already singular
+            snake_singular = snake_name
+        
+        # Generate all case variations from the singular form
+        camel_singular = self._to_camel_case(snake_singular)
+        pascal_singular = self._to_camel_case_capitalized(snake_singular)
+        kebab_singular = self._to_kebab_case(snake_singular)
+        
+        # Generate plural forms
+        snake_plural = self._pluralize(snake_singular)
+        camel_plural = self._to_camel_case(snake_plural)
+        pascal_plural = self._to_camel_case_capitalized(snake_plural)
+        kebab_plural = self._to_kebab_case(snake_plural)
         
         return Names(
             camel_case=NameVariations(
-                singular=camel_name,
-                plural=self._to_camel_case(self._pluralize(snake_name))
+                singular=camel_singular,
+                plural=camel_plural
             ),
             pascal_case=NameVariations(
-                singular=pascal_name,
-                plural=self._to_camel_case_capitalized(self._pluralize(snake_name))
+                singular=pascal_singular,
+                plural=pascal_plural
             ),
             kebab_case=NameVariations(
-                singular=kebab_name,
-                plural=self._to_kebab_case(self._pluralize(snake_name))
+                singular=kebab_singular,
+                plural=kebab_plural
             ),
             snake_case=NameVariations(
-                singular=snake_name,
-                plural=self._pluralize(snake_name)
+                singular=snake_singular,
+                plural=snake_plural
             )
         )
 

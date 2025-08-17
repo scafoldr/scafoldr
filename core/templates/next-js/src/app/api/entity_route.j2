@@ -1,6 +1,6 @@
-import { {{ entity_name }} } from '@/drizzle/schema';
+import { {{ entityNamePlural }} } from '@/drizzle/schema';
 import { db } from '@/lib/db';
 import { createRESTAPI } from '@/lib/rest-generator';
 
-const api = createRESTAPI({{ entity_name }}, db, '{{ entity_name }}');
+const api = createRESTAPI({{ entityNamePlural }}, db, '{{ entityNamePlural }}');
 export const { GET, POST, PUT, DELETE } = api;

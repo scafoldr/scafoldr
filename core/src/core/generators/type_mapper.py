@@ -66,13 +66,12 @@ class TypeMapper:
                 'not': lambda a: not a,
             }
             
+            # Handle .contains() method calls first (before other replacements)
+            condition = re.sub(r"\.contains\('([^']+)'\)", r".find('\1') != -1", condition)
+            
             # Replace common patterns for easier condition writing
             condition = condition.replace("type.lower()", f"'{type_lower}'")
             condition = condition.replace("type", f"'{sql_type}'")
-            
-            # Handle contains() function calls
-            if "contains(" in condition:
-                condition = re.sub(r"contains\('([^']+)'\)", rf"'{type_lower}'.find('\1') != -1", condition)
             
             # Evaluate the condition
             return eval(condition, {"__builtins__": {}}, context)

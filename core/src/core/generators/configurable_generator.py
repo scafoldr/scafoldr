@@ -180,8 +180,8 @@ class ConfigurableGenerator(BaseGenerator):
                 context["associations"] = associations
             
             # Add backward compatibility for relationships
-            if self.relationship_handler:
-                context["relationships"] = self.relationship_handler
+            # Always provide relationships, even if None, to avoid template errors
+            context["relationships"] = self.relationship_handler
             
             # Render template
             content = template.render(context)

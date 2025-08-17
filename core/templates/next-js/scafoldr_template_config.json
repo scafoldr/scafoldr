@@ -128,7 +128,7 @@
       "EntityNamePlural": "{{ entity.names.pascal_case.plural }}",
       "table_name": "{{ entity.names.snake_case.singular }}",
       "api_route": "{{ entity.names.snake_case.plural }}",
-      "feature_path": "{{ entity.names.snake_case.plural }}"
+      "entity_path": "{{ entity.names.snake_case.plural }}"
     },
     "computed": {}
   },
@@ -155,25 +155,25 @@
         "name": "dashboard_pages",
         "description": "Dashboard pages for entity management",
         "template": "src/app/dashboard/entity_page.j2",
-        "output_path": "src/app/dashboard/{{ feature_path }}/page.tsx",
+        "output_path": "src/app/dashboard/{{ entity_path }}/page.tsx",
         "context": "entity",
         "enabled": true,
         "variables": {}
       },
       {
-        "name": "feature_config",
-        "description": "Feature configuration for CRUD operations",
-        "template": "src/features/entity_config.j2",
-        "output_path": "src/features/{{ feature_path }}/config.ts",
+        "name": "entity_config",
+        "description": "Entity configuration for CRUD operations",
+        "template": "src/entities/entity_config.j2",
+        "output_path": "src/entities/{{ entity_path }}/config.ts",
         "context": "entity",
         "enabled": true,
         "variables": {}
       },
       {
-        "name": "feature_types",
-        "description": "TypeScript types for entity features",
-        "template": "src/features/entity_types.j2",
-        "output_path": "src/features/{{ feature_path }}/types.ts",
+        "name": "entity_types",
+        "description": "TypeScript types for entities",
+        "template": "src/entities/entity_types.j2",
+        "output_path": "src/entities/{{ entity_path }}/types.ts",
         "context": "entity",
         "enabled": true,
         "variables": {}
@@ -279,8 +279,8 @@
     "required_templates": [
       "src/app/api/entity_route.j2",
       "src/app/dashboard/entity_page.j2",
-      "src/features/entity_config.j2",
-      "src/features/entity_types.j2",
+      "src/entities/entity_config.j2",
+      "src/entities/entity_types.j2",
       "src/drizzle/schema_main.j2",
       "src/lib/validations_main.j2",
       "package.j2",

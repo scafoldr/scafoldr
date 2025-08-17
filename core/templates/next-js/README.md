@@ -9,16 +9,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ```
 App Layer (src/app/**)
     ↑ can import from
-Features Layer (src/features/**)
+Entities Layer (src/entities/**)
     ↑ can import from
 Shared Layer (src/components, src/lib, src/hooks, etc.)
 ```
 
 **Critical Rules:**
 - **Shared modules** → Can ONLY import from other shared modules
-- **Features** → Can ONLY import from shared modules + same feature
-- **App pages** → Can import from shared modules + any feature
-- **Features CANNOT import from other features** (strict isolation)
+- **Entities** → Can ONLY import from shared modules + same entity
+- **App pages** → Can import from shared modules + any entity
+- **Entities CANNOT import from other entities** (strict isolation)
 
 **ESLint will block any violations of these rules.**
 
@@ -30,10 +30,10 @@ src/
 │   ├── layout.tsx         # Root layout
 │   ├── page.tsx           # Home page
 │   └── globals.css        # Global styles
-├── features/              # 🧩 Feature modules (isolated)
-│   ├── products/          # Product feature
-│   ├── users/             # User management feature
-│   └── sales/             # Sales feature
+├── entities/              # 🧩 Entity modules (isolated)
+│   ├── products/          # Product entity
+│   ├── users/             # User management entity
+│   └── sales/             # Sales entity
 ├── components/            # 📦 Shared UI components
 ├── lib/                   # 📦 Shared utilities & configurations
 ├── hooks/                 # 📦 Shared React hooks
@@ -51,19 +51,19 @@ Our ESLint configuration enforces these architectural boundaries:
 - **Can import**: Only other shared modules
 - **Purpose**: Reusable utilities, components, and configurations
 
-### 🧩 Features Layer  
-- **Location**: `src/features/{featureName}/**/*`
-- **Can import**: Shared modules + same feature only
-- **Purpose**: Isolated business logic and feature-specific code
+### 🧩 Entities Layer  
+- **Location**: `src/entities/{entityName}/**/*`
+- **Can import**: Shared modules + same entity only
+- **Purpose**: Isolated business logic and entity-specific code
 
 ### 🎯 App Layer
 - **Location**: `src/app/**/*`
-- **Can import**: Shared modules, any feature, CSS files
+- **Can import**: Shared modules, any entity, CSS files
 - **Purpose**: Next.js pages, layouts, and routing
 
 ### 🚫 Restricted Files
 - **Location**: `src/*`, `src/tasks/**/*`
-- **Can import**: Shared modules and features
+- **Can import**: Shared modules and entities
 - **Purpose**: Root-level files and build scripts
 
 ## 🔧 ESLint Configuration

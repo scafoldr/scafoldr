@@ -34,20 +34,20 @@
       "allowImportsFrom": ["shared-*"]
     },
     {
-      "name": "feature-{featureName}",
-      "pattern": "src/features/{featureName}/**/*",
-      "allowImportsFrom": ["shared-*", "feature-{featureName}"]
+      "name": "entity-{entityName}",
+      "pattern": "src/entities/{entityName}/**/*",
+      "allowImportsFrom": ["shared-*", "entity-{entityName}"]
     },
     {
       "name": "app-layer",
       "pattern": "src/app/**/*",
-      "allowImportsFrom": ["shared-*", "feature-*"],
+      "allowImportsFrom": ["shared-*", "entity-*"],
       "allowImportsFromPatterns": ["src/app/**/*.css"]
     },
     {
       "name": "restricted-root",
       "pattern": ["src/*", "src/tasks/**/*"],
-      "allowImportsFrom": ["shared-*", "feature-*"]
+      "allowImportsFrom": ["shared-*", "entity-*"]
     }
   ],
   

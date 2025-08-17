@@ -50,7 +50,7 @@ Adding a new entity now requires only **3 simple steps**:
 
 ### **Step 1: Create Types**
 ```typescript
-// src/features/[entity]/types.ts
+// src/entities/[entity]/types.ts
 export interface MyEntity extends CrudEntity {
   name: string;
   status: string;
@@ -60,7 +60,7 @@ export interface MyEntity extends CrudEntity {
 
 ### **Step 2: Create Configuration**
 ```typescript
-// src/features/[entity]/config.ts
+// src/entities/[entity]/config.ts
 export const myEntityCrudConfig = createCrudPageConfig<MyEntity>({
   entityName: 'MyEntity',
   entityNamePlural: 'MyEntities',
@@ -100,7 +100,7 @@ export const myEntityCrudConfig = createCrudPageConfig<MyEntity>({
 ```typescript
 // src/app/dashboard/myentities/page.tsx
 import { CrudPage } from '@/components/crud-page';
-import { myEntityCrudConfig } from '@/features/myentities/config';
+import { myEntityCrudConfig } from '@/entities/myentities/config';
 
 export default function MyEntitiesPage() {
   return <CrudPage config={myEntityCrudConfig} />;
@@ -176,7 +176,7 @@ export default function UsersPage() {
 ### **After (5 lines)**
 ```typescript
 import { CrudPage } from '@/components/crud-page';
-import { userCrudConfig } from '@/features/users/config';
+import { userCrudConfig } from '@/entities/users/config';
 
 export default function UsersPage() {
   return <CrudPage config={userCrudConfig} />;

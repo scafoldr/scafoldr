@@ -143,15 +143,6 @@
     },
     "entity_based": [
       {
-        "name": "drizzle_schema",
-        "description": "Drizzle ORM table definitions",
-        "template": "src/drizzle/schema_entity.j2",
-        "output_path": "src/drizzle/tables/{{ entity_name }}.ts",
-        "context": "entity",
-        "enabled": true,
-        "variables": {}
-      },
-      {
         "name": "api_routes",
         "description": "Next.js API route handlers",
         "template": "src/app/api/entity_route.j2",
@@ -286,7 +277,6 @@
   },
   "validation": {
     "required_templates": [
-      "src/drizzle/schema_entity.j2",
       "src/app/api/entity_route.j2",
       "src/app/dashboard/entity_page.j2",
       "src/features/entity_config.j2",

@@ -42,12 +42,20 @@ def generate_backend_route(request: GenerateRequest):
         )
     except Exception as e:
         # Handle other unexpected errors
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"DETAILED ERROR in /generate endpoint:")
+        print(f"Exception type: {type(e).__name__}")
+        print(f"Exception message: {str(e)}")
+        print(f"Full traceback:\n{error_details}")
+        
         raise HTTPException(
             status_code=500,
             detail={
                 "error": "Code generation failed",
                 "message": str(e),
-                "type": "generation_error"
+                "type": "generation_error",
+                "traceback": error_details
             }
         )
 

@@ -13,6 +13,7 @@ import logging
 from typing import Dict, List
 
 from .framework_testers.base import FrameworkTester, FrameworkTesterFactory
+from .output_formatter import formatter, format_info, format_success, format_error, format_warning
 
 
 class IntegrationTestOrchestrator:
@@ -25,16 +26,24 @@ class IntegrationTestOrchestrator:
         self.output_dir = self.base_dir / "output"
         self.reports_dir = self.base_dir / "reports"
         
-        # Setup logging
+        # Ensure reports directory exists first
+        self.reports_dir.mkdir(exist_ok=True)
+        
+        # Setup basic logging (for file logs)
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s'
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            filename=str(self.reports_dir / "test_execution.log"),
+            filemode='a'
         )
         self.logger = logging.getLogger(__name__)
         
         # Test configuration
         self.templates = FrameworkTesterFactory.get_supported_frameworks()
         self.dbml_files = ['example.dbml', 'flowers.dbml']
+        
+        # Track timing
+        self.test_start_time = None
 
     def read_dbml_file(self, dbml_file: str) -> str:
         """Read DBML content from file."""
@@ -58,7 +67,9 @@ class IntegrationTestOrchestrator:
             "user_input": dbml_content
         }
         
+        print(format_info(f"Calling generate API for {template} with project name: {project_name}", 'api_call'))
         self.logger.info(f"Calling generate API for {template} with project name: {project_name}")
+        
         response = requests.post(api_url, json=payload, timeout=120)
         
         if response.status_code == 200:
@@ -80,11 +91,13 @@ class IntegrationTestOrchestrator:
             with open(full_path, 'w', encoding='utf-8') as f:
                 f.write(file_content)
         
+        print(format_info(f"Created {len(files)} files in output directory", 'files'))
         self.logger.info(f"Created {len(files)} files in {output_dir}")
 
     def run_docker_compose(self, project_dir: str) -> bool:
         """Run docker-compose up -d in the project directory."""
         try:
+            print(format_info("Running docker-compose up -d", 'docker'))
             self.logger.info("Running docker-compose up -d")
             
             # Change to project directory
@@ -101,9 +114,11 @@ class IntegrationTestOrchestrator:
                 )
                 
                 if result.returncode == 0:
+                    print(format_success("Docker compose started successfully", 'docker'))
                     self.logger.info("Docker compose started successfully")
                     return True
                 else:
+                    print(format_error(f"Docker compose failed: {result.stderr}", 'docker'))
                     self.logger.error(f"Docker compose failed: {result.stderr}")
                     return False
                     
@@ -111,9 +126,11 @@ class IntegrationTestOrchestrator:
                 os.chdir(original_cwd)
                 
         except subprocess.TimeoutExpired:
+            print(format_error("Docker compose timed out", 'docker'))
             self.logger.error("Docker compose timed out")
             return False
         except Exception as e:
+            print(format_error(f"Error running docker compose: {str(e)}", 'docker'))
             self.logger.error(f"Error running docker compose: {str(e)}")
             return False
 
@@ -123,6 +140,7 @@ class IntegrationTestOrchestrator:
         max_wait = framework_tester.get_docker_wait_time()
         framework_name = framework_tester.get_framework_name()
         
+        print(format_info(f"Waiting for {framework_name} application at {health_url}", 'health_check'))
         self.logger.info(f"Waiting for {framework_name} application at {health_url}")
         
         for i in range(max_wait):
@@ -130,6 +148,7 @@ class IntegrationTestOrchestrator:
                 response = requests.get(health_url, timeout=5)
                 
                 if framework_tester.check_application_ready(response):
+                    print(format_success(f"{framework_name} application is ready! (took {i+1} seconds)", 'health_check'))
                     self.logger.info(f"{framework_name} application is ready! (took {i+1} seconds)")
                     return True
                         
@@ -140,6 +159,7 @@ class IntegrationTestOrchestrator:
             
             time.sleep(1)
         
+        print(format_error(f"{framework_name} application did not become ready within {max_wait} seconds", 'health_check'))
         self.logger.error(f"{framework_name} application did not become ready within {max_wait} seconds")
         return False
 
@@ -156,17 +176,18 @@ class IntegrationTestOrchestrator:
                     text=True,
                     timeout=60
                 )
+                print(format_info("Docker compose stopped and cleaned up", 'cleanup'))
                 self.logger.info("Docker compose stopped and cleaned up")
             finally:
                 os.chdir(original_cwd)
                 
         except Exception as e:
+            print(format_error(f"Error stopping docker compose: {str(e)}", 'cleanup'))
             self.logger.error(f"Error stopping docker compose: {str(e)}")
 
     def test_single_combination(self, dbml_file: str, template: str) -> dict:
         """Test a single DBML file with a single template."""
         test_name = f"{template}_{dbml_file.replace('.dbml', '')}"
-        self.logger.info(f"Starting test: {test_name}")
         
         # Create framework tester
         try:
@@ -181,6 +202,13 @@ class IntegrationTestOrchestrator:
                 'error': str(e),
                 'project_dir': None
             }
+        
+        # Print framework test banner
+        formatter.print_framework_start(framework_tester.get_framework_name(), test_name)
+        self.logger.info(f"Starting test: {test_name}")
+        
+        # Track test timing
+        self.test_start_time = time.time()
         
         result = {
             'test_name': test_name,
@@ -243,6 +271,12 @@ class IntegrationTestOrchestrator:
             if project_dir:
                 self.stop_docker_compose(str(project_dir))
         
+        # Calculate test duration
+        test_duration = time.time() - self.test_start_time if self.test_start_time else None
+        
+        # Print test result with styling
+        formatter.print_test_result(test_name, result['success'], test_duration)
+        
         status = "PASS" if result['success'] else "FAIL"
         self.logger.info(f"Test {test_name}: {status}")
         
@@ -250,6 +284,8 @@ class IntegrationTestOrchestrator:
 
     def run_all_tests(self) -> List[dict]:
         """Run all test combinations."""
+        # Print header
+        formatter.print_header("SCAFOLDR INTEGRATION TESTS")
         self.logger.info("Starting simple integration tests")
         
         # Ensure output and reports directories exist
@@ -263,10 +299,19 @@ class IntegrationTestOrchestrator:
                 result = self.test_single_combination(dbml_file, template)
                 results.append(result)
         
-        # Generate summary report
+        # Generate summary report and display
         self.generate_report(results)
+        self.print_final_summary(results)
         
         return results
+    
+    def print_final_summary(self, results: List[dict]):
+        """Print final test summary with styled output."""
+        total_tests = len(results)
+        passed_tests = sum(1 for r in results if r['success'])
+        failed_tests = total_tests - passed_tests
+        
+        formatter.print_summary(total_tests, passed_tests, failed_tests)
 
     def generate_report(self, results: List[dict]):
         """Generate test report."""
@@ -318,6 +363,9 @@ class IntegrationTestOrchestrator:
                 
                 f.write("\n")
         
+        print(format_info("Reports generated:", 'reports'))
+        print(format_info(f"  JSON: {json_report}", 'files'))
+        print(format_info(f"  Text: {text_report}", 'files'))
         self.logger.info(f"Reports generated:")
         self.logger.info(f"  JSON: {json_report}")
         self.logger.info(f"  Text: {text_report}")

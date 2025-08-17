@@ -1,46 +1,66 @@
-import { pgTable, serial, varchar, text, integer, timestamp, primaryKey, boolean, bigint, decimal, real, doublePrecision, date, json, jsonb, bigserial } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, text, integer, timestamp, primaryKey, decimal } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-{% for entity in entities %}
-export const {{ entity.table_name }} = pgTable('{{ entity.table_name }}', {
-{% for attr in schema.entities[loop.index0].attributes %}
-  {{ attr.names.snake_case.singular }}: {% if attr.type.lower() == 'serial' %}serial('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower() == 'bigserial' %}bigserial('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('int') and not attr.type.lower().contains('bigint') %}integer('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('bigint') %}bigint('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('varchar') or attr.type.lower().contains('char') %}varchar('{{ attr.names.snake_case.singular }}'{% if attr.length %}, { length: {{ attr.length }} }{% endif %}){% elif attr.type.lower().contains('text') %}text('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('bool') %}boolean('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower() == 'date' %}date('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('timestamp') or attr.type.lower().contains('datetime') %}timestamp('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('decimal') or attr.type.lower().contains('numeric') %}decimal('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('float') %}real('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('double') %}doublePrecision('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('json') and not attr.type.lower().contains('jsonb') %}json('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower().contains('jsonb') %}jsonb('{{ attr.names.snake_case.singular }}'){% else %}varchar('{{ attr.names.snake_case.singular }}'){% endif %}{% if attr.pk %}.primaryKey(){% endif %}{% if attr.not_null %}.notNull(){% endif %}{% if attr.unique %}.unique(){% endif %}{% if attr.default %}.default({{ attr.default }}){% endif %}{% if attr.names.snake_case.singular == 'created_at' or attr.names.snake_case.singular == 'updated_at' %}.defaultNow(){% endif %}{% if not loop.last %},{% endif %}
+{% for entity in schema.backend_schema.entities %}
+export const {{ entity.names.snake_case.plural }} = pgTable('{{ entity.names.snake_case.plural }}', {
+{% for attr in entity.attributes %}
+  {{ attr.names.camel_case.singular }}: {% if attr.type.lower() == 'serial' %}serial('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower() == 'bigserial' %}bigserial('{{ attr.names.snake_case.singular }}'){% elif 'int' in attr.type.lower() and 'bigint' not in attr.type.lower() %}integer('{{ attr.names.snake_case.singular }}'){% elif 'bigint' in attr.type.lower() %}bigint('{{ attr.names.snake_case.singular }}'){% elif 'varchar' in attr.type.lower() or 'char' in attr.type.lower() %}varchar('{{ attr.names.snake_case.singular }}', { length: 255 }){% elif 'text' in attr.type.lower() %}text('{{ attr.names.snake_case.singular }}'){% elif 'bool' in attr.type.lower() %}boolean('{{ attr.names.snake_case.singular }}'){% elif attr.type.lower() == 'date' %}date('{{ attr.names.snake_case.singular }}'){% elif 'timestamp' in attr.type.lower() or 'datetime' in attr.type.lower() %}timestamp('{{ attr.names.snake_case.singular }}'){% elif 'decimal' in attr.type.lower() or 'numeric' in attr.type.lower() %}decimal('{{ attr.names.snake_case.singular }}'){% elif 'float' in attr.type.lower() %}real('{{ attr.names.snake_case.singular }}'){% elif 'double' in attr.type.lower() %}doublePrecision('{{ attr.names.snake_case.singular }}'){% elif 'json' in attr.type.lower() and 'jsonb' not in attr.type.lower() %}json('{{ attr.names.snake_case.singular }}'){% elif 'jsonb' in attr.type.lower() %}jsonb('{{ attr.names.snake_case.singular }}'){% else %}varchar('{{ attr.names.snake_case.singular }}'){% endif %}{% if attr.pk %}.primaryKey(){% endif %}{% if attr.not_null %}.notNull(){% endif %}{% if attr.unique %}.unique(){% endif %}{% for ref in schema.database_schema.refs %}{% if (ref.col1.table == entity.names.snake_case.singular or ref.col1.table == entity.names.snake_case.plural) and ref.col1.name == attr.names.snake_case.singular and ref.type == '>' %}.references(() => {{ ref.col2.table }}.{{ ref.col2.name }}, { onDelete: 'cascade' }){% elif (ref.col2.table == entity.names.snake_case.singular or ref.col2.table == entity.names.snake_case.plural) and ref.col2.name == attr.names.snake_case.singular and ref.type == '<' %}.references(() => {{ ref.col1.table }}.{{ ref.col1.name }}, { onDelete: 'cascade' }){% endif %}{% endfor %}{% if attr.default %}.default({{ attr.default }}){% endif %}{% if attr.names.snake_case.singular == 'created_at' or attr.names.snake_case.singular == 'updated_at' %}.defaultNow(){% endif %},
 {% endfor %}
-}{% if schema.entities[loop.index0].attributes | selectattr('pk') | list | length > 1 %}, (table) => ({
-  pk: primaryKey({ columns: [{% for attr in schema.entities[loop.index0].attributes | selectattr('pk') %}table.{{ attr.names.snake_case.singular }}{% if not loop.last %}, {% endif %}{% endfor %}] }),
+}{% if entity.attributes | selectattr('pk') | list | length > 1 %}, (table) => ({
+  pk: primaryKey({ columns: [{% for attr in entity.attributes | selectattr('pk') %}table.{{ attr.names.camel_case.singular }}{% if not loop.last %}, {% endif %}{% endfor %}] }),
 }){% endif %});
 
 {% endfor %}
 
-{% for entity in entities %}
-{% set entity_data = schema.entities[loop.index0] %}
-// Relations for {{ entity.EntityName }}
-export const {{ entity_data.names.camel_case.singular }}Relations = relations({{ entity_data.names.camel_case.singular }}, ({ one, many }) => ({
+// Relations
+{% for entity in schema.backend_schema.entities %}
+{% set entity_plural = entity.names.snake_case.plural %}
+export const {{ entity.names.camel_case.plural }}Relations = relations({{ entity_plural }}, ({ one, many }) => ({
 {% for ref in schema.database_schema.refs %}
-  {% if ref.col1.table_name == entity_data.names.snake_case.singular %}
-    {% if ref.type == '>' %}
-  {{ ref.col2.table_name }}: one({{ ref.col2.table_name }}, {
-    fields: [{{ entity_data.names.camel_case.singular }}.{{ ref.col1.name }}],
-    references: [{{ ref.col2.table_name }}.{{ ref.col2.name }}],
+  {% if ref.type == '>' and ref.col1.table == entity.names.snake_case.plural %}
+  {% set field_name = ref.col1.name.replace('_id', '').replace('_', '') | title | lower %}
+  {{ field_name }}: one({{ ref.col2.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col1.name | replace('_', '') | replace('userid', 'userId') | replace('categoryid', 'categoryId') | replace('orderid', 'orderId') | replace('productid', 'productId') | replace('followinguserid', 'followingUserId') | replace('followeduserid', 'followedUserId') }}],
+    references: [{{ ref.col2.table }}.id],
   }),
-    {% endif %}
-  {% elif ref.col2.table_name == entity_data.names.snake_case.singular %}
-    {% if ref.type == '>' %}
-  {{ ref.col1.table_name }}: many({{ ref.col1.table_name }}),
-    {% elif ref.type == '<' %}
-  {{ ref.col1.table_name }}: one({{ ref.col1.table_name }}, {
-    fields: [{{ entity_data.names.camel_case.singular }}.{{ ref.col2.name }}],
-    references: [{{ ref.col1.table_name }}.{{ ref.col1.name }}],
+  {% elif ref.type == '>' and ref.col2.table == entity.names.snake_case.plural %}
+  {{ ref.col1.table }}: many({{ ref.col1.table }}),
+  {% elif ref.type == '<' and ref.col1.table == entity.names.snake_case.plural %}
+  {% if ref.col2.name == 'following_user_id' %}
+  following: many({{ ref.col2.table }}, { relationName: 'following' }),
+  {% elif ref.col2.name == 'followed_user_id' %}
+  followers: many({{ ref.col2.table }}, { relationName: 'followers' }),
+  {% else %}
+  {{ ref.col2.table }}: many({{ ref.col2.table }}),
+  {% endif %}
+  {% elif ref.type == '<' and ref.col2.table == entity.names.snake_case.plural %}
+  {% if ref.col2.name == 'following_user_id' %}
+  followingUser: one({{ ref.col1.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col2.name | replace('_', '') | replace('followinguserid', 'followingUserId') }}],
+    references: [{{ ref.col1.table }}.id],
+    relationName: 'following',
   }),
-    {% endif %}
+  {% elif ref.col2.name == 'followed_user_id' %}
+  followedUser: one({{ ref.col1.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col2.name | replace('_', '') | replace('followeduserid', 'followedUserId') }}],
+    references: [{{ ref.col1.table }}.id],
+    relationName: 'followers',
+  }),
+  {% else %}
+  {% set field_name = ref.col2.name.replace('_id', '').replace('_', '') | title | lower %}
+  {{ field_name }}: one({{ ref.col1.table }}, {
+    fields: [{{ entity_plural }}.{{ ref.col2.name | replace('_', '') | replace('userid', 'userId') | replace('categoryid', 'categoryId') | replace('orderid', 'orderId') | replace('productid', 'productId') }}],
+    references: [{{ ref.col1.table }}.id],
+  }),
+  {% endif %}
   {% endif %}
 {% endfor %}
 }));
 
 {% endfor %}
 
-// Export all types
-{% for entity in entities %}
-export type {{ schema.entities[loop.index0].names.pascal_case.singular }} = typeof {{ schema.entities[loop.index0].names.camel_case.singular }}.$inferSelect;
-export type New{{ schema.entities[loop.index0].names.pascal_case.singular }} = typeof {{ schema.entities[loop.index0].names.camel_case.singular }}.$inferInsert;
+// Types
+{% for entity in schema.backend_schema.entities %}
+export type {{ entity.names.pascal_case.singular }} = typeof {{ entity.names.snake_case.plural }}.$inferSelect;
+export type New{{ entity.names.pascal_case.singular }} = typeof {{ entity.names.snake_case.plural }}.$inferInsert;
 {% endfor %}

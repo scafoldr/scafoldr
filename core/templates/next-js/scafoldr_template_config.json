@@ -187,20 +187,7 @@
         "output_path": "src/drizzle/schema.ts",
         "context": "all_entities",
         "enabled": true,
-        "variables": {
-          "entities": {
-            "source": "entities",
-            "transform": {
-              "table_name": "{{ item.names.snake_case.singular }}",
-              "EntityName": "{{ item.names.pascal_case.singular }}"
-            }
-          },
-          "relationships": {
-            "source": "database_schema.refs",
-            "transform": "{{ relationships.generate_drizzle_relations(item) }}",
-            "filter": "item.type in ['>', '<']"
-          }
-        }
+        "variables": {}
       },
       {
         "name": "validations",
@@ -209,15 +196,7 @@
         "output_path": "src/lib/validations.ts",
         "context": "all_entities",
         "enabled": true,
-        "variables": {
-          "schemas": {
-            "source": "entities",
-            "transform": {
-              "schema_name": "{{ item.names.camel_case.singular }}Schema",
-              "EntityName": "{{ item.names.pascal_case.singular }}"
-            }
-          }
-        }
+        "variables": {}
       },
       {
         "name": "package_json",

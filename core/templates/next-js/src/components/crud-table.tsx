@@ -42,15 +42,6 @@ export function CrudTable<T extends CrudEntity>({
 }: CrudTableProps<T>) {
   // Generate columns based on configuration
   const columns: ColumnDef<T>[] = [
-    // ID column (always first)
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => (
-        <div className="font-medium">{row.getValue('id')}</div>
-      ),
-    },
-    
     // Dynamic columns based on config
     ...config.columns.map((col): ColumnDef<T> => ({
       accessorKey: col.key as string,

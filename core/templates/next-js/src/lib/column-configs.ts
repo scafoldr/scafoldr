@@ -57,4 +57,23 @@ export const commonColumns = {
     type: 'custom',
     render: renderFn,
   }),
+
+  boolean: (key: string, header: string): ColumnConfig => ({
+    key: key as any,
+    header,
+    type: 'text',
+    render: (value: any) => value ? '✓' : '✗',
+  }),
+
+  date: (key: string, header: string): ColumnConfig => ({
+    key: key as any,
+    header,
+    type: 'date',
+  }),
+
+  updatedAt: (): ColumnConfig => ({
+    key: 'updatedAt' as any,
+    header: 'Updated',
+    type: 'date',
+  }),
 };

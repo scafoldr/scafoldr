@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:setup": "npm run db:setup && npm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
+    "db:setup": "npm run db:generate && npm run db:migrate",
     "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
   },
   "dependencies": {

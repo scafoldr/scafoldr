@@ -2,8 +2,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 import pyparsing
 
-from core.chat.chats.dbml_chat.main import DBMLChatResponseFormat
-from core.orchestrator import generate_backend, dbml_chat, stream_dbml_chat
+from core.orchestrator import generate_backend
 from core.company import ScafoldrInc
 from models.generate import GenerateRequest, GenerateResponse
 from models.chat import ChatRequest
@@ -63,15 +62,7 @@ def generate_backend_route(request: GenerateRequest):
             }
         )
 
-@router.post("/generate-dbml-chat", response_model=DBMLChatResponseFormat)
-def dbml_chat_route(request: ChatRequest):
-    response = dbml_chat(request)
-    return response
-
-@router.post("/generate-dbml-chat-stream")
-def chat_interactive_route(request: ChatRequest):
-    print("Starting interactive chat")
-    return StreamingResponse(stream_dbml_chat(request), media_type="text/plain")
+# Legacy endpoints removed - use /scafoldr-inc/consult instead
 
 @router.post("/scafoldr-inc/consult")
 async def scafoldr_inc_consult_route(request: ChatRequest):

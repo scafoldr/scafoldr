@@ -2,6 +2,7 @@ services:
   core:
     container_name: core
     image: scafoldr/core
+    pull_policy: never
     build:
       context: ./core
       target: app_dev
@@ -17,6 +18,7 @@ services:
   web:
     container_name: web
     image: scafoldr/web
+    pull_policy: never
     build:
       context: ./web
       target: app_dev
@@ -29,6 +31,7 @@ services:
   proxy:
     container_name: proxy
     image: scafoldr/proxy
+    pull_policy: never
     build:
       context: ./proxy
     ports:

@@ -19,6 +19,8 @@ export interface Message {
   type: MessageType;
   from: MessageFrom;
   timestamp: Date;
+  agentInfo?: ScafoldrIncAgent;
+  metadata?: Record<string, any>;
 }
 
 export interface ChatState {
@@ -34,7 +36,16 @@ export interface ChatApiRequest {
   conversationId: string;
 }
 
-export interface ChatApiResponse {
-  response_type: 'question' | 'dbml';
+export interface ScafoldrIncAgent {
+  role: string;
+  expertise: string[];
+  confidence: number;
+}
+
+export interface ScafoldrIncResponse {
   response: string;
+  response_type: 'question' | 'dbml' | 'error';
+  agent_info: ScafoldrIncAgent;
+  metadata: Record<string, any>;
+  conversation_id: string;
 }

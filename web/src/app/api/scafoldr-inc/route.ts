@@ -1,6 +1,6 @@
 export async function POST(req: Request) {
   const { userInput, conversationId } = await req.json();
-  const externalUrl = `${process.env.CORE_API_BASE_URL}/generate-dbml-chat`;
+  const externalUrl = `${process.env.CORE_API_BASE_URL}/scafoldr-inc/consult`;
 
   try {
     const res = await fetch(externalUrl, {

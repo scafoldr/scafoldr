@@ -19,13 +19,15 @@ export function useChat(options: UseChatOptions = {}) {
   });
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  const addMessage = useCallback((content: string, type: MessageType, from: MessageFrom) => {
+  const addMessage = useCallback((content: string, type: MessageType, from: MessageFrom, agentInfo?: any, metadata?: any) => {
     const newMessage: Message = {
       id: Math.random().toString(),
       text: content,
       type,
       from,
-      timestamp: new Date()
+      timestamp: new Date(),
+      agentInfo,
+      metadata
     };
 
     setChatState((prev) => ({
@@ -35,7 +37,7 @@ export function useChat(options: UseChatOptions = {}) {
     }));
   }, []);
 
-  const updateLastMessage = useCallback((content: string, type: MessageType) => {
+  const updateLastMessage = useCallback((content: string, type: MessageType, agentInfo?: any, metadata?: any) => {
     setChatState((prev) => {
       const updatedMessages = [...prev.messages];
       const lastMessage = updatedMessages.pop();
@@ -44,7 +46,9 @@ export function useChat(options: UseChatOptions = {}) {
         updatedMessages.push({
           ...lastMessage,
           text: content,
-          type
+          type,
+          agentInfo: agentInfo || lastMessage.agentInfo,
+          metadata: metadata || lastMessage.metadata
         });
       }
 
@@ -83,20 +87,24 @@ export function useChat(options: UseChatOptions = {}) {
       setChatState((prev) => ({ ...prev, isLoading: true }));
 
       try {
+        // Use Scafoldr Inc API (via /api/chat which proxies to /scafoldr-inc/consult)
         const response = await sendChatMessage({
           userInput,
           conversationId: chatState.conversationId
         });
 
         if (response.response_type === 'question') {
-          updateLastMessage(response.response, MessageType.TEXT);
+          updateLastMessage(response.response, MessageType.TEXT, response.agent_info, response.metadata);
         } else if (response.response_type === 'dbml') {
-          updateLastMessage(response.response, MessageType.RESULT);
+          updateLastMessage(response.response, MessageType.RESULT, response.agent_info, response.metadata);
 
-          // Automatically add a code generation message after DBML result
+          // Automatically add a code generation message after DBML result with agent info
           setTimeout(() => {
-            addMessage(response.response, MessageType.CODE_GENERATION, MessageFrom.AGENT);
+            addMessage(response.response, MessageType.CODE_GENERATION, MessageFrom.AGENT, response.agent_info, response.metadata);
           }, 500); // Small delay for better UX
+        } else if (response.response_type === 'error') {
+          updateLastMessage(response.response, MessageType.ERROR, response.agent_info, response.metadata);
+          setError(response.response);
         }
       } catch (error) {
         const errorMessage =

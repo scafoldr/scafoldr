@@ -1,6 +1,8 @@
 target
 .git
+.gitignore
 .idea
 .vscode
 **/*.iml
+node_modules
 .DS_Store

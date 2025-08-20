@@ -4,10 +4,14 @@ import pyparsing
 
 from core.chat.chats.dbml_chat.main import DBMLChatResponseFormat
 from core.orchestrator import generate_backend, dbml_chat, stream_dbml_chat
+from core.company import ScafoldrInc
 from models.generate import GenerateRequest, GenerateResponse
 from models.chat import ChatRequest
 
 router = APIRouter()
+
+# Initialize the global Scafoldr Inc company instance
+scafoldr_company = ScafoldrInc()
 
 @router.post("/generate", response_model=GenerateResponse)
 def generate_backend_route(request: GenerateRequest):
@@ -68,3 +72,47 @@ def dbml_chat_route(request: ChatRequest):
 def chat_interactive_route(request: ChatRequest):
     print("Starting interactive chat")
     return StreamingResponse(stream_dbml_chat(request), media_type="text/plain")
+
+@router.post("/scafoldr-inc/consult")
+async def scafoldr_inc_consult_route(request: ChatRequest):
+    """
+    New endpoint for the Scafoldr Inc agent-based architecture.
+    
+    Provides the same functionality as existing DBML chat endpoints
+    but with enhanced structure and agent information.
+    """
+    try:
+        response = await scafoldr_company.process_request(
+            user_request=request.user_input,
+            conversation_id=request.conversation_id
+        )
+        return response
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Scafoldr Inc consultation failed",
+                "message": str(e),
+                "type": "agent_error"
+            }
+        )
+
+@router.post("/scafoldr-inc/consult-stream")
+async def scafoldr_inc_consult_stream_route(request: ChatRequest):
+    """
+    Streaming version of the Scafoldr Inc consultation endpoint.
+    
+    Provides real-time response streaming while maintaining compatibility
+    with existing streaming functionality.
+    """
+    async def generate_stream():
+        try:
+            async for chunk in scafoldr_company.stream_process_request(
+                user_request=request.user_input,
+                conversation_id=request.conversation_id
+            ):
+                yield chunk
+        except Exception as e:
+            yield f"Error: {str(e)}"
+    
+    return StreamingResponse(generate_stream(), media_type="text/plain")

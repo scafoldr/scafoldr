@@ -53,11 +53,12 @@ const frameworks: Framework[] = [
 
 interface FrameworkSelectorProps {
   value?: string;
+  // eslint-disable-next-line no-unused-vars
   onValueChange?: (value: string) => void;
   className?: string;
 }
 
-export function FrameworkSelector({ value, onValueChange, className }: FrameworkSelectorProps) {
+export function FrameworkSelector({ value, onValueChange }: FrameworkSelectorProps) {
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const [selectedComingSoonFramework, setSelectedComingSoonFramework] = useState<Framework | null>(
     null

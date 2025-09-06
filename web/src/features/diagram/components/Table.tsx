@@ -5,6 +5,29 @@ import { Group, Rect, Text } from 'react-konva';
 import { ITable } from '../types';
 import { COLUMN_HEIGHT, COLUMN_PADDING_LEFT, FONT_SIZE, HEADER_COLUMN_HEIGHT } from '../constants';
 
+// Minimum gap to keep between tables while dragging
+const MIN_TABLE_GAP = 60; // px
+
+type RectLike = { left: number; top: number; right: number; bottom: number };
+
+const rectFromTable = (t: ITable): RectLike => ({
+  left: t.position.x,
+  top: t.position.y,
+  right: t.position.x + t.width,
+  bottom: t.position.y + t.height,
+});
+
+const expandRect = (r: RectLike, by: number): RectLike => ({
+  left: r.left - by,
+  top: r.top - by,
+  right: r.right + by,
+  bottom: r.bottom + by,
+});
+
+const intersects = (a: RectLike, b: RectLike) =>
+  Math.min(a.right, b.right) > Math.max(a.left, b.left) &&
+  Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
+
 // Theme-aware colors
 const getThemeColors = () => {
   const isDark = document.documentElement.classList.contains('dark');
@@ -39,20 +62,101 @@ const FK_ICON_COLOR = '#3b82f6'; // blue-500
 
 const Table = ({
   table,
+  allTables,
+  stageScale,
+  stageOffset,
   onDragMove
 }: {
   table: ITable;
+  allTables: ITable[];
+  stageScale: number;
+  stageOffset: { x: number; y: number };
   // eslint-disable-next-line no-unused-vars
   onDragMove: (tableId: string, x: number, y: number) => void;
 }) => {
   const lastIdx = table.columns.length - 1;
   const colors = getThemeColors();
 
+  // drag bound function to keep a minimum gap from other tables
+  const dragBoundFunc = (absPos: { x: number; y: number }) => {
+    // Convert absolute position (provided by Konva) into scene-local coordinates
+    const toLocal = (ax: number, ay: number) => ({
+      x: (ax - stageOffset.x) / stageScale,
+      y: (ay - stageOffset.y) / stageScale,
+    });
+    const toAbs = (lx: number, ly: number) => ({
+      x: lx * stageScale + stageOffset.x,
+      y: ly * stageScale + stageOffset.y,
+    });
+
+    let { x, y } = toLocal(absPos.x, absPos.y);
+
+    const width = table.width;
+    const height = table.height;
+
+    // Precompute expanded obstacle rects (all other tables) in local coords
+    const obstacles = allTables
+      .filter((t) => t.id !== table.id)
+      .map((t) => expandRect(rectFromTable(t), MIN_TABLE_GAP));
+
+    // Resolve overlaps by pushing out along the axis of least penetration
+    let guard = 0;
+    let moved = true;
+    while (moved && guard < 50) {
+      moved = false;
+      const me: RectLike = { left: x, top: y, right: x + width, bottom: y + height };
+      for (const ob of obstacles) {
+        if (!intersects(me, ob)) continue;
+        const overlapX = Math.min(me.right, ob.right) - Math.max(me.left, ob.left);
+        const overlapY = Math.min(me.bottom, ob.bottom) - Math.max(me.top, ob.top);
+        if (overlapX <= 0 || overlapY <= 0) continue;
+
+        // push out along smaller overlap
+        if (overlapX <= overlapY) {
+          // move in X
+          const meCenterX = (me.left + me.right) / 2;
+          const obCenterX = (ob.left + ob.right) / 2;
+          if (meCenterX < obCenterX) {
+            x -= overlapX;
+          } else {
+            x += overlapX;
+          }
+        } else {
+          // move in Y
+          const meCenterY = (me.top + me.bottom) / 2;
+          const obCenterY = (ob.top + ob.bottom) / 2;
+          if (meCenterY < obCenterY) {
+            y -= overlapY;
+          } else {
+            y += overlapY;
+          }
+        }
+        moved = true;
+        // update me for subsequent obstacles in this pass
+        me.left = x;
+        me.top = y;
+        me.right = x + width;
+        me.bottom = y + height;
+      }
+      guard++;
+    }
+
+    // Return absolute coordinates expected by Konva
+    return toAbs(x, y);
+  };
+
   return (
     <Group
       x={table.position.x}
       y={table.position.y}
       draggable
+      dragBoundFunc={dragBoundFunc}
+      onDragStart={(e) => {
+        // ensure dragged table is on top, not hidden behind others
+        e.target.moveToTop();
+        const layer = e.target.getLayer();
+        if (layer) layer.batchDraw();
+      }}
       onDragMove={(e) => {
         onDragMove(table.id, e.target.x(), e.target.y());
       }}>

@@ -1,4 +1,4 @@
-import { ChatApiRequest, ChatApiResponse } from '../types/chat.types';
+import { ChatApiRequest, ScafoldrIncResponse } from '../types/chat.types';
 
 export class ChatApiError extends Error {
   constructor(
@@ -10,9 +10,9 @@ export class ChatApiError extends Error {
   }
 }
 
-export async function sendChatMessage(request: ChatApiRequest): Promise<ChatApiResponse> {
+export async function sendChatMessage(request: ChatApiRequest): Promise<ScafoldrIncResponse> {
   try {
-    const response = await fetch('/api/chat', {
+    const response = await fetch('/api/scafoldr-inc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request)
@@ -20,11 +20,13 @@ export async function sendChatMessage(request: ChatApiRequest): Promise<ChatApiR
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new ChatApiError(errorText || 'API error', response.status);
+      throw new ChatApiError(errorText || 'Scafoldr Inc API error', response.status);
     }
 
     const responseData = await response.json();
-    return responseData;
+
+    // Return Scafoldr Inc response format directly
+    return responseData as ScafoldrIncResponse;
   } catch (error) {
     if (error instanceof ChatApiError) {
       throw error;

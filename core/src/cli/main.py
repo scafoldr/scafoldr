@@ -10,6 +10,7 @@ app = typer.Typer()
 BACKEND_OPTIONS = [
     {"name": "Node.js Express (JavaScript)", "value": "nodejs-express-js"},
     {"name": "Java Spring", "value": "java-spring"},
+    {"name": "Next.js TypeScript", "value": "next-js-typescript"},
 ]
 
 # TODO: Need to implement these features
@@ -84,6 +85,11 @@ def generate(
         backend_option=answers["backend_option"],
         features=features,
         user_input=dbml_schema,
+        description=f"Generated project: {project_name}",
+        version="1.0",
+        backend_port=8080,
+        backend_container_name="api",
+        database_connection_string=f"postgresql://user:password@localhost:5432/{database_name}"
     )
     
     try:

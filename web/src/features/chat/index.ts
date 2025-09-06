@@ -11,7 +11,7 @@ export { ChatResultMessage } from './components/chat-result-message';
 export { useChat } from './hooks/use-chat';
 
 // Types
-export type { Message, ChatState, ChatApiRequest, ChatApiResponse } from './types/chat.types';
+export type { Message, ChatState, ChatApiRequest } from './types/chat.types';
 export { MessageType, MessageFrom } from './types/chat.types';
 
 // API utilities

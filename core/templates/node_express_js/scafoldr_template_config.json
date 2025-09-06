@@ -1,0 +1,247 @@
+{
+  "template": {
+    "name": "node-express-js",
+    "version": "1.0.0",
+    "description": "Node.js Express.js REST API generator with Sequelize ORM",
+    "author": "Scafoldr Team",
+    "framework": "express",
+    "language": "javascript",
+    "orm": "sequelize"
+  },
+  "type_mappings": {
+    "sql_to_framework": {
+      "int": "INTEGER",
+      "integer": "INTEGER",
+      "bigint": "BIGINT",
+      "varchar": "STRING",
+      "char": "STRING", 
+      "text": "TEXT",
+      "longtext": "TEXT",
+      "boolean": "BOOLEAN",
+      "bool": "BOOLEAN",
+      "date": "DATEONLY",
+      "timestamp": "DATE",
+      "datetime": "DATE",
+      "decimal": "DECIMAL",
+      "numeric": "DECIMAL",
+      "float": "FLOAT",
+      "double": "DOUBLE",
+      "json": "JSON"
+    },
+    "default_type": "STRING",
+    "custom_mappings": [
+      {
+        "condition": "type.lower().contains('int')",
+        "result": "INTEGER"
+      },
+      {
+        "condition": "type.lower().contains('char') or type.lower().contains('text')",
+        "result": "STRING"
+      },
+      {
+        "condition": "type.lower().contains('bool')",
+        "result": "BOOLEAN"
+      },
+      {
+        "condition": "type.lower().contains('date') or type.lower().contains('timestamp')",
+        "result": "DATE"
+      },
+      {
+        "condition": "type.lower().contains('decimal') or type.lower().contains('float')",
+        "result": "DECIMAL"
+      }
+    ]
+  },
+  "variables": {
+    "global": {
+      "project_name": "{{ schema.project_name }}",
+      "database_name": "{{ schema.database_schema.name | default('app_db') }}",
+      "api_version": "v1"
+    },
+    "entity_context": {
+      "Model": "{{ entity.names.pascal_case.singular }}",
+      "model": "{{ entity.names.camel_case.singular }}",
+      "models": "{{ entity.names.camel_case.plural }}",
+      "table_name": "{{ entity.names.snake_case.singular }}",
+      "route_path": "{{ entity.names.snake_case.plural }}",
+      "controller_var": "{{ entity.names.camel_case.singular }}Controller",
+      "service_var": "{{ entity.names.camel_case.singular }}Service",
+      "repository_var": "{{ entity.names.camel_case.singular }}Repository"
+    },
+    "computed": {
+      "columns": {
+        "source": "entity.attributes",
+        "transform": {
+          "name": "{{ attr.names.snake_case.singular }}",
+          "mapped_type": "{{ type_mappings.resolve(attr.type) }}",
+          "allowNull": "{{ not attr.not_null }}",
+          "pk": "{{ attr.pk }}",
+          "unique": "{{ attr.unique }}",
+          "default": "{{ attr.default }}"
+        }
+      }
+    }
+  },
+  "generation_rules": {
+    "static_files": {
+      "enabled": true,
+      "exclude_patterns": ["*.j2", "*.jinja2", "scafoldr_template_config.json"],
+      "include_patterns": ["*"],
+      "transformations": {
+        ".env.example": ".env"
+      },
+      "path_transformations": {
+        "com.example.demo": "com/example"
+      }
+    },
+    "entity_based": [
+      {
+        "name": "models",
+        "description": "Sequelize model definitions",
+        "template": "src/models/model_formula.j2",
+        "output_path": "src/models/{{ Model }}.js",
+        "context": "entity",
+        "enabled": true,
+        "variables": {}
+      },
+      {
+        "name": "controllers",
+        "description": "Express.js route controllers",
+        "template": "src/controllers/controller_formula.j2",
+        "output_path": "src/controllers/{{ Model }}Controller.js",
+        "context": "entity",
+        "enabled": true,
+        "variables": {
+          "Model": "{{ entity.names.pascal_case.singular }}"
+        }
+      },
+      {
+        "name": "services",
+        "description": "Business logic services",
+        "template": "src/services/service_formula.j2",
+        "output_path": "src/services/{{ Model }}Service.js",
+        "context": "entity",
+        "enabled": true,
+        "variables": {
+          "Model": "{{ entity.names.pascal_case.singular }}",
+          "variable_name": "{{ entity.names.camel_case.singular }}Repository"
+        }
+      },
+      {
+        "name": "repositories",
+        "description": "Data access layer repositories",
+        "template": "src/repositories/repository_formula.j2",
+        "output_path": "src/repositories/{{ Model }}Repository.js",
+        "context": "entity",
+        "enabled": true,
+        "variables": {
+          "Model": "{{ entity.names.pascal_case.singular }}"
+        }
+      },
+      {
+        "name": "routes",
+        "description": "Express.js route definitions",
+        "template": "src/routes/route_formula.j2",
+        "output_path": "src/routes/{{ entity.names.snake_case.plural }}.js",
+        "context": "entity",
+        "enabled": true,
+        "variables": {
+          "Model": "{{ entity.names.pascal_case.singular }}",
+          "var": "{{ entity.names.camel_case.singular }}Controller"
+        }
+      }
+    ],
+    "aggregate": [
+      {
+        "name": "app_file",
+        "description": "Main Express application file",
+        "template": "src/app_formula.j2",
+        "output_path": "src/app.js",
+        "context": "all_entities",
+        "enabled": true,
+        "variables": {
+          "tables": {
+            "source": "entities",
+            "transform": {
+              "var": "{{ item.names.camel_case.singular }}Routes",
+              "plural": "{{ item.names.snake_case.plural }}"
+            }
+          }
+        }
+      },
+      {
+        "name": "models_index",
+        "description": "Sequelize models index with associations",
+        "template": "src/models/models_index_formula.j2",
+        "output_path": "src/models/index.js",
+        "context": "all_entities",
+        "enabled": true,
+        "variables": {
+          "tables": {
+            "source": "entities",
+            "transform": {
+              "Model": "{{ item.names.pascal_case.singular }}"
+            }
+          },
+          "associations": {
+            "source": "database_schema.refs",
+            "transform": "{{ relationships.generate_sequelize_associations(item) }}",
+            "filter": "item.type in ['>', '<']"
+          }
+        }
+      }
+    ]
+  },
+  "relationships": {
+    "association_patterns": {
+      "one_to_many": {
+        "condition": "ref.type == '>'",
+        "many_side": "ref.col1",
+        "one_side": "ref.col2",
+        "templates": [
+          "{{ many_entity.names.pascal_case.singular }}.belongsTo({{ one_entity.names.pascal_case.singular }}, { foreignKey: '{{ many_col.name }}' });",
+          "{{ one_entity.names.pascal_case.singular }}.hasMany({{ many_entity.names.pascal_case.singular }}, { foreignKey: '{{ many_col.name }}' });"
+        ]
+      },
+      "many_to_one": {
+        "condition": "ref.type == '<'",
+        "many_side": "ref.col2",
+        "one_side": "ref.col1",
+        "templates": [
+          "{{ many_entity.names.pascal_case.singular }}.belongsTo({{ one_entity.names.pascal_case.singular }}, { foreignKey: '{{ many_col.name }}' });",
+          "{{ one_entity.names.pascal_case.singular }}.hasMany({{ many_entity.names.pascal_case.singular }}, { foreignKey: '{{ many_col.name }}' });"
+        ]
+      }
+    }
+  },
+  "plugins": {
+    "custom_functions": [],
+    "filters": [],
+    "tests": []
+  },
+  "validation": {
+    "required_templates": [
+      "src/models/model_formula.j2",
+      "src/controllers/controller_formula.j2",
+      "src/services/service_formula.j2",
+      "src/repositories/repository_formula.j2",
+      "src/routes/route_formula.j2",
+      "src/app_formula.j2",
+      "src/models/models_index_formula.j2"
+    ],
+    "required_variables": ["Model", "table_name"],
+    "template_syntax": "jinja2",
+    "schema_version": "1.0"
+  },
+  "commands": {
+    "post_generation": [
+      "npm install"
+    ],
+    "development": [
+      "npm run dev"
+    ],
+    "production": [
+      "npm start"
+    ]
+  }
+}

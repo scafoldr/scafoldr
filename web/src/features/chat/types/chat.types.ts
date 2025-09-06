@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export enum MessageType {
   ERROR = 'error',
   TEXT = 'text',
@@ -19,6 +20,9 @@ export interface Message {
   type: MessageType;
   from: MessageFrom;
   timestamp: Date;
+  agentInfo?: ScafoldrIncAgent;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: Record<string, any>;
 }
 
 export interface ChatState {
@@ -34,7 +38,17 @@ export interface ChatApiRequest {
   conversationId: string;
 }
 
-export interface ChatApiResponse {
-  response_type: 'question' | 'dbml';
+export interface ScafoldrIncAgent {
+  role: string;
+  expertise: string[];
+  confidence: number;
+}
+
+export interface ScafoldrIncResponse {
   response: string;
+  response_type: 'question' | 'dbml' | 'error';
+  agent_info: ScafoldrIncAgent;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata: Record<string, any>;
+  conversation_id: string;
 }

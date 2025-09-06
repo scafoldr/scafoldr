@@ -1,0 +1,52 @@
+import { z } from 'zod';
+
+{% for entity in schema.backend_schema.entities %}
+// {{ entity.names.pascal_case.singular }} validation schemas
+export const {{ entity.names.camel_case.singular }}Schema = z.object({
+{% for attr in entity.attributes %}
+  {% if not attr.pk and attr.names.snake_case.singular not in ['created_at', 'updated_at'] %}
+  {% set field_name = attr.names.camel_case.singular %}
+  {% if 'varchar' in attr.type.lower() or 'char' in attr.type.lower() or 'text' in attr.type.lower() %}
+  {{ field_name }}: z.string(){% if attr.not_null %}.min(1, '{{ attr.names.title_case.singular }} is required'){% endif %}{% if attr.length %}.max({{ attr.length }}, '{{ attr.names.title_case.singular }} too long'){% endif %},
+  {% elif 'int' in attr.type.lower() or 'serial' in attr.type.lower() %}
+  {{ field_name }}: z.number().int(){% if attr.not_null %}.positive('{{ attr.names.title_case.singular }} must be a positive integer'){% endif %},
+  {% elif 'decimal' in attr.type.lower() or 'float' in attr.type.lower() or 'double' in attr.type.lower() %}
+  {{ field_name }}: z.number(){% if attr.not_null %}.positive('{{ attr.names.title_case.singular }} must be a positive number'){% endif %},
+  {% elif 'bool' in attr.type.lower() %}
+  {{ field_name }}: z.boolean(),
+  {% elif 'date' in attr.type.lower() or 'timestamp' in attr.type.lower() %}
+  {{ field_name }}: z.date(){% if not attr.not_null %}.optional(){% endif %},
+  {% elif 'json' in attr.type.lower() %}
+  {{ field_name }}: z.any(){% if not attr.not_null %}.optional(){% endif %},
+  {% else %}
+  {{ field_name }}: z.string(){% if attr.not_null %}.min(1, '{{ attr.names.title_case.singular }} is required'){% endif %},
+  {% endif %}
+  {% endif %}
+{% endfor %}
+});
+
+export const update{{ entity.names.pascal_case.singular }}Schema = {{ entity.names.camel_case.singular }}Schema.partial();
+
+{% endfor %}
+
+// Search and filter schemas
+export const searchSchema = z.object({
+  query: z.string().optional(),
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(10),
+});
+
+{% for entity in schema.backend_schema.entities %}
+export const {{ entity.names.camel_case.singular }}FilterSchema = searchSchema.extend({
+  // Add entity-specific filters here
+});
+
+{% endfor %}
+
+// Type exports
+{% for entity in schema.backend_schema.entities %}
+export type {{ entity.names.pascal_case.singular }}Input = z.infer<typeof {{ entity.names.camel_case.singular }}Schema>;
+export type Update{{ entity.names.pascal_case.singular }}Input = z.infer<typeof update{{ entity.names.pascal_case.singular }}Schema>;
+export type {{ entity.names.pascal_case.singular }}FilterInput = z.infer<typeof {{ entity.names.camel_case.singular }}FilterSchema>;
+{% endfor %}
+export type SearchInput = z.infer<typeof searchSchema>;

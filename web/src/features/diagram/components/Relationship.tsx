@@ -557,10 +557,10 @@ const Relationship = ({ relationship, tables }: RelationshipProps) => {
 
 
       {/* Source connection point */}
-      <Circle x={sourceX} y={sourceY} radius={3} fill="#f59e0b" stroke="#ffffff" strokeWidth={1} />
+      <Circle x={sourceX} y={sourceY} radius={4} fill="#f59e0b" stroke="#ffffff" strokeWidth={1} />
 
       {/* Target connection point */}
-      <Circle x={targetX} y={targetY} radius={3} fill="#3b82f6" stroke="#ffffff" strokeWidth={1} />
+      <Circle x={targetX} y={targetY} radius={4} fill="#3b82f6" stroke="#ffffff" strokeWidth={1} />
     </>
   );
 };

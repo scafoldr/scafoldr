@@ -174,6 +174,31 @@ export default function LandingPage() {
         </motion.div>
       </main>
 
+      {/* Minimal Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm text-sm py-4">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+          {/* Logo on left */}
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              🏗️ scafoldr
+            </span>
+          </div>
+          {/* Placeholder for future links */}
+          <div className="flex items-center space-x-4 mt-2 md:mt-0">
+            {/* GitHub link on right */}
+            <Link
+              href="https://github.com/scafoldr/scafoldr"
+              target="_blank"
+              className="flex items-center space-x-1 hover:underline">
+              <Github className="w-4 h-4" />
+              <span>GitHub</span>
+            </Link>
+            {/* Future social links can go here */}
+            {/* <Link href="#" className="opacity-50 pointer-events-none">Discord (soon)</Link> */}
+          </div>
+        </div>
+      </footer>
+
       {/* Auth Coming Soon Modal */}
       <AuthComingSoonModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </div>

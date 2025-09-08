@@ -55,7 +55,7 @@ function layoutTables(tables: ITable[], relationships: IRelationship[]): ITable[
     while (queue.length) {
       const u = queue.shift()!;
       comp.push(u);
-      for (const v of adj.get(u) ?? []) {
+      for (const v of Array.from(adj.get(u) ?? new Set<string>())) {
         if (!visited.has(v)) {
           visited.add(v);
           queue.push(v);
@@ -104,7 +104,7 @@ function layoutTables(tables: ITable[], relationships: IRelationship[]): ITable[
     level.set(root, 0);
     for (let qi = 0; qi < q.length; qi++) {
       const u = q[qi];
-      for (const v of adj.get(u) ?? []) {
+      for (const v of Array.from(adj.get(u) ?? new Set<string>())) {
         if (!level.has(v)) {
           level.set(v, (level.get(u) || 0) + 1);
           q.push(v);
@@ -120,9 +120,9 @@ function layoutTables(tables: ITable[], relationships: IRelationship[]): ITable[
     // Group nodes by level index
     const maxLevel = Math.max(...Array.from(level.values()));
     const columns: string[][] = Array.from({ length: maxLevel + 1 }, () => []);
-    for (const [id, lv] of level.entries()) {
+    level.forEach((lv, id) => {
       columns[lv].push(id);
-    }
+    });
 
     // Sort each column by degree desc to place hubs earlier (visual grouping)
     for (const col of columns) {

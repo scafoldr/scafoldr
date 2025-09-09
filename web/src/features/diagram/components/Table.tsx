@@ -9,6 +9,8 @@ import { COLUMN_HEIGHT, COLUMN_PADDING_LEFT, FONT_SIZE, HEADER_COLUMN_HEIGHT } f
 const getThemeColors = () => {
   const isDark = document.documentElement.classList.contains('dark');
 
+
+  
   if (isDark) {
     return {
       TABLE_BACKGROUND: '#1e293b', // slate-800

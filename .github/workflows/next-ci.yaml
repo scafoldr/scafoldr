@@ -1,0 +1,36 @@
+name: Next CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'web/**'
+
+jobs:
+  build:
+  # Job name should be lint-and-fix once Lint step is enabled
+
+    name: Run Next Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      # Uncomment this job when all Lint errors are fixed
+      # - name: Lint
+      #   working-directory: ./web
+      #   run: npm run format:check
+      
+      - name: Build
+        working-directory: ./web
+        run: npm run build

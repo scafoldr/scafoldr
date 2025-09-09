@@ -34,7 +34,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -65,7 +65,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-20">
+      <main className="container mx-auto px-4 py-20 flex-1">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -173,6 +173,31 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
       </main>
+
+      {/* Minimal Footer */}
+      <footer className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm text-sm py-4">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+          {/* Logo on left */}
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              🏗️ scafoldr
+            </span>
+          </div>
+          {/* Placeholder for future links */}
+          <div className="flex items-center space-x-4 mt-2 md:mt-0">
+            {/* GitHub link on right */}
+            <Link
+              href="https://github.com/scafoldr/scafoldr"
+              target="_blank"
+              className="flex items-center space-x-1 hover:underline">
+              <Github className="w-4 h-4" />
+              <span>GitHub</span>
+            </Link>
+            {/* Future social links can go here */}
+            {/* <Link href="#" className="opacity-50 pointer-events-none">Discord (soon)</Link> */}
+          </div>
+        </div>
+      </footer>
 
       {/* Auth Coming Soon Modal */}
       <AuthComingSoonModal open={showAuthModal} onOpenChange={setShowAuthModal} />

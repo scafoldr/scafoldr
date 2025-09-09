@@ -58,6 +58,29 @@ This two-step approach gives you the benefits of automated assistance for databa
 
 ## Getting Started
 
+### Local development
+
+#### With Docker (recommended)
+
+```bash
+# Clone our repo
+git clone https://github.com/scafoldr/scafoldr.git
+
+# Navigate to project directory and set up environment variables
+cd scafoldr
+cp .env.example .env
+# Edit .env file to add your OPENAI_API_KEY (required for AI features)
+
+# Start all services with Docker
+docker compose up -d
+# Once running, the app will be available at http://localhost:80
+```
+
+#### Without Docker (good if you want to run Core and Frontend separately)
+For running without Docker, see alternative setup instructions:
+- [Core API setup](./core/README.md)
+- [Web frontend setup](./web/README.md)
+
 ### Web Interface
 
 1. Visit [scafoldr.com](https://scafoldr.com)
@@ -118,12 +141,6 @@ We welcome contributions! Whether you want to:
 - Improve existing templates
 - Enhance the user interface
 - Fix bugs or improve documentation
-
-**Getting Started:**
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/scafoldr/scafoldr.git`
-3. Set up the development environment: `docker-compose up -d`
-4. Make your changes and submit a pull request
 
 See our [Contributing Guide](./CONTRIBUTING.md) for detailed instructions.
 

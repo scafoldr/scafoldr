@@ -14,14 +14,14 @@ const rectFromTable = (t: ITable): RectLike => ({
   left: t.position.x,
   top: t.position.y,
   right: t.position.x + t.width,
-  bottom: t.position.y + t.height,
+  bottom: t.position.y + t.height
 });
 
 const expandRect = (r: RectLike, by: number): RectLike => ({
   left: r.left - by,
   top: r.top - by,
   right: r.right + by,
-  bottom: r.bottom + by,
+  bottom: r.bottom + by
 });
 
 const intersects = (a: RectLike, b: RectLike) =>
@@ -77,71 +77,65 @@ const Table = ({
   const lastIdx = table.columns.length - 1;
   const colors = getThemeColors();
 
-  // drag bound function to keep a minimum gap from other tables
   const dragBoundFunc = (absPos: { x: number; y: number }) => {
-    // Convert absolute position (provided by Konva) into scene-local coordinates
     const toLocal = (ax: number, ay: number) => ({
       x: (ax - stageOffset.x) / stageScale,
-      y: (ay - stageOffset.y) / stageScale,
+      y: (ay - stageOffset.y) / stageScale
     });
     const toAbs = (lx: number, ly: number) => ({
       x: lx * stageScale + stageOffset.x,
-      y: ly * stageScale + stageOffset.y,
+      y: ly * stageScale + stageOffset.y
     });
 
     let { x, y } = toLocal(absPos.x, absPos.y);
-
     const width = table.width;
     const height = table.height;
 
-    // Precompute expanded obstacle rects (all other tables) in local coords
+    const me: RectLike = { left: x, top: y, right: x + width, bottom: y + height };
+
+    // Precompute expanded obstacle rects
     const obstacles = allTables
       .filter((t) => t.id !== table.id)
       .map((t) => expandRect(rectFromTable(t), MIN_TABLE_GAP));
 
-    // Resolve overlaps by pushing out along the axis of least penetration
+    // Check if dragged rect overlaps ALL possible gaps (no place to fit)
+    const overlapsAll = obstacles.some((ob) => intersects(me, ob));
+    if (overlapsAll) {
+      // ❌ reject move – snap back
+      return toAbs(table.position.x, table.position.y);
+    }
+
+    // ✅ otherwise do your normal overlap resolution
     let guard = 0;
     let moved = true;
     while (moved && guard < 50) {
       moved = false;
-      const me: RectLike = { left: x, top: y, right: x + width, bottom: y + height };
       for (const ob of obstacles) {
         if (!intersects(me, ob)) continue;
         const overlapX = Math.min(me.right, ob.right) - Math.max(me.left, ob.left);
         const overlapY = Math.min(me.bottom, ob.bottom) - Math.max(me.top, ob.top);
         if (overlapX <= 0 || overlapY <= 0) continue;
 
-        // push out along smaller overlap
         if (overlapX <= overlapY) {
-          // move in X
           const meCenterX = (me.left + me.right) / 2;
           const obCenterX = (ob.left + ob.right) / 2;
-          if (meCenterX < obCenterX) {
-            x -= overlapX;
-          } else {
-            x += overlapX;
-          }
+          if (meCenterX < obCenterX) x -= overlapX;
+          else x += overlapX;
         } else {
-          // move in Y
           const meCenterY = (me.top + me.bottom) / 2;
           const obCenterY = (ob.top + ob.bottom) / 2;
-          if (meCenterY < obCenterY) {
-            y -= overlapY;
-          } else {
-            y += overlapY;
-          }
+          if (meCenterY < obCenterY) y -= overlapY;
+          else y += overlapY;
         }
-        moved = true;
-        // update me for subsequent obstacles in this pass
         me.left = x;
         me.top = y;
         me.right = x + width;
         me.bottom = y + height;
+        moved = true;
       }
       guard++;
     }
 
-    // Return absolute coordinates expected by Konva
     return toAbs(x, y);
   };
 

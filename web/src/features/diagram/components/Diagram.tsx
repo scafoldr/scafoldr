@@ -1,10 +1,13 @@
 'use client';
 
 import { Stage, Layer, Line } from 'react-konva';
+import React from 'react';
 import Relationship from './Relationship';
 import { IERDiagram, ITable } from '../types';
 import Table from './Table';
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallback } from 'react';
+import Konva from 'konva';
+import KonvaEventObject = Konva.KonvaEventObject;
 
 interface DiagramProps {
   initialDiagram: IERDiagram;
@@ -17,90 +20,94 @@ export interface DiagramRef {
   fitToScreen: () => void;
 }
 
-const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<any>(null);
-  const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
+// --------------------- Helper Functions ---------------------
+type Rect = { left: number; top: number; right: number; bottom: number };
 
-  // Resolve initial overlaps between tables when a diagram is loaded
-  const MIN_TABLE_GAP_INIT = 24; // px; should mirror Table.tsx MIN_TABLE_GAP
+const rectFromTable = (t: ITable): Rect => ({
+  left: t.position.x,
+  top: t.position.y,
+  right: t.position.x + t.width,
+  bottom: t.position.y + t.height
+});
 
-  type Rect = { left: number; top: number; right: number; bottom: number };
-  const rectFromTable = (t: ITable): Rect => ({
-    left: t.position.x,
-    top: t.position.y,
-    right: t.position.x + t.width,
-    bottom: t.position.y + t.height,
-  });
-  const expandRectHalf = (r: Rect, gap: number): Rect => {
-    const h = gap / 2;
-    return { left: r.left - h, top: r.top - h, right: r.right + h, bottom: r.bottom + h };
-  };
-  const resolveInitialCollisions = (tables: ITable[], gap: number): ITable[] => {
-    const res = tables.map((t) => ({ ...t, position: { ...t.position } }));
-    const maxIter = 200;
-    for (let iter = 0; iter < maxIter; iter++) {
-      let movedAny = false;
-      for (let i = 0; i < res.length; i++) {
-        for (let j = i + 1; j < res.length; j++) {
-          const a = res[i];
-          const b = res[j];
-          const ar = expandRectHalf(rectFromTable(a), gap);
-          const br = expandRectHalf(rectFromTable(b), gap);
-          const overlapX = Math.min(ar.right, br.right) - Math.max(ar.left, br.left);
-          const overlapY = Math.min(ar.bottom, br.bottom) - Math.max(ar.top, br.top);
-          if (overlapX > 0 && overlapY > 0) {
-            // Push apart along the axis with smaller overlap
-            if (overlapX < overlapY) {
-              const push = overlapX / 2 + 0.5;
-              const aCenter = (ar.left + ar.right) / 2;
-              const bCenter = (br.left + br.right) / 2;
-              if (aCenter <= bCenter) {
-                a.position.x -= push;
-                b.position.x += push;
-              } else {
-                a.position.x += push;
-                b.position.x -= push;
-              }
+const expandRectHalf = (r: Rect, gap: number): Rect => {
+  const h = gap / 2;
+  return { left: r.left - h, top: r.top - h, right: r.right + h, bottom: r.bottom + h };
+};
+
+const resolveInitialCollisions = (tables: ITable[], gap: number): ITable[] => {
+  const res = tables.map((t) => ({ ...t, position: { ...t.position } }));
+  const maxIter = 200;
+  for (let iter = 0; iter < maxIter; iter++) {
+    let movedAny = false;
+    for (let i = 0; i < res.length; i++) {
+      for (let j = i + 1; j < res.length; j++) {
+        const a = res[i];
+        const b = res[j];
+        const ar = expandRectHalf(rectFromTable(a), gap);
+        const br = expandRectHalf(rectFromTable(b), gap);
+        const overlapX = Math.min(ar.right, br.right) - Math.max(ar.left, br.left);
+        const overlapY = Math.min(ar.bottom, br.bottom) - Math.max(ar.top, br.top);
+        if (overlapX > 0 && overlapY > 0) {
+          if (overlapX < overlapY) {
+            const push = overlapX / 2 + 0.5;
+            const aCenter = (ar.left + ar.right) / 2;
+            const bCenter = (br.left + br.right) / 2;
+            if (aCenter <= bCenter) {
+              a.position.x -= push;
+              b.position.x += push;
             } else {
-              const push = overlapY / 2 + 0.5;
-              const aCenter = (ar.top + ar.bottom) / 2;
-              const bCenter = (br.top + br.bottom) / 2;
-              if (aCenter <= bCenter) {
-                a.position.y -= push;
-                b.position.y += push;
-              } else {
-                a.position.y += push;
-                b.position.y -= push;
-              }
+              a.position.x += push;
+              b.position.x -= push;
             }
-            movedAny = true;
+          } else {
+            const push = overlapY / 2 + 0.5;
+            const aCenter = (ar.top + ar.bottom) / 2;
+            const bCenter = (br.top + br.bottom) / 2;
+            if (aCenter <= bCenter) {
+              a.position.y -= push;
+              b.position.y += push;
+            } else {
+              a.position.y += push;
+              b.position.y -= push;
+            }
           }
+          movedAny = true;
         }
       }
-      if (!movedAny) break;
     }
-    return res;
-  };
+    if (!movedAny) break;
+  }
+  return res;
+};
 
+// --------------------- Diagram Component ---------------------
+const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stageRef = useRef<Stage | any>(null);
+  const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
 
-  useEffect(() => {
-    const resolved = resolveInitialCollisions(initialDiagram.tables, MIN_TABLE_GAP_INIT);
-    setDiagram({ ...initialDiagram, tables: resolved });
-  }, [initialDiagram]);
+  const MIN_TABLE_GAP_INIT = 24;
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 3;
+  const SCALE_FACTOR = 1.2;
 
   const [sceneWidth, setSceneWidth] = useState(710);
   const [sceneHeight, setSceneHeight] = useState(626);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const MIN_SCALE = 0.5; // Prevent zooming out below 50%
-  const MAX_SCALE = 3;
-  const SCALE_FACTOR = 1.2;
   const didAutoFit = useRef(false);
   const didCenterTables = useRef(false);
 
+  // --------------------- Initial collision resolution ---------------------
+  useEffect(() => {
+    const resolved = resolveInitialCollisions(initialDiagram.tables, MIN_TABLE_GAP_INIT);
+    setDiagram({ ...initialDiagram, tables: resolved });
+  }, [initialDiagram]);
 
+  // --------------------- Resize ---------------------
   useEffect(() => {
     if (containerRef.current) {
       const bounds = containerRef.current.getBoundingClientRect();
@@ -109,26 +116,22 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     }
   }, []);
 
-  // Zoom functions
-  const zoomIn = () => {
-    const newScale = Math.min(scale * SCALE_FACTOR, MAX_SCALE);
-    setScale(newScale);
-  };
+  // --------------------- Zoom functions ---------------------
+  const zoomIn = useCallback(() => {
+    setScale((s) => Math.min(s * SCALE_FACTOR, MAX_SCALE));
+  }, []);
 
-  const zoomOut = () => {
-    const newScale = Math.max(scale / SCALE_FACTOR, MIN_SCALE);
-    setScale(newScale);
-  };
+  const zoomOut = useCallback(() => {
+    setScale((s) => Math.max(s / SCALE_FACTOR, MIN_SCALE));
+  }, []);
 
-  const resetZoom = () => {
+  const resetZoom = useCallback(() => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
-  };
+  }, []);
 
-  const fitToScreen = () => {
+  const fitToScreen = useCallback(() => {
     if (!diagram.tables.length) return;
-
-    // Calculate bounding box of all tables
     let minX = Infinity,
       minY = Infinity,
       maxX = -Infinity,
@@ -144,45 +147,19 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     const contentWidth = maxX - minX;
     const contentHeight = maxY - minY;
 
-    // No padding: fit exactly to tables' bounding box
     const padding = 0;
     const scaleX = (sceneWidth - padding * 2) / contentWidth;
     const scaleY = (sceneHeight - padding * 2) / contentHeight;
     const newScale = Math.min(scaleX, scaleY, MAX_SCALE);
 
-    // Center the content
     const centerX = (sceneWidth - contentWidth * newScale) / 2 - minX * newScale;
     const centerY = (sceneHeight - contentHeight * newScale) / 2 - minY * newScale;
 
     setScale(newScale);
     setPosition({ x: centerX, y: centerY });
-  };
+  }, [diagram.tables, sceneWidth, sceneHeight]);
 
-  // Center content without changing scale
-  const centerContent = () => {
-    if (!diagram.tables.length) return;
-
-    let minX = Infinity,
-      minY = Infinity,
-      maxX = -Infinity,
-      maxY = -Infinity;
-
-    diagram.tables.forEach((table) => {
-      minX = Math.min(minX, table.position.x);
-      minY = Math.min(minY, table.position.y);
-      maxX = Math.max(maxX, table.position.x + table.width);
-      maxY = Math.max(maxY, table.position.y + table.height);
-    });
-
-    const contentWidth = maxX - minX;
-    const contentHeight = maxY - minY;
-
-    const centerX = (sceneWidth - contentWidth * scale) / 2 - minX * scale;
-    const centerY = (sceneHeight - contentHeight * scale) / 2 - minY * scale;
-    setPosition({ x: centerX, y: centerY });
-  };
-
-  // Expose methods to parent components
+  // --------------------- Expose methods ---------------------
   useImperativeHandle(ref, () => ({
     zoomIn,
     zoomOut,
@@ -190,48 +167,43 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     fitToScreen
   }));
 
-  // Auto fit to screen after initial collision resolution and measuring container
+  // --------------------- Auto fit ---------------------
   useEffect(() => {
-    if (didAutoFit.current) return;
-    if (!diagram.tables.length) return;
-    if (!sceneWidth || !sceneHeight) return;
+    if (didAutoFit.current || !diagram.tables.length || !sceneWidth || !sceneHeight) return;
     didAutoFit.current = true;
-    requestAnimationFrame(() => {
-      fitToScreen();
-    });
-  }, [diagram.tables, sceneWidth, sceneHeight]);
+    requestAnimationFrame(() => fitToScreen());
+  }, [diagram.tables, sceneWidth, sceneHeight, fitToScreen]);
 
-  // After auto-fit centers the view, shift tables so their bounding box center aligns
-  // exactly with the canvas center (in world coordinates). Runs once.
   useEffect(() => {
-    if (!didAutoFit.current) return; // wait until we have centered view
-    if (didCenterTables.current) return;
-    if (!diagram.tables.length) return;
-    if (!sceneWidth || !sceneHeight) return;
+    if (
+      !didAutoFit.current ||
+      didCenterTables.current ||
+      !diagram.tables.length ||
+      !sceneWidth ||
+      !sceneHeight
+    )
+      return;
 
-    // Compute world-space center corresponding to the screen center
-    const worldCenterX = (sceneWidth / 2 - position.x) / scale;
-    const worldCenterY = (sceneHeight / 2 - position.y) / scale;
-
-    // Compute current tables bounding box center
     let minX = Infinity,
       minY = Infinity,
       maxX = -Infinity,
       maxY = -Infinity;
+
     diagram.tables.forEach((t) => {
       minX = Math.min(minX, t.position.x);
       minY = Math.min(minY, t.position.y);
       maxX = Math.max(maxX, t.position.x + t.width);
       maxY = Math.max(maxY, t.position.y + t.height);
     });
-    if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) return;
+
+    const worldCenterX = (sceneWidth / 2 - position.x) / scale;
+    const worldCenterY = (sceneHeight / 2 - position.y) / scale;
     const cx = (minX + maxX) / 2;
     const cy = (minY + maxY) / 2;
 
     const dx = worldCenterX - cx;
     const dy = worldCenterY - cy;
 
-    // If already centered (within subpixel), do nothing
     if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
       didCenterTables.current = true;
       return;
@@ -241,74 +213,65 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
       ...diagram,
       tables: diagram.tables.map((t) => ({
         ...t,
-        position: { x: t.position.x + dx, y: t.position.y + dy },
-      })),
+        position: { x: t.position.x + dx, y: t.position.y + dy }
+      }))
     };
     didCenterTables.current = true;
     setDiagram(shifted);
-    // After tables moved, re-fit once to ensure perfect centering with current settings
-    requestAnimationFrame(() => {
-      fitToScreen();
-    });
-  }, [diagram, sceneWidth, sceneHeight, scale, position]);
 
-  // Handle wheel zoom
-  const handleWheel = (e: any) => {
-    e.evt.preventDefault();
+    requestAnimationFrame(() => fitToScreen());
+  }, [diagram, position.x, position.y, scale, sceneWidth, sceneHeight, fitToScreen]);
 
-    const scaleBy = 1.02;
-    const stage = e.target.getStage();
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
+  // --------------------- Handlers ---------------------
+  const handleWheel = useCallback(
+    (e: KonvaEventObject<WheelEvent>) => {
+      e.evt.preventDefault();
+      const stage = e.target.getStage();
+      if (!stage) return;
 
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale
-    };
+      const oldScale = stage.scaleX();
+      const pointer = stage.getPointerPosition();
+      if (!pointer) return;
 
-    let newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
-    newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+      const mousePointTo = {
+        x: (pointer.x - stage.x()) / oldScale,
+        y: (pointer.y - stage.y()) / oldScale
+      };
 
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale
-    };
+      let newScale = e.evt.deltaY > 0 ? oldScale / 1.02 : oldScale * 1.02;
+      newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
-    setScale(newScale);
-    setPosition(newPos);
-  };
+      const newPos = {
+        x: pointer.x - mousePointTo.x * newScale,
+        y: pointer.y - mousePointTo.y * newScale
+      };
 
-  const handleDragMove = (tableId: string, x: number, y: number) => {
-    setDiagram((prevDiagram) => {
-      const updatedTables = prevDiagram.tables.map((table) => {
-        if (table.id === tableId) {
-          return { ...table, position: { x, y } };
-        }
-        return table;
-      });
+      setScale(newScale);
+      setPosition(newPos);
+    },
+    [MIN_SCALE, MAX_SCALE]
+  );
 
-      return { ...prevDiagram, tables: updatedTables };
-    });
-  };
+  const handleDragMove = useCallback((tableId: string, x: number, y: number) => {
+    setDiagram((prevDiagram) => ({
+      ...prevDiagram,
+      tables: prevDiagram.tables.map((t) => (t.id === tableId ? { ...t, position: { x, y } } : t))
+    }));
+  }, []);
 
-  // Infinite grid background component with theme support
-  const GridBackground = () => {
+  // --------------------- Grid Background ---------------------
+  const GridBackground = useCallback(() => {
     const gridSize = 20;
-    const gridLines = [];
-
-    // Create a much larger grid that extends beyond the visible area
-    const gridExtension = 2000; // Extra space around the visible area
+    const gridLines: React.ReactNode[] = [];
+    const gridExtension = 2000;
     const startX = -gridExtension;
     const endX = sceneWidth + gridExtension;
     const startY = -gridExtension;
     const endY = sceneHeight + gridExtension;
-
-    // Use lighter grid color for light mode, darker for dark mode
     const isDark = document.documentElement.classList.contains('dark');
-    const gridColor = isDark ? '#334155' : '#e2e8f0'; // slate-700 for dark, slate-200 for light
+    const gridColor = isDark ? '#334155' : '#e2e8f0';
     const gridOpacity = isDark ? 0.4 : 0.6;
 
-    // Vertical lines
     for (let i = startX; i <= endX; i += gridSize) {
       gridLines.push(
         <Line
@@ -320,8 +283,6 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
         />
       );
     }
-
-    // Horizontal lines
     for (let i = startY; i <= endY; i += gridSize) {
       gridLines.push(
         <Line
@@ -335,8 +296,9 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     }
 
     return <>{gridLines}</>;
-  };
+  }, [sceneWidth, sceneHeight]);
 
+  // --------------------- Render ---------------------
   return (
     <div
       tabIndex={0}
@@ -357,22 +319,22 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
           {/* Grid Background */}
           <GridBackground />
 
-          {diagram.tables.map((table) => {
-            return (
-              <Table
-                key={table.id}
-                table={table}
-                allTables={diagram.tables}
-                stageScale={scale}
-                stageOffset={position}
-                onDragMove={handleDragMove}
-              />
-            );
-          })}
+          {/* Tables */}
+          {diagram.tables.map((table) => (
+            <Table
+              key={table.id}
+              table={table}
+              allTables={diagram.tables}
+              stageScale={scale}
+              stageOffset={position}
+              onDragMove={handleDragMove}
+            />
+          ))}
 
-          {diagram.relationships.map((rel) => {
-            return <Relationship key={rel.id} relationship={rel} tables={diagram.tables} />;
-          })}
+          {/* Relationships */}
+          {diagram.relationships.map((rel) => (
+            <Relationship key={rel.id} relationship={rel} tables={diagram.tables} />
+          ))}
         </Layer>
       </Stage>
     </div>

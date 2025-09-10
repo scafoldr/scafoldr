@@ -84,8 +84,7 @@ const resolveInitialCollisions = (tables: ITable[], gap: number): ITable[] => {
 // --------------------- Diagram Component ---------------------
 const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stageRef = useRef<Stage | any>(null);
+  const stageRef = useRef<Stage>(null);
   const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
 
   const MIN_TABLE_GAP_INIT = 24;

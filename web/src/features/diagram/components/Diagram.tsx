@@ -1,7 +1,6 @@
 'use client';
 
 import { Stage, Layer, Line } from 'react-konva';
-import { KonvaStage } from 'konva';
 import React from 'react';
 import Relationship from './Relationship';
 import { IERDiagram, ITable } from '../types';
@@ -85,7 +84,7 @@ const resolveInitialCollisions = (tables: ITable[], gap: number): ITable[] => {
 // --------------------- Diagram Component ---------------------
 const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<KonvaStage>(null);
+  const stageRef = useRef<Konva.Stage>(null);
   const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
 
   const MIN_TABLE_GAP_INIT = 24;

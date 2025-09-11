@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 import pyparsing
 
+from config.config import Config
 from core.orchestrator import generate_backend
 from core.company import ScafoldrInc
 from models.generate import GenerateRequest, GenerateResponse
@@ -9,8 +10,10 @@ from models.chat import ChatRequest
 
 router = APIRouter()
 
+config = Config()
+
 # Initialize the global Scafoldr Inc company instance
-scafoldr_company = ScafoldrInc()
+scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider)
 
 @router.post("/generate", response_model=GenerateResponse)
 def generate_backend_route(request: GenerateRequest):

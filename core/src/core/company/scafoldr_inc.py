@@ -7,6 +7,8 @@ establishing the foundation for a full agent-based architecture.
 """
 
 from typing import Dict, Any, Optional, List, Iterator
+
+from core.ai_providers.base_ai_provider import BaseAiProvider
 from core.company.infrastructure.simple_ai_provider import SimpleAIProvider
 from core.company.agents.architect import SoftwareArchitect
 from core.company.agents.base_agent import BaseCompanyAgent
@@ -20,10 +22,10 @@ class ScafoldrInc:
     to maintain 100% backward compatibility with existing DBML chat functionality.
     """
     
-    def __init__(self):
+    def __init__(self, ai_provider: BaseAiProvider):
         """Initialize the company with AI provider and agents."""
         # Initialize the AI provider
-        self.ai_provider = SimpleAIProvider()
+        self.ai_provider = ai_provider
         
         # Initialize agents
         self.agents: Dict[str, BaseCompanyAgent] = {}

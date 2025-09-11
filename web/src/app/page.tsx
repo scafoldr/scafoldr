@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 import { FrameworkSelector } from '@/features/framework-selector';
 import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
+import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -194,7 +195,13 @@ export default function LandingPage() {
               <span>GitHub</span>
             </Link>
             {/* Future social links can go here */}
-            {/* <Link href="#" className="opacity-50 pointer-events-none">Discord (soon)</Link> */}
+            <Link
+              href="https://discord.gg/jZPTchaUFB"
+              target="_blank"
+              className="flex items-center space-x-1 hover:underline">
+              <SiDiscord className="w-4 h-4" />
+              <span>Discord</span>
+            </Link>
           </div>
         </div>
       </footer>

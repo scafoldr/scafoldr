@@ -3,7 +3,7 @@
 import { Stage, Layer, Line } from 'react-konva';
 import React from 'react';
 import Relationship from './Relationship';
-import { IERDiagram, ITable } from '../types';
+import { IERDiagram } from '../types';
 import Table from './Table';
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallback } from 'react';
 import Konva from 'konva';
@@ -20,74 +20,12 @@ export interface DiagramRef {
   fitToScreen: () => void;
 }
 
-// --------------------- Helper Functions ---------------------
-type Rect = { left: number; top: number; right: number; bottom: number };
-
-const rectFromTable = (t: ITable): Rect => ({
-  left: t.position.x,
-  top: t.position.y,
-  right: t.position.x + t.width,
-  bottom: t.position.y + t.height
-});
-
-const expandRectHalf = (r: Rect, gap: number): Rect => {
-  const h = gap / 2;
-  return { left: r.left - h, top: r.top - h, right: r.right + h, bottom: r.bottom + h };
-};
-
-const resolveInitialCollisions = (tables: ITable[], gap: number): ITable[] => {
-  const res = tables.map((t) => ({ ...t, position: { ...t.position } }));
-  const maxIter = 200;
-  for (let iter = 0; iter < maxIter; iter++) {
-    let movedAny = false;
-    for (let i = 0; i < res.length; i++) {
-      for (let j = i + 1; j < res.length; j++) {
-        const a = res[i];
-        const b = res[j];
-        const ar = expandRectHalf(rectFromTable(a), gap);
-        const br = expandRectHalf(rectFromTable(b), gap);
-        const overlapX = Math.min(ar.right, br.right) - Math.max(ar.left, br.left);
-        const overlapY = Math.min(ar.bottom, br.bottom) - Math.max(ar.top, br.top);
-        if (overlapX > 0 && overlapY > 0) {
-          if (overlapX < overlapY) {
-            const push = overlapX / 2 + 0.5;
-            const aCenter = (ar.left + ar.right) / 2;
-            const bCenter = (br.left + br.right) / 2;
-            if (aCenter <= bCenter) {
-              a.position.x -= push;
-              b.position.x += push;
-            } else {
-              a.position.x += push;
-              b.position.x -= push;
-            }
-          } else {
-            const push = overlapY / 2 + 0.5;
-            const aCenter = (ar.top + ar.bottom) / 2;
-            const bCenter = (br.top + br.bottom) / 2;
-            if (aCenter <= bCenter) {
-              a.position.y -= push;
-              b.position.y += push;
-            } else {
-              a.position.y += push;
-              b.position.y -= push;
-            }
-          }
-          movedAny = true;
-        }
-      }
-    }
-    if (!movedAny) break;
-  }
-  return res;
-};
-
 // --------------------- Diagram Component ---------------------
 const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
 
-  const MIN_TABLE_GAP_INIT = 24;
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 3;
   const SCALE_FACTOR = 1.2;
@@ -99,12 +37,6 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
 
   const didAutoFit = useRef(false);
   const didCenterTables = useRef(false);
-
-  // --------------------- Initial collision resolution ---------------------
-  useEffect(() => {
-    const resolved = resolveInitialCollisions(initialDiagram.tables, MIN_TABLE_GAP_INIT);
-    setDiagram({ ...initialDiagram, tables: resolved });
-  }, [initialDiagram]);
 
   // --------------------- Resize ---------------------
   useEffect(() => {

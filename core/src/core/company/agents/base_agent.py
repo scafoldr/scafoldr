@@ -8,7 +8,7 @@ All specialized agents inherit from BaseCompanyAgent.
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
-
+from strands.models import Model
 
 class AgentResponse(BaseModel):
     """
@@ -34,7 +34,7 @@ class BaseCompanyAgent(ABC):
     to process requests and generate responses.
     """
     
-    def __init__(self, role: str, expertise: List[str], ai_provider):
+    def __init__(self, role: str, expertise: List[str], ai_provider: Model):
         """
         Initialize the agent with role, expertise, and AI provider.
         

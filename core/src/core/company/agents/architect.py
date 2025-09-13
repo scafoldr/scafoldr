@@ -7,6 +7,8 @@ but wrapped in the new agent architecture.
 """
 
 from typing import Optional
+
+from strands.models import Model
 from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
 from core.chat.chats.dbml_chat.main import DBMLChat
 from core.chat.chats.dbml_chat.prompt import PROMPT_TEMPLATE
@@ -20,7 +22,7 @@ class SoftwareArchitect(BaseCompanyAgent):
     backward compatibility while providing the new agent interface.
     """
     
-    def __init__(self, ai_provider):
+    def __init__(self, ai_provider: Model):
         """
         Initialize the Software Architect agent.
         

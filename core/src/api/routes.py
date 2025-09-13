@@ -65,8 +65,6 @@ def generate_backend_route(request: GenerateRequest):
             }
         )
 
-# Legacy endpoints removed - use /scafoldr-inc/consult instead
-
 @router.post("/scafoldr-inc/consult")
 async def scafoldr_inc_consult_route(request: ChatRequest):
     """

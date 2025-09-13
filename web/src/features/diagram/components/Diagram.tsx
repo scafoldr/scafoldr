@@ -1,10 +1,13 @@
 'use client';
 
 import { Stage, Layer, Line } from 'react-konva';
+import React from 'react';
 import Relationship from './Relationship';
 import { IERDiagram } from '../types';
 import Table from './Table';
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallback } from 'react';
+import Konva from 'konva';
+import KonvaEventObject = Konva.KonvaEventObject;
 
 interface DiagramProps {
   initialDiagram: IERDiagram;
@@ -17,24 +20,25 @@ export interface DiagramRef {
   fitToScreen: () => void;
 }
 
+// --------------------- Diagram Component ---------------------
 const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<any>(null);
+  const stageRef = useRef<Konva.Stage>(null);
   const [diagram, setDiagram] = useState<IERDiagram>(initialDiagram);
 
-  useEffect(() => {
-    setDiagram(initialDiagram);
-  }, [initialDiagram]);
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 3;
+  const SCALE_FACTOR = 1.2;
 
   const [sceneWidth, setSceneWidth] = useState(710);
   const [sceneHeight, setSceneHeight] = useState(626);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const MIN_SCALE = 0.5; // Prevent zooming out below 50%
-  const MAX_SCALE = 3;
-  const SCALE_FACTOR = 1.2;
+  const didAutoFit = useRef(false);
+  const didCenterTables = useRef(false);
 
+  // --------------------- Resize ---------------------
   useEffect(() => {
     if (containerRef.current) {
       const bounds = containerRef.current.getBoundingClientRect();
@@ -43,26 +47,22 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     }
   }, []);
 
-  // Zoom functions
-  const zoomIn = () => {
-    const newScale = Math.min(scale * SCALE_FACTOR, MAX_SCALE);
-    setScale(newScale);
-  };
+  // --------------------- Zoom functions ---------------------
+  const zoomIn = useCallback(() => {
+    setScale((s) => Math.min(s * SCALE_FACTOR, MAX_SCALE));
+  }, []);
 
-  const zoomOut = () => {
-    const newScale = Math.max(scale / SCALE_FACTOR, MIN_SCALE);
-    setScale(newScale);
-  };
+  const zoomOut = useCallback(() => {
+    setScale((s) => Math.max(s / SCALE_FACTOR, MIN_SCALE));
+  }, []);
 
-  const resetZoom = () => {
+  const resetZoom = useCallback(() => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
-  };
+  }, []);
 
-  const fitToScreen = () => {
+  const fitToScreen = useCallback(() => {
     if (!diagram.tables.length) return;
-
-    // Calculate bounding box of all tables
     let minX = Infinity,
       minY = Infinity,
       maxX = -Infinity,
@@ -78,21 +78,19 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     const contentWidth = maxX - minX;
     const contentHeight = maxY - minY;
 
-    // Add padding
-    const padding = 50;
+    const padding = 0;
     const scaleX = (sceneWidth - padding * 2) / contentWidth;
     const scaleY = (sceneHeight - padding * 2) / contentHeight;
     const newScale = Math.min(scaleX, scaleY, MAX_SCALE);
 
-    // Center the content
     const centerX = (sceneWidth - contentWidth * newScale) / 2 - minX * newScale;
     const centerY = (sceneHeight - contentHeight * newScale) / 2 - minY * newScale;
 
     setScale(newScale);
     setPosition({ x: centerX, y: centerY });
-  };
+  }, [diagram.tables, sceneWidth, sceneHeight]);
 
-  // Expose methods to parent components
+  // --------------------- Expose methods ---------------------
   useImperativeHandle(ref, () => ({
     zoomIn,
     zoomOut,
@@ -100,63 +98,111 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     fitToScreen
   }));
 
-  // Handle wheel zoom
-  const handleWheel = (e: any) => {
-    e.evt.preventDefault();
+  // --------------------- Auto fit ---------------------
+  useEffect(() => {
+    if (didAutoFit.current || !diagram.tables.length || !sceneWidth || !sceneHeight) return;
+    didAutoFit.current = true;
+    requestAnimationFrame(() => fitToScreen());
+  }, [diagram.tables, sceneWidth, sceneHeight, fitToScreen]);
 
-    const scaleBy = 1.02;
-    const stage = e.target.getStage();
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
+  useEffect(() => {
+    if (
+      !didAutoFit.current ||
+      didCenterTables.current ||
+      !diagram.tables.length ||
+      !sceneWidth ||
+      !sceneHeight
+    )
+      return;
 
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale
-    };
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
 
-    let newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
-    newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
-
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale
-    };
-
-    setScale(newScale);
-    setPosition(newPos);
-  };
-
-  const handleDragMove = (tableId: string, x: number, y: number) => {
-    setDiagram((prevDiagram) => {
-      const updatedTables = prevDiagram.tables.map((table) => {
-        if (table.id === tableId) {
-          return { ...table, position: { x, y } };
-        }
-        return table;
-      });
-
-      return { ...prevDiagram, tables: updatedTables };
+    diagram.tables.forEach((t) => {
+      minX = Math.min(minX, t.position.x);
+      minY = Math.min(minY, t.position.y);
+      maxX = Math.max(maxX, t.position.x + t.width);
+      maxY = Math.max(maxY, t.position.y + t.height);
     });
-  };
 
-  // Infinite grid background component with theme support
-  const GridBackground = () => {
+    const worldCenterX = (sceneWidth / 2 - position.x) / scale;
+    const worldCenterY = (sceneHeight / 2 - position.y) / scale;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const dx = worldCenterX - cx;
+    const dy = worldCenterY - cy;
+
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+      didCenterTables.current = true;
+      return;
+    }
+
+    const shifted: IERDiagram = {
+      ...diagram,
+      tables: diagram.tables.map((t) => ({
+        ...t,
+        position: { x: t.position.x + dx, y: t.position.y + dy }
+      }))
+    };
+    didCenterTables.current = true;
+    setDiagram(shifted);
+
+    requestAnimationFrame(() => fitToScreen());
+  }, [diagram, position.x, position.y, scale, sceneWidth, sceneHeight, fitToScreen]);
+
+  // --------------------- Handlers ---------------------
+  const handleWheel = useCallback(
+    (e: KonvaEventObject<WheelEvent>) => {
+      e.evt.preventDefault();
+      const stage = e.target.getStage();
+      if (!stage) return;
+
+      const oldScale = stage.scaleX();
+      const pointer = stage.getPointerPosition();
+      if (!pointer) return;
+
+      const mousePointTo = {
+        x: (pointer.x - stage.x()) / oldScale,
+        y: (pointer.y - stage.y()) / oldScale
+      };
+
+      let newScale = e.evt.deltaY > 0 ? oldScale / 1.02 : oldScale * 1.02;
+      newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+
+      const newPos = {
+        x: pointer.x - mousePointTo.x * newScale,
+        y: pointer.y - mousePointTo.y * newScale
+      };
+
+      setScale(newScale);
+      setPosition(newPos);
+    },
+    [MIN_SCALE, MAX_SCALE]
+  );
+
+  const handleDragMove = useCallback((tableId: string, x: number, y: number) => {
+    setDiagram((prevDiagram) => ({
+      ...prevDiagram,
+      tables: prevDiagram.tables.map((t) => (t.id === tableId ? { ...t, position: { x, y } } : t))
+    }));
+  }, []);
+
+  // --------------------- Grid Background ---------------------
+  const GridBackground = useCallback(() => {
     const gridSize = 20;
-    const gridLines = [];
-
-    // Create a much larger grid that extends beyond the visible area
-    const gridExtension = 2000; // Extra space around the visible area
+    const gridLines: React.ReactNode[] = [];
+    const gridExtension = 2000;
     const startX = -gridExtension;
     const endX = sceneWidth + gridExtension;
     const startY = -gridExtension;
     const endY = sceneHeight + gridExtension;
-
-    // Use lighter grid color for light mode, darker for dark mode
     const isDark = document.documentElement.classList.contains('dark');
-    const gridColor = isDark ? '#334155' : '#e2e8f0'; // slate-700 for dark, slate-200 for light
+    const gridColor = isDark ? '#334155' : '#e2e8f0';
     const gridOpacity = isDark ? 0.4 : 0.6;
 
-    // Vertical lines
     for (let i = startX; i <= endX; i += gridSize) {
       gridLines.push(
         <Line
@@ -168,8 +214,6 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
         />
       );
     }
-
-    // Horizontal lines
     for (let i = startY; i <= endY; i += gridSize) {
       gridLines.push(
         <Line
@@ -183,8 +227,9 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     }
 
     return <>{gridLines}</>;
-  };
+  }, [sceneWidth, sceneHeight]);
 
+  // --------------------- Render ---------------------
   return (
     <div
       tabIndex={0}
@@ -205,13 +250,22 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
           {/* Grid Background */}
           <GridBackground />
 
-          {diagram.tables.map((table) => {
-            return <Table key={table.id} table={table} onDragMove={handleDragMove} />;
-          })}
+          {/* Tables */}
+          {diagram.tables.map((table) => (
+            <Table
+              key={table.id}
+              table={table}
+              allTables={diagram.tables}
+              stageScale={scale}
+              stageOffset={position}
+              onDragMove={handleDragMove}
+            />
+          ))}
 
-          {diagram.relationships.map((rel) => {
-            return <Relationship key={rel.id} relationship={rel} tables={diagram.tables} />;
-          })}
+          {/* Relationships */}
+          {diagram.relationships.map((rel) => (
+            <Relationship key={rel.id} relationship={rel} tables={diagram.tables} />
+          ))}
         </Layer>
       </Stage>
     </div>

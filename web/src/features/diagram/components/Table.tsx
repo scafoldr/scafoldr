@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Group, Rect, Text } from 'react-konva';
 import { ITable } from '../types';
 import { COLUMN_HEIGHT, COLUMN_PADDING_LEFT, FONT_SIZE, HEADER_COLUMN_HEIGHT } from '../constants';
@@ -11,52 +11,85 @@ const getThemeColors = () => {
 
   if (isDark) {
     return {
-      TABLE_BACKGROUND: '#1e293b', // slate-800
-      TABLE_BORDER: '#334155', // slate-700
-      HEADER_BACKGROUND: '#0f172a', // slate-900
-      HEADER_TEXT: '#e2e8f0', // slate-200
-      FIELD_NAME_COLOR: '#f1f5f9', // slate-100
-      FIELD_TYPE_COLOR: '#94a3b8', // slate-400
-      PK_HIGHLIGHT: 'rgba(245, 158, 11, 0.1)', // amber with opacity
-      FK_HIGHLIGHT: 'rgba(59, 130, 246, 0.1)' // blue with opacity
+      TABLE_BACKGROUND: '#1e293b',
+      TABLE_BORDER: '#334155',
+      HEADER_BACKGROUND: '#0f172a',
+      HEADER_TEXT: '#e2e8f0',
+      FIELD_NAME_COLOR: '#f1f5f9',
+      FIELD_TYPE_COLOR: '#94a3b8',
+      PK_HIGHLIGHT: 'rgba(245, 158, 11, 0.1)',
+      FK_HIGHLIGHT: 'rgba(59, 130, 246, 0.1)'
     };
   } else {
     return {
-      TABLE_BACKGROUND: '#ffffff', // white
-      TABLE_BORDER: '#d1d5db', // gray-300
-      HEADER_BACKGROUND: '#f8fafc', // slate-50
-      HEADER_TEXT: '#1e293b', // slate-800
-      FIELD_NAME_COLOR: '#374151', // gray-700
-      FIELD_TYPE_COLOR: '#6b7280', // gray-500
-      PK_HIGHLIGHT: 'rgba(245, 158, 11, 0.15)', // amber with opacity
-      FK_HIGHLIGHT: 'rgba(59, 130, 246, 0.15)' // blue with opacity
+      TABLE_BACKGROUND: '#ffffff',
+      TABLE_BORDER: '#d1d5db',
+      HEADER_BACKGROUND: '#f8fafc',
+      HEADER_TEXT: '#1e293b',
+      FIELD_NAME_COLOR: '#374151',
+      FIELD_TYPE_COLOR: '#6b7280',
+      PK_HIGHLIGHT: 'rgba(245, 158, 11, 0.15)',
+      FK_HIGHLIGHT: 'rgba(59, 130, 246, 0.15)'
     };
   }
 };
 
-const PK_ICON_COLOR = '#f59e0b'; // amber-500
-const FK_ICON_COLOR = '#3b82f6'; // blue-500
+const PK_ICON_COLOR = '#f59e0b';
+const FK_ICON_COLOR = '#3b82f6';
 
-const Table = ({
-  table,
-  onDragMove
-}: {
+// overlap check
+const intersects = (a: ITable, b: ITable) =>
+  Math.min(a.position.x + a.width, b.position.x + b.width) > Math.max(a.position.x, b.position.x) &&
+  Math.min(a.position.y + a.height, b.position.y + b.height) > Math.max(a.position.y, b.position.y);
+
+// ✅ Extract props interface (fixes ESLint warnings)
+interface TableProps {
   table: ITable;
-  // eslint-disable-next-line no-unused-vars
-  onDragMove: (tableId: string, x: number, y: number) => void;
-}) => {
+  allTables: ITable[];
+  stageScale: number;
+  stageOffset: { x: number; y: number };
+  onDragMove: (tableId: string, x: number, y: number) => void; // <-- fix here
+}
+
+const Table = ({ table, allTables, onDragMove }: TableProps) => {
   const lastIdx = table.columns.length - 1;
   const colors = getThemeColors();
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [isOverlapping, setIsOverlapping] = useState(false);
 
   return (
     <Group
       x={table.position.x}
       y={table.position.y}
       draggable
+      opacity={isDragging && isOverlapping ? 0.6 : 1} // only while dragging + overlap
+      onDragStart={(e) => {
+        setIsDragging(true);
+        e.target.moveToTop();
+        const layer = e.target.getLayer();
+        if (layer) layer.batchDraw();
+      }}
       onDragMove={(e) => {
-        onDragMove(table.id, e.target.x(), e.target.y());
+        const newX = e.target.x();
+        const newY = e.target.y();
+
+        // temporary rect for current drag position
+        const me = {
+          ...table,
+          position: { x: newX, y: newY }
+        };
+
+        const overlap = allTables.some((t) => t.id !== table.id && intersects(me, t));
+
+        setIsOverlapping(overlap);
+        onDragMove(table.id, newX, newY);
+      }}
+      onDragEnd={() => {
+        setIsDragging(false);
+        setIsOverlapping(false);
       }}>
-      {/* Table container with shadow effect */}
+      {/* Table container */}
       <Rect
         width={table.width}
         height={table.height}
@@ -70,7 +103,7 @@ const Table = ({
         shadowOpacity={0.2}
       />
 
-      {/* Header background */}
+      {/* Header */}
       <Rect
         width={table.width}
         height={HEADER_COLUMN_HEIGHT}
@@ -80,10 +113,8 @@ const Table = ({
         cornerRadius={[8, 8, 0, 0]}
       />
 
-      {/* Table icon (database symbol) */}
       <Text text="🗃️" x={COLUMN_PADDING_LEFT} y={HEADER_COLUMN_HEIGHT / 2 - 8} fontSize={16} />
 
-      {/* Table name */}
       <Text
         text={table.name}
         x={COLUMN_PADDING_LEFT + 25}
@@ -94,7 +125,7 @@ const Table = ({
         fontFamily="system-ui, -apple-system, sans-serif"
       />
 
-      {/* Column rows */}
+      {/* Columns */}
       {table.columns.map((col, idx) => {
         const isPK = col.isPrimary;
         const isFK = col.isForeign;
@@ -102,7 +133,6 @@ const Table = ({
 
         return (
           <Fragment key={col.id}>
-            {/* Column separator line */}
             {idx > 0 && (
               <Rect
                 x={COLUMN_PADDING_LEFT}
@@ -113,7 +143,6 @@ const Table = ({
               />
             )}
 
-            {/* Highlight background for PK/FK */}
             {(isPK || isFK) && (
               <Rect
                 x={0}
@@ -125,7 +154,6 @@ const Table = ({
               />
             )}
 
-            {/* Key icon */}
             <Text
               text={isPK ? '🔑' : isFK ? '🔗' : ''}
               x={COLUMN_PADDING_LEFT}
@@ -133,7 +161,6 @@ const Table = ({
               fontSize={12}
             />
 
-            {/* Field name */}
             <Text
               text={col.name}
               x={COLUMN_PADDING_LEFT + (isPK || isFK ? 22 : 0)}
@@ -144,19 +171,17 @@ const Table = ({
               fontStyle={isPK ? 'bold' : 'normal'}
             />
 
-            {/* Required indicator */}
             {(isPK || col.name.includes('_id')) && (
               <Text
                 text="*"
                 x={COLUMN_PADDING_LEFT + (isPK || isFK ? 22 : 0) + col.name.length * 8}
                 y={yPos + COLUMN_HEIGHT / 2 - 7}
                 fontSize={FONT_SIZE - 1}
-                fill="#ef4444" // red-500
+                fill="#ef4444"
                 fontFamily="system-ui, -apple-system, sans-serif"
               />
             )}
 
-            {/* Data type */}
             <Text
               text={col.dataType.toUpperCase()}
               x={table.width - COLUMN_PADDING_LEFT - col.dataType.length * 7}

@@ -34,7 +34,7 @@ class BaseCompanyAgent(ABC):
     to process requests and generate responses.
     """
     
-    def __init__(self, role: str, expertise: List[str], ai_provider: Model):
+    def __init__(self, role: str, expertise: List[str], system_prompt: str, ai_provider: Model):
         """
         Initialize the agent with role, expertise, and AI provider.
         
@@ -46,6 +46,7 @@ class BaseCompanyAgent(ABC):
         self.role = role
         self.expertise = expertise
         self.ai_provider = ai_provider
+        self.system_prompt = system_prompt
     
     @abstractmethod
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:
@@ -61,7 +62,6 @@ class BaseCompanyAgent(ABC):
         """
         pass
     
-    @abstractmethod
     def get_system_prompt(self) -> str:
         """
         Get the system prompt that defines this agent's behavior and expertise.
@@ -69,7 +69,7 @@ class BaseCompanyAgent(ABC):
         Returns:
             System prompt string for the AI provider
         """
-        pass
+        return self.system_prompt
     
     def can_handle_request(self, request_type: str) -> bool:
         """

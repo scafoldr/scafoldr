@@ -2,24 +2,59 @@
 Software Architect Agent
 
 This agent specializes in database design and system architecture,
-providing the same functionality as the existing DBML chat system
-but wrapped in the new agent architecture.
+providing expertise in DBML generation and architectural design.
 """
 
-from typing import Optional
-
+from typing import Optional, AsyncIterator
+from strands import Agent
 from strands.models import Model
-from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
-from core.chat.chats.dbml_chat.main import DBMLChat
-from core.chat.chats.dbml_chat.prompt import PROMPT_TEMPLATE
 
+from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
+from core.company.tools.generator_tools import scaffold_project
+
+ARCHITECT_PROMPT = """
+You are a Software Architect at Scafoldr Inc, specializing in database design, system architecture, and DBML generation. You are part of a multi-agent system where you collaborate with other specialized agents like Senior Engineers, Product Managers, and QA Engineers.
+
+Your primary responsibilities include:
+1. Translating high-level business goals into complete DBML schemas using Clean Architecture principles
+2. Providing architectural guidance and best practices
+3. Supporting the scaffold_project tool to generate complete application scaffolds
+
+When handling DBML schema generation:
+
+1. Clarification
+   - If the user's business goal is ambiguous or lacks critical details, ask exactly one targeted question at a time (e.g. "Should we track order status history?") and wait for their reply before proceeding.
+   - Do not generate any DBML until you have enough clarity.
+
+2. Autonomous Modeling
+   - Based solely on the business goal, decide on appropriate tables, columns (with types), relationships, constraints, indexes, default values, nullability, and naming.
+   - You choose all table and column names—there is no need for the user to specify them.
+
+3. Output Format
+   - When you're fully confident you have all requirements, output the valid DBML schema.
+   - When the user specifically requests just the DBML schema, provide only the DBML code without any additional text.
+   - When providing architectural guidance or responding to questions, include explanations and context.
+
+4. Conventions
+   - Use **snake_case** for all names, and plural table names (e.g. `users`).
+   - Define primary keys as `id integer [pk, increment]`.
+   - Use `Ref: table_a.column_a > table_b.column_b` for foreign keys.
+   - Annotate `not null` and `[unique]` blocks where appropriate.
+
+5. Integration with Scaffold Generation
+   - You have access to the scaffold_project tool that can generate a complete application from a DBML schema.
+   - When users want to generate a project, guide them through providing the necessary information:
+     - Project name
+     - Backend option (nodejs-express-js, java-spring, next-js-typescript)
+     - DBML schema
+     - Any additional configuration parameters
+
+Remember that you are part of a collaborative system. For implementation details, defer to the Senior Engineer. For product requirements and user stories, defer to the Product Manager. Focus on your architectural expertise while acknowledging the broader multi-agent context.
+"""
 
 class SoftwareArchitect(BaseCompanyAgent):
     """
     Software Architect agent specializing in database design and DBML generation.
-    
-    This agent wraps the existing DBMLChat functionality to maintain 100%
-    backward compatibility while providing the new agent interface.
     """
     
     def __init__(self, ai_provider: Model):
@@ -32,17 +67,20 @@ class SoftwareArchitect(BaseCompanyAgent):
         super().__init__(
             role="Software Architect",
             expertise=["database_design", "dbml", "system_architecture"],
-            ai_provider=ai_provider
+            ai_provider=ai_provider,
+            system_prompt=ARCHITECT_PROMPT,
         )
-        # Initialize the existing DBML chat system
-        self.dbml_chat = DBMLChat()
+
+        # Initialize the Strands agent
+        self.architect_agent = Agent(
+            model=self.ai_provider,
+            system_prompt=ARCHITECT_PROMPT,
+            tools=[scaffold_project]
+        )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:
         """
         Process a user request for database design and architecture.
-        
-        This method wraps the existing DBMLChat functionality to maintain
-        identical behavior while providing the new AgentResponse format.
         
         Args:
             user_request: The user's request or question
@@ -51,53 +89,44 @@ class SoftwareArchitect(BaseCompanyAgent):
         Returns:
             AgentResponse with the agent's response and metadata
         """
-        # Use a default conversation ID if none provided
-        if conversation_id is None:
-            conversation_id = "default"
-        
         try:
-            # Use the existing DBML chat system
-            chat_response = self.dbml_chat.talk(user_request, conversation_id)
+            # Call the Strands agent
+            response = self.architect_agent(user_request)
             
-            # Convert the existing response to our new format
+            # Determine response type based on content analysis
+            response_type = "text"
+            if "```dbml" in str(response):
+                response_type = "dbml"
+            elif "```" in str(response):
+                response_type = "code"
+            
+            # Return the response
             return AgentResponse(
-                content=chat_response.response,
-                response_type=chat_response.response_type,
+                content=str(response),
+                response_type=response_type,
                 metadata={
                     "agent_role": self.role,
-                    "conversation_id": conversation_id,
-                    "expertise_used": ["database_design", "dbml"],
-                    "original_response_format": "DBMLChatResponse"
+                    "conversation_id": conversation_id or "default",
+                    "expertise_used": self.expertise
                 },
-                confidence=0.95  # High confidence as this is the existing proven system
+                confidence=0.95
             )
         except Exception as e:
-            # Return error response in case of any issues
+            # Return error response
             return AgentResponse(
                 content=f"I encountered an error while processing your request: {str(e)}",
                 response_type="error",
                 metadata={
                     "agent_role": self.role,
                     "error": str(e),
-                    "conversation_id": conversation_id
+                    "conversation_id": conversation_id or "default"
                 },
                 confidence=0.0
             )
     
-    def get_system_prompt(self) -> str:
+    async def stream_process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AsyncIterator[str]:
         """
-        Get the system prompt for the Software Architect agent.
-        
-        Returns:
-            The existing DBML prompt template
-        """
-        return PROMPT_TEMPLATE
-    
-    async def stream_process_request(self, user_request: str, conversation_id: Optional[str] = None):
-        """
-        Process a request with streaming response for real-time feedback.
-        
-        This method wraps the existing streaming DBML chat functionality.
+        Process a request with streaming response.
         
         Args:
             user_request: The user's request or question
@@ -106,17 +135,23 @@ class SoftwareArchitect(BaseCompanyAgent):
         Yields:
             Response chunks as they become available
         """
-        # Use a default conversation ID if none provided
-        if conversation_id is None:
-            conversation_id = "default"
-        
         try:
-            # Use the existing streaming DBML chat system
-            for chunk in self.dbml_chat.stream_talk(user_request, conversation_id):
-                yield chunk
+            # Use the Strands agent with streaming
+            agent_stream = self.architect_agent.stream_async(user_request)
+            async for chunk in agent_stream:
+                yield str(chunk)
         except Exception as e:
-            # Yield error message in case of any issues
+            # Yield error message
             yield f"Error: {str(e)}"
+    
+    def get_system_prompt(self) -> str:
+        """
+        Get the system prompt for the Software Architect agent.
+        
+        Returns:
+            The existing DBML prompt template
+        """
+        return ARCHITECT_PROMPT
     
     def get_capabilities(self) -> dict:
         """

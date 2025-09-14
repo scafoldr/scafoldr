@@ -2,15 +2,14 @@
 Scafoldr Inc - AI Company Simulation System
 
 Main orchestrator for the AI company that manages agents and routes requests.
-This implementation focuses on maintaining backward compatibility while
-establishing the foundation for a full agent-based architecture.
+This implementation uses Strands agents with the "Agents as Tools" pattern.
 """
 
-from typing import Dict, Any, Optional, List, Iterator
+from typing import Dict, Any, Optional, AsyncIterator
 
 from strands.models import Model
 
-from core.company.agents.architect import SoftwareArchitect
+from core.company.agents.coordinator import ProjectCoordinator
 from core.company.agents.base_agent import BaseCompanyAgent
 
 
@@ -18,33 +17,24 @@ class ScafoldrInc:
     """
     Main company orchestrator that manages AI agents and routes user requests.
     
-    In Phase 1, all requests are routed to the Software Architect agent
-    to maintain 100% backward compatibility with existing DBML chat functionality.
+    This implementation uses a Project Coordinator as the main orchestrator,
+    which routes requests to specialized agents using the "Agents as Tools" pattern.
     """
     
     def __init__(self, ai_provider: Model):
         """Initialize the company with AI provider and agents."""
         # Initialize the AI provider
         self.ai_provider = ai_provider
-        
-        # Initialize agents
-        self.agents: Dict[str, BaseCompanyAgent] = {}
-        self._initialize_agents()
-        
-        # For Phase 1, default to architect agent for all requests
-        self.default_agent = "architect"
-    
-    def _initialize_agents(self):
-        """Initialize all company agents."""
-        # Create Software Architect agent
-        self.agents["architect"] = SoftwareArchitect(self.ai_provider)
+
+        self.coordinator = ProjectCoordinator(self.ai_provider)
+
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Process a user request and return a structured response.
         
-        For Phase 1, all requests are routed to the Software Architect agent
-        to maintain backward compatibility with existing DBML chat functionality.
+        By default, all requests are routed through the Project Coordinator,
+        which delegates to specialized agents as needed.
         
         Args:
             user_request: The user's request or question
@@ -54,19 +44,18 @@ class ScafoldrInc:
             Dictionary with response data compatible with existing API expectations
         """
         try:
-            # For Phase 1, always use the architect agent
-            agent = self.agents[self.default_agent]
+            # Use the coordinator agent by default
             
             # Process the request
-            response = await agent.process_request(user_request, conversation_id)
+            response = await self.coordinator.process_request(user_request, conversation_id)
             
             # Return structured response compatible with existing API format
             return {
                 "response": response.content,
                 "response_type": response.response_type,
                 "agent_info": {
-                    "role": agent.role,
-                    "expertise": agent.expertise,
+                    "role": self.coordinator.role,
+                    "expertise": self.coordinator.expertise,
                     "confidence": response.confidence
                 },
                 "metadata": response.metadata,
@@ -90,7 +79,7 @@ class ScafoldrInc:
                 "conversation_id": conversation_id or "default"
             }
     
-    async def stream_process_request(self, user_request: str, conversation_id: Optional[str] = None) -> Iterator[str]:
+    async def stream_process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AsyncIterator[str]:
         """
         Process a request with streaming response for real-time feedback.
         
@@ -102,32 +91,18 @@ class ScafoldrInc:
             Response chunks as they become available
         """
         try:
-            # For Phase 1, always use the architect agent
-            agent = self.agents[self.default_agent]
             
             # Check if agent supports streaming
-            if hasattr(agent, 'stream_process_request'):
-                async for chunk in agent.stream_process_request(user_request, conversation_id):
+            if hasattr(self.coordinator, 'stream_process_request'):
+                async for chunk in self.coordinator.stream_process_request(user_request, conversation_id):
                     yield chunk
             else:
                 # Fallback to non-streaming response
-                response = await agent.process_request(user_request, conversation_id)
+                response = await self.coordinator.process_request(user_request, conversation_id)
                 yield response.content
                 
         except Exception as e:
             yield f"Error: {str(e)}"
-    
-    def get_available_agents(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get information about all available agents.
-        
-        Returns:
-            Dictionary with agent information
-        """
-        return {
-            agent_id: agent.get_agent_info() 
-            for agent_id, agent in self.agents.items()
-        }
     
     def get_agent_by_expertise(self, expertise_area: str) -> Optional[BaseCompanyAgent]:
         """
@@ -153,18 +128,22 @@ class ScafoldrInc:
         """
         return {
             "company_name": "Scafoldr Inc",
-            "description": "AI-powered software development company specializing in backend code generation",
-            "version": "1.0.0",
-            "agents": self.get_available_agents(),
+            "description": "AI-powered software development company with specialized agents",
+            "version": "2.0.0",
             "capabilities": [
                 "Database schema design",
                 "DBML generation",
-                "System architecture consulting"
+                "System architecture consulting",
+                "Code implementation",
+                "Technical solutions",
+                "Quality assurance",
+                "Product management"
             ],
             "supported_features": {
                 "streaming_responses": True,
                 "conversation_history": True,
                 "multiple_agents": True,
-                "expertise_routing": True
+                "expertise_routing": True,
+                "agent_collaboration": True
             }
         }

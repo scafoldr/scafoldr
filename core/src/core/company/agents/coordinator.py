@@ -184,7 +184,10 @@ class ProjectCoordinator(BaseCompanyAgent):
             # Use the Strands agent with streaming
             agent_stream = self.coordinator_agent.stream_async(user_request)
             async for chunk in agent_stream:
-                yield str(chunk)
+                if "data" in chunk:
+                    # Only stream text chunks to the client
+                    yield chunk["data"]
+
         except Exception as e:
             # Yield error message
             yield f"Error: {str(e)}"

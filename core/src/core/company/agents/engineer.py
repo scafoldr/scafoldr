@@ -49,7 +49,8 @@ class SeniorEngineer(BaseCompanyAgent):
         # Initialize the Strands agent
         self.senior_engineer_agent = Agent(
             model=self.ai_provider,
-            system_prompt=ENGINEER_PROMPT
+            system_prompt=ENGINEER_PROMPT,
+            callback_handler=None
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

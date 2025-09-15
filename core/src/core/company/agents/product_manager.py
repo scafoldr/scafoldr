@@ -49,7 +49,8 @@ class ProductManager(BaseCompanyAgent):
         # Initialize the Strands agent
         self.product_manager_agent = Agent(
             model=self.ai_provider,
-            system_prompt=PRODUCT_MANAGER_PROMPT
+            system_prompt=PRODUCT_MANAGER_PROMPT,
+            callback_handler=None
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

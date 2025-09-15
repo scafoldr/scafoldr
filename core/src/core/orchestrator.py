@@ -12,5 +12,3 @@ def generate_backend(request: GenerateRequest) -> GenerateResponse:
     project_files = generator.generate(scafoldr_schema)
     
     return project_files
-
-# Old chat functions removed - use ScafoldrInc instead

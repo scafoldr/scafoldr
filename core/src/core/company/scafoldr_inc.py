@@ -27,7 +27,12 @@ class ScafoldrInc:
         # Initialize the AI provider
         self.ai_provider = ai_provider
 
-        self.coordinator = ProjectCoordinator(self.ai_provider, code_storage=code_storage, project_id, conversation_id)
+        self.coordinator = ProjectCoordinator(
+            self.ai_provider,
+            project_id=project_id,
+            conversation_id=conversation_id,
+            code_storage=code_storage
+        )
 
         self.code_storage = code_storage
 

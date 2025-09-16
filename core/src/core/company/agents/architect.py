@@ -11,6 +11,7 @@ from strands.models import Model
 
 from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
 from core.company.tools.generator_tools import scaffold_project
+from core.storage.code_storage import CodeStorage
 
 ARCHITECT_PROMPT = """
 You are a Software Architect at Scafoldr Inc, specializing in database design, system architecture, and DBML generation. You are part of a multi-agent system where you collaborate with other specialized agents like Senior Engineers, Product Managers, and QA Engineers.
@@ -57,7 +58,7 @@ class SoftwareArchitect(BaseCompanyAgent):
     Software Architect agent specializing in database design and DBML generation.
     """
     
-    def __init__(self, ai_provider: Model):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, code_storage: CodeStorage):
         """
         Initialize the Software Architect agent.
         
@@ -69,6 +70,8 @@ class SoftwareArchitect(BaseCompanyAgent):
             expertise=["database_design", "dbml", "system_architecture"],
             ai_provider=ai_provider,
             system_prompt=ARCHITECT_PROMPT,
+            project_id=project_id,
+            conversation_id=conversation_id
         )
 
         # Initialize the Strands agent
@@ -76,7 +79,8 @@ class SoftwareArchitect(BaseCompanyAgent):
             model=self.ai_provider,
             system_prompt=ARCHITECT_PROMPT,
             tools=[scaffold_project],
-            callback_handler=None
+            callback_handler=None,
+            state={code_storage: code_storage, project_id: project_id, conversation_id: conversation_id}
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

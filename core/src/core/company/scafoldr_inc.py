@@ -11,6 +11,7 @@ from strands.models import Model
 
 from core.company.agents.coordinator import ProjectCoordinator
 from core.company.agents.base_agent import BaseCompanyAgent
+from core.storage.code_storage import CodeStorage
 
 
 class ScafoldrInc:
@@ -20,13 +21,15 @@ class ScafoldrInc:
     This implementation uses a Project Coordinator as the main orchestrator,
     which routes requests to specialized agents using the "Agents as Tools" pattern.
     """
-    
-    def __init__(self, ai_provider: Model):
+
+    def __init__(self, ai_provider: Model, code_storage: CodeStorage, project_id: str, conversation_id: str):
         """Initialize the company with AI provider and agents."""
         # Initialize the AI provider
         self.ai_provider = ai_provider
 
-        self.coordinator = ProjectCoordinator(self.ai_provider)
+        self.coordinator = ProjectCoordinator(self.ai_provider, code_storage=code_storage, project_id, conversation_id)
+
+        self.code_storage = code_storage
 
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> Dict[str, Any]:

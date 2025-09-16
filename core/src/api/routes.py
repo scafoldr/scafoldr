@@ -14,10 +14,6 @@ router = APIRouter()
 
 config = Config()
 
-# Initialize the global Scafoldr Inc company instance
-scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider)
-
-
 @router.post(
     "/generate",
     response_model=GenerateResponse,
@@ -94,6 +90,11 @@ async def scafoldr_inc_consult_route(request: ChatRequest):
     with multi-agent capabilities while maintaining the same API interface.
     """
     try:
+        conversation_id = request.conversation_id
+        # TODO: At some point allow users to store projects more permanently when #10 is finished
+        project_id = conversation_id
+        scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage,
+                                       project_id=project_id, conversation_id=conversation_id)
         response = await scafoldr_company.process_request(
             user_request=request.user_input,
             conversation_id=request.conversation_id
@@ -124,11 +125,17 @@ async def scafoldr_inc_consult_stream_route(request: ChatRequest):
     This endpoint now uses the updated Strands-based implementation
     with multi-agent capabilities while maintaining the same streaming API interface.
     """
+    conversation_id = request.conversation_id
+    # TODO: At some point allow users to store projects more permanently when #10 is finished
+    project_id = conversation_id
+    scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage,
+                                   project_id=project_id, conversation_id=conversation_id)
+
     async def generate_stream():
         try:
             async for chunk in scafoldr_company.stream_process_request(
                 user_request=request.user_input,
-                conversation_id=request.conversation_id
+                conversation_id=conversation_id
             ):
                 yield chunk
         except Exception as e:
@@ -151,6 +158,7 @@ async def scafoldr_inc_info_route():
     This endpoint provides details about the company, its agents, and supported features.
     """
     try:
+        scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage, project_id='', conversation_id='')
         company_info = scafoldr_company.get_company_info()
         return company_info
     except Exception as e:

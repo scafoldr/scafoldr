@@ -10,6 +10,7 @@ from strands import Agent
 from strands.models import Model
 
 from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
+from core.storage.code_storage import CodeStorage
 
 # Define the system prompt for the Senior Engineer
 ENGINEER_PROMPT = """
@@ -32,7 +33,7 @@ class SeniorEngineer(BaseCompanyAgent):
     Senior Engineer agent specializing in code implementation and technical solutions.
     """
     
-    def __init__(self, ai_provider: Model):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, code_storage: CodeStorage):
         """
         Initialize the Senior Engineer agent.
         
@@ -44,13 +45,16 @@ class SeniorEngineer(BaseCompanyAgent):
             expertise=["code_implementation", "technical_solutions", "best_practices"],
             ai_provider=ai_provider,
             system_prompt=ENGINEER_PROMPT,
+            project_id=project_id,
+            conversation_id=conversation_id
         )
 
         # Initialize the Strands agent
         self.senior_engineer_agent = Agent(
             model=self.ai_provider,
             system_prompt=ENGINEER_PROMPT,
-            callback_handler=None
+            callback_handler=None,
+            state={code_storage: code_storage, project_id: project_id, conversation_id: conversation_id}
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

@@ -12,6 +12,7 @@ from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
 from core.company.agents.architect import SoftwareArchitect
 from core.company.agents.engineer import SeniorEngineer
 from core.company.agents.product_manager import ProductManager
+from core.storage.code_storage import CodeStorage
 
 # Define the system prompt for the Project Coordinator
 COORDINATOR_PROMPT = """
@@ -47,7 +48,7 @@ class ProjectCoordinator(BaseCompanyAgent):
     specialized agents using the "Agents as Tools" pattern.
     """
     
-    def __init__(self, ai_provider: Model):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, code_storage: CodeStorage):
         """
         Initialize the Project Coordinator agent.
         
@@ -59,12 +60,14 @@ class ProjectCoordinator(BaseCompanyAgent):
             expertise=["request_routing", "team_coordination", "project_management"],
             ai_provider=ai_provider,
             system_prompt=COORDINATOR_PROMPT,
+            project_id=project_id,
+            conversation_id=conversation_id
         )
-        
+
         # Initialize specialized agents
-        self.architect = SoftwareArchitect(ai_provider)
-        self.engineer = SeniorEngineer(ai_provider)
-        self.product_manager = ProductManager(ai_provider)
+        self.architect = SoftwareArchitect(ai_provider, project_id=project_id, conversation_id=conversation_id, code_storage=code_storage)
+        self.engineer = SeniorEngineer(ai_provider, project_id=project_id, conversation_id=conversation_id, code_storage=code_storage)
+        self.product_manager = ProductManager(ai_provider, project_id=project_id, conversation_id=conversation_id, )
         
         # Initialize the Strands agent with specialized agents as tools
         self.coordinator_agent = Agent(
@@ -74,7 +77,8 @@ class ProjectCoordinator(BaseCompanyAgent):
                 self._architect_tool,
                 self._engineer_tool,
                 self._product_manager_tool
-            ]
+            ],
+            state={project_id: project_id, conversation_id: conversation_id}
         )
     
     @tool

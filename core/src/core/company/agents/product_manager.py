@@ -32,7 +32,7 @@ class ProductManager(BaseCompanyAgent):
     Product Manager agent specializing in requirements, user stories, and product features.
     """
     
-    def __init__(self, ai_provider: Model):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str):
         """
         Initialize the Product Manager agent.
         
@@ -44,13 +44,16 @@ class ProductManager(BaseCompanyAgent):
             expertise=["requirements", "user_stories", "product_features"],
             ai_provider=ai_provider,
             system_prompt=PRODUCT_MANAGER_PROMPT,
+            project_id=project_id,
+            conversation_id=conversation_id
         )
 
         # Initialize the Strands agent
         self.product_manager_agent = Agent(
             model=self.ai_provider,
             system_prompt=PRODUCT_MANAGER_PROMPT,
-            callback_handler=None
+            callback_handler=None,
+            state={project_id: project_id, conversation_id: conversation_id}
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

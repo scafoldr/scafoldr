@@ -3,11 +3,20 @@ from typing import Optional
 
 from strands.models import Model
 
+from core.storage.storage_provider import InMemoryStorage
+from core.storage.code_storage import CodeStorage
+
 
 class Config:
     """Configuration class that reads from environment variables with proper defaults and validation."""
     def __init__(self):
         self.ai_provider = self.create_ai_provider()
+        self.code_storage = self.create_code_storage()
+
+    # Development setup (in-memory)
+    def create_code_storage(self) -> CodeStorage:
+        storage_provider = InMemoryStorage() # For production, replace with Redis
+        return CodeStorage(storage_provider)
 
     def create_ai_provider(self) -> Model:
         """Create AI provider instance using configuration.

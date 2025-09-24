@@ -80,7 +80,7 @@ class SoftwareArchitect(BaseCompanyAgent):
             system_prompt=ARCHITECT_PROMPT,
             tools=[scaffold_project],
             callback_handler=None,
-            state={code_storage: code_storage, project_id: project_id, conversation_id: conversation_id}
+            state={project_id: project_id, conversation_id: conversation_id}
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

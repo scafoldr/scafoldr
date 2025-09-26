@@ -8,6 +8,7 @@ All specialized agents inherit from BaseCompanyAgent.
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
+from strands import Agent
 from strands.models import Model
 
 class AgentResponse(BaseModel):
@@ -97,3 +98,13 @@ class BaseCompanyAgent(ABC):
             "expertise": self.expertise,
             "description": f"I'm a {self.role} specialized in {', '.join(self.expertise)}"
         }
+    
+    @abstractmethod
+    def get_agent(self) -> Agent:
+        """
+        Get the underlying Strands Agent instance.
+        
+        Returns:
+            Strands Agent instance
+        """
+        pass

@@ -1,8 +1,8 @@
 """
 Software Architect Agent
 
-This agent specializes in database design and system architecture,
-providing expertise in DBML generation and architectural design.
+This agent specializes in database design and DBML generation,
+with built-in validation to ensure the quality of the generated schemas.
 """
 
 from typing import Optional, AsyncIterator
@@ -10,55 +10,47 @@ from strands import Agent
 from strands.models import Model
 
 from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
-from core.company.tools.generator_tools import scaffold_project
+from core.company.tools.generator_tools import validate_dbml
 from core.storage.code_storage import CodeStorage
 
 ARCHITECT_PROMPT = """
-You are a Software Architect at Scafoldr Inc, specializing in database design, system architecture, and DBML generation. You are part of a multi-agent system where you collaborate with other specialized agents like Senior Engineers, Product Managers, and QA Engineers.
+You are a Software Architect at Scafoldr Inc, specializing in database design and DBML generation. Your primary responsibility is to translate business requirements into valid DBML schemas.
 
-Your primary responsibilities include:
-1. Translating high-level business goals into complete DBML schemas using Clean Architecture principles
-2. Providing architectural guidance and best practices
-3. Supporting the scaffold_project tool to generate complete application scaffolds
-
-When handling DBML schema generation:
-
-1. Clarification
-   - If the user's business goal is ambiguous or lacks critical details, ask exactly one targeted question at a time (e.g. "Should we track order status history?") and wait for their reply before proceeding.
-   - Do not generate any DBML until you have enough clarity.
+Your workflow for DBML generation:
+1. Requirement Analysis
+   - Carefully read and understand the user's business requirements.
+   - Ask clarifying questions if any details are missing or ambiguous.
 
 2. Autonomous Modeling
    - Based solely on the business goal, decide on appropriate tables, columns (with types), relationships, constraints, indexes, default values, nullability, and naming.
    - You choose all table and column names—there is no need for the user to specify them.
 
-3. Output Format
-   - When you're fully confident you have all requirements, output the valid DBML schema.
-   - When the user specifically requests just the DBML schema, provide only the DBML code without any additional text.
+3. DBML Generation and Validation
+   - When you're confident you have all requirements, generate the DBML schema.
+   - ALWAYS use the validate_dbml tool to check if your DBML is valid before presenting it to the user.
+   - If validation fails, fix the issues in your DBML and validate again until it passes.
+   - Only present DBML to the user after successful validation.
+
+4. Output Format
+   - Provide only the DBML code without any additional text.
    - When providing architectural guidance or responding to questions, include explanations and context.
 
-4. Conventions
+5. DBML Conventions
    - Use **snake_case** for all names, and plural table names (e.g. `users`).
    - Define primary keys as `id integer [pk, increment]`.
    - Use `Ref: table_a.column_a > table_b.column_b` for foreign keys.
    - Annotate `not null` and `[unique]` blocks where appropriate.
 
-5. Integration with Scaffold Generation
-   - You have access to the scaffold_project tool that can generate a complete application from a DBML schema.
-   - When users want to generate a project, guide them through providing the necessary information:
-     - Project name
-     - Backend option (nodejs-express-js, java-spring, next-js-typescript)
-     - DBML schema
-     - Any additional configuration parameters
-
-Remember that you are part of a collaborative system. For implementation details, defer to the Senior Engineer. For product requirements and user stories, defer to the Product Manager. Focus on your architectural expertise while acknowledging the broader multi-agent context.
+Remember: ALWAYS validate your DBML using the validate_dbml tool before presenting it to the user. This is a critical step to ensure the quality of your output.
 """
 
 class SoftwareArchitect(BaseCompanyAgent):
     """
-    Software Architect agent specializing in database design and DBML generation.
+    Software Architect agent specializing in database design and DBML generation
+    with built-in validation.
     """
     
-    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, code_storage: CodeStorage):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str):
         """
         Initialize the Software Architect agent.
         
@@ -78,8 +70,8 @@ class SoftwareArchitect(BaseCompanyAgent):
         self.architect_agent = Agent(
             model=self.ai_provider,
             system_prompt=ARCHITECT_PROMPT,
-            tools=[scaffold_project],
-            callback_handler=None,
+            tools=[validate_dbml],
+            # callback_handler=None,
             state={project_id: project_id, conversation_id: conversation_id}
         )
     
@@ -166,15 +158,24 @@ class SoftwareArchitect(BaseCompanyAgent):
             Dictionary describing the agent's capabilities
         """
         return {
-            "primary_function": "Database schema design and system architecture",
+            "primary_function": "Database schema design with validation",
             "input_formats": ["natural language business requirements"],
-            "output_formats": ["DBML schema", "architectural questions"],
+            "output_formats": ["validated DBML schema", "architectural guidance"],
             "streaming_supported": True,
             "conversation_support": True,
             "specialties": [
-                "Converting business requirements to database schemas",
+                "Converting business requirements to validated database schemas",
                 "DBML generation following Clean Architecture principles",
-                "Database relationship modeling",
+                "Database relationship modeling with validation",
                 "Schema optimization and best practices"
             ]
         }
+    
+    def get_agent(self) -> Agent:
+        """
+        Get the underlying Strands Agent instance.
+        
+        Returns:
+            Strands Agent instance
+        """
+        return self.architect_agent

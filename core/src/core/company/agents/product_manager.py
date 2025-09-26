@@ -52,7 +52,7 @@ class ProductManager(BaseCompanyAgent):
         self.product_manager_agent = Agent(
             model=self.ai_provider,
             system_prompt=PRODUCT_MANAGER_PROMPT,
-            callback_handler=None,
+            # callback_handler=None,
             state={project_id: project_id, conversation_id: conversation_id}
         )
     
@@ -143,3 +143,12 @@ class ProductManager(BaseCompanyAgent):
                 "Stakeholder communication"
             ]
         }
+    
+    def get_agent(self) -> Agent:
+        """
+        Get the underlying Strands Agent instance.
+        
+        Returns:
+            Strands Agent instance
+        """
+        return self.product_manager_agent

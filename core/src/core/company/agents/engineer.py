@@ -1,8 +1,8 @@
 """
 Senior Engineer Agent
 
-This agent specializes in code implementation, technical solutions, and best practices.
-It provides practical implementation details, code examples, and technical advice.
+This agent specializes in code implementation, project scaffolding, and technical solutions.
+It generates complete application scaffolds from DBML schemas and provides technical advice.
 """
 
 from typing import Optional, AsyncIterator
@@ -11,29 +11,50 @@ from strands.models import Model
 
 from core.company.agents.base_agent import BaseCompanyAgent, AgentResponse
 from core.storage.code_storage import CodeStorage
+from core.company.tools.generator_tools import scaffold_project
 
 # Define the system prompt for the Senior Engineer
 ENGINEER_PROMPT = """
-You are a Senior Software Engineer at Scafoldr Inc, specializing in code implementation, 
-technical solutions, and best practices. Your expertise includes:
+You are a Senior Software Engineer at Scafoldr Inc, specializing in code implementation,
+technical solutions, and project scaffolding. Your expertise includes:
 
 1. Writing clean, efficient, and maintainable code
 2. Implementing technical solutions based on architectural designs
-3. Advising on technology choices and implementation strategies
-4. Reviewing code and suggesting improvements
+3. Scaffolding new projects from DBML schemas
+4. Advising on technology choices and implementation strategies
 5. Solving complex technical problems
 
-When responding to requests, focus on practical implementation details, code examples,
+Your primary responsibility is to use the scaffold_project tool to generate complete
+application scaffolds from DBML schemas. When you receive a request containing DBML:
+
+1. Project Creation
+   - Identify the DBML schema in the request
+   - Extract or ask for a suitable project name
+   - Use the scaffold_project tool to generate the project
+   - The scaffold_project tool requires two parameters:
+     * project_name: A descriptive name for the project (use snake_case or kebab-case)
+     * dbml_schema: The complete DBML schema
+
+2. Technology Selection
+   - The scaffold_project tool will automatically select the appropriate technology stack
+   - Default is next-js-typescript, but can be customized if needed
+
+3. Response Format
+   - After successful scaffolding, provide a summary of what was generated
+   - Include next steps for the user to work with their new project
+
+For other technical requests, focus on practical implementation details, code examples,
 and technical best practices. Provide specific, actionable advice that helps users
 implement their software solutions effectively.
 """
 
 class SeniorEngineer(BaseCompanyAgent):
     """
-    Senior Engineer agent specializing in code implementation and technical solutions.
+    Senior Engineer agent specializing in project scaffolding from DBML schemas,
+    code implementation, and technical solutions.
     """
     
-    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, code_storage: CodeStorage):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str):
         """
         Initialize the Senior Engineer agent.
         
@@ -53,7 +74,8 @@ class SeniorEngineer(BaseCompanyAgent):
         self.senior_engineer_agent = Agent(
             model=self.ai_provider,
             system_prompt=ENGINEER_PROMPT,
-            callback_handler=None,
+            # callback_handler=None,
+            tools=[scaffold_project],
             state={project_id: project_id, conversation_id: conversation_id}
         )
     
@@ -130,16 +152,25 @@ class SeniorEngineer(BaseCompanyAgent):
             Dictionary describing the agent's capabilities
         """
         return {
-            "primary_function": "Code implementation and technical solutions",
-            "input_formats": ["technical questions", "implementation requests"],
-            "output_formats": ["code examples", "technical advice"],
+            "primary_function": "Project scaffolding and technical solutions",
+            "input_formats": ["DBML schemas", "technical questions", "implementation requests"],
+            "output_formats": ["scaffolded projects", "code examples", "technical advice"],
             "streaming_supported": True,
             "conversation_support": True,
             "specialties": [
+                "Generating complete application scaffolds from DBML",
                 "Writing clean, efficient code",
                 "Implementing technical solutions",
                 "Technology selection advice",
-                "Code review and improvement",
                 "Problem solving"
             ]
         }
+    
+    def get_agent(self) -> Agent:
+        """
+        Get the underlying Strands Agent instance.
+        
+        Returns:
+            Strands Agent instance
+        """
+        return self.senior_engineer_agent

@@ -31,7 +31,6 @@ class ScafoldrInc:
             self.ai_provider,
             project_id=project_id,
             conversation_id=conversation_id,
-            code_storage=code_storage
         )
 
         self.code_storage = code_storage

@@ -1,35 +1,75 @@
 from strands import tool
+from pydbml import PyDBML
 
 from core.generators.generator_factory import get_generator
 from core.scafoldr_schema.dbml_scafoldr_schema_maker import DbmlScafoldrSchemaMaker
+from core.orchestrator import generate_backend
 from models.generate import GenerateRequest, GenerateResponse
 
+
 @tool
-def scaffold_project(request: GenerateRequest) -> GenerateResponse:
-    """Generates a complete application scaffold from a DBML database schema.
+def validate_dbml(dbml_schema: str) -> str:
+    """Validates the provided DBML schema string.
     
-    This function takes a GenerateRequest containing a DBML schema and project configuration,
-    and then uses the appropriate generator based on the requested backend option to produce
-    a complete set of project files.
+    This function checks the syntax and structure of the DBML schema to ensure it adheres
+    to the DBML specification. It returns True if the schema is valid, otherwise False.
     
     Args:
-        request: A GenerateRequest object containing:
-            - project_name: Name of the project
-            - backend_option: Backend framework to use (nodejs-express-js, java-spring, next-js-typescript)
-            - user_input: DBML schema string defining database structure
-            - Additional configuration parameters (database connection, ports, etc.)
-            
+        dbml: A string containing the DBML schema to validate
     Returns:
-        GenerateResponse containing:
-            - files: Dictionary mapping file paths to generated file contents
-            - commands: List of commands to execute for project setup
+        A string indicating whether the DBML is valid or an error message if invalid
     """
-    # Create ScafoldrSchema from the request
-    schema_maker = DbmlScafoldrSchemaMaker()
-    scafoldr_schema = schema_maker.make_schema(request)
+    try:
+        PyDBML(dbml_schema)
+        # Simple validation could be checking for required keywords
+        schema_maker = DbmlScafoldrSchemaMaker()
+        scafoldr_schema = schema_maker.from_dbml(dbml=dbml_schema, project_name="validation_temp")
 
-    # Generate code using the schema
-    generator = get_generator(request.backend_option)
-    project_files = generator.generate(scafoldr_schema)
+        if not scafoldr_schema.database_schema.tables:
+            print(f"DBML validation failed: No tables found.")
+            return "Error - DBML validation failed: No tables found."
 
-    return project_files
+        print("DBML validation successful.")
+        return "Success - DBML is valid."
+
+        # More complex validation can be added here as needed
+    except Exception as e:
+        print(f"DBML validation failed: {str(e)}. Exception occurred during parsing. {dbml_schema}")
+        return f"Error - DBML validation failed: {str(e)}"
+
+@tool
+def scaffold_project(project_name: str, dbml_schema: str) -> str:
+    """Generates a complete application scaffold from the provided DBML schema.
+    This function uses the generate_backend orchestrator to create a full project
+    based on the DBML schema. It returns a summary of the generated project.
+
+    Args:
+        project_name: A descriptive name for the project (use snake_case or kebab-case)
+        dbml_schema: A string containing the complete DBML schema
+    Returns:
+        A summary string of the generated project files and structure
+    """
+    database_name = project_name.replace('-', '_') + "_db"
+    
+    request = GenerateRequest(
+        project_name=project_name,
+        database_name=database_name,
+        backend_option='next-js-typescript',
+        features=[],
+        user_input=dbml_schema,
+        description=f"Generated project: {project_name}",
+        version="1.0",
+        backend_port=8080,
+        backend_container_name="api",
+        database_connection_string=f"postgresql://user:password@localhost:5432/{database_name}"
+    )
+
+    try:
+        project_files = generate_backend(request)
+        print(f"Scaffolded project '{project_name}' with {len(project_files.files)} files.")
+        return f"Project '{project_name}' scaffolded successfully with {len(project_files.files)} files."
+    except Exception as e:
+        print(f"Error during project scaffolding: {str(e)}")
+        return f"Error during project scaffolding: {str(e)}"
+
+    

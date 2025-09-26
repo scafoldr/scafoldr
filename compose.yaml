@@ -47,6 +47,17 @@ services:
       - DOMAIN=${DOMAIN}
     restart: unless-stopped
 
+  redis:
+    container_name: redis
+    build:
+      context: ./redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
 volumes:
   caddy_data:
   caddy_config:
+  redis_data:

@@ -32,7 +32,7 @@ application scaffolds from DBML schemas. When you receive a request containing D
    - Extract or ask for a suitable project name
    - Use the scaffold_project tool to generate the project
    - The scaffold_project tool requires two parameters:
-     * project_name: A descriptive name for the project (use snake_case or kebab-case)
+     * project_name: A descriptive name for the project (use snake_case or kebab-case); if not provided, figure it out based on the DBML content
      * dbml_schema: The complete DBML schema
 
 2. Technology Selection

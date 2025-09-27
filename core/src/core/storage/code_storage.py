@@ -83,7 +83,21 @@ class CodeStorage:
         )
         
         await self.event_manager.publish('project_changed', change)
-    
+
+    async def save_files_bulk(self, project_id: str, files: Dict[str, str]):
+        """Save multiple files in bulk"""
+        for file_path, content in files.items():
+            await self.backend.set_file(project_id, file_path, content)
+            
+            change = CodeChange(
+                project_id=project_id,
+                file_path=file_path,
+                action='update',
+                content=content
+            )
+            
+            self.event_manager.publish('file_changed', change)
+
     def on_file_change(self, callback: Callable):
         """Subscribe to file changes"""
         self.event_manager.subscribe('file_changed', callback)

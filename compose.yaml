@@ -7,15 +7,16 @@ services:
       context: ./core
       target: app_dev
     ports:
+    # Core API will be publicly exposed on port 8000 only for local environment
       - "8000:8000"
     volumes:
       - ./core:/srv/www
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_MODEL=${OPENAI_API_MODEL}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_DB=0
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
     depends_on:
       - redis
     restart: unless-stopped
@@ -57,6 +58,7 @@ services:
     build:
       context: ./redis
     ports:
+    # Redis will be exposed on port 6379 only for local environment
       - "6379:6379"
     volumes:
       - redis_data:/data

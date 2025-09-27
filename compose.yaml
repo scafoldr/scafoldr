@@ -13,6 +13,11 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_MODEL=${OPENAI_API_MODEL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+    depends_on:
+      - redis
     restart: unless-stopped
 
   web:

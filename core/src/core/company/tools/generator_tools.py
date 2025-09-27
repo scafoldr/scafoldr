@@ -5,10 +5,12 @@ from core.generators.generator_factory import get_generator
 from core.scafoldr_schema.dbml_scafoldr_schema_maker import DbmlScafoldrSchemaMaker
 from core.orchestrator import generate_backend
 from models.generate import GenerateRequest, GenerateResponse
+from config.config import Config
 
+config = Config()
 
 @tool
-def validate_dbml(dbml_schema: str) -> str:
+async def validate_dbml(dbml_schema: str) -> str:
     """Validates the provided DBML schema string.
     
     This function checks the syntax and structure of the DBML schema to ensure it adheres
@@ -30,6 +32,11 @@ def validate_dbml(dbml_schema: str) -> str:
             return "Error - DBML validation failed: No tables found."
 
         print("DBML validation successful.")
+
+        # TODO: Replace "test-project-id" with actual project ID management from agent context
+        await config.code_storage.save_file("test-project-id", "validation_temp.dbml", dbml_schema)
+        print("Saved DBML to code storage for further use.")
+
         return "Success - DBML is valid."
 
         # More complex validation can be added here as needed
@@ -38,7 +45,7 @@ def validate_dbml(dbml_schema: str) -> str:
         return f"Error - DBML validation failed: {str(e)}"
 
 @tool
-def scaffold_project(project_name: str, dbml_schema: str) -> str:
+async def scaffold_project(project_name: str, dbml_schema: str) -> str:
     """Generates a complete application scaffold from the provided DBML schema.
     This function uses the generate_backend orchestrator to create a full project
     based on the DBML schema. It returns a summary of the generated project.
@@ -67,6 +74,11 @@ def scaffold_project(project_name: str, dbml_schema: str) -> str:
     try:
         project_files = generate_backend(request)
         print(f"Scaffolded project '{project_name}' with {len(project_files.files)} files.")
+
+        # TODO: Replace "test-project-id" with actual project ID management from agent context 
+        await config.code_storage.save_files_bulk(project_id="test-project-id", files=project_files.files)
+        print(f"Saved scaffolded project '{project_name}' files to code storage.")
+
         return f"Project '{project_name}' scaffolded successfully with {len(project_files.files)} files."
     except Exception as e:
         print(f"Error during project scaffolding: {str(e)}")

@@ -1,9 +1,11 @@
 import os
+import asyncio
 from typing import Optional
 
 from strands.models import Model
 
-from core.storage.storage_provider import InMemoryStorage
+import redis.asyncio as redis
+from core.storage.storage_provider import InMemoryStorage, RedisStorage
 from core.storage.code_storage import CodeStorage
 
 
@@ -13,9 +15,23 @@ class Config:
         self.ai_provider = self.create_ai_provider()
         self.code_storage = self.create_code_storage()
 
-    # Development setup (in-memory)
+    def create_redis_client(self):
+        """Create Redis client instance using configuration."""
+        redis_host = self._get_env("REDIS_HOST", "redis")
+        redis_port = int(self._get_env("REDIS_PORT", "6379"))
+        redis_db = int(self._get_env("REDIS_DB", "0"))
+        
+        return redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            decode_responses=False  # Keep as bytes for proper handling
+        )
+
     def create_code_storage(self) -> CodeStorage:
-        storage_provider = InMemoryStorage() # For production, replace with Redis
+        """Create code storage instance using Redis."""
+        redis_client = self.create_redis_client()
+        storage_provider = RedisStorage(redis_client)
         return CodeStorage(storage_provider)
 
     def create_ai_provider(self) -> Model:

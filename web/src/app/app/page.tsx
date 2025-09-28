@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { ProjectSwitcher } from '@/components/project-switcher';
 import { ChatInterface } from '@/features/chat';
 import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
-import { CodeEditor } from '@/features/code-editor';
+import { CodeEditor, FileMap } from '@/features/code-editor';
 import { DatabaseViewer } from '@/components/database-viewer';
 import { AppPreview } from '@/components/app-preview';
 import { UserProfileDropdown } from '@/components/user-profile-dropdown';
@@ -21,15 +21,64 @@ import {
   DeployComingSoonModal,
   ShareComingSoonModal
 } from '@/components/coming-soon-modal';
+import { useCodeStorage } from '@/contexts/CodeStorageContext';
+import { FileContent } from '@/services/codeStorage';
+
+// Define a type for generated files
+interface GeneratedFiles {
+  [filePath: string]: string;
+}
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');
   const [currentProject, setCurrentProject] = useState('Task Manager App');
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>();
   const [selectedFramework, setSelectedFramework] = useState<string>('nodejs-express-js');
-  const [generatedFiles, setGeneratedFiles] = useState<any>({});
+  const [generatedFiles, setGeneratedFiles] = useState<FileMap>({});
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(true);
+
+  const { activeProjectId, projects, getFile, getProjectFiles, isFileLoaded } = useCodeStorage();
+
+  useEffect(() => {
+    if (projects.size === 0 || !activeProjectId) {
+      return;
+    }
+    const projectFiles = projects.get(activeProjectId)?.files;
+    if (projectFiles) {
+      const freshFiles = Object.fromEntries(
+        Object.keys(projectFiles).map((filePath) =>
+          isFileLoaded(activeProjectId, filePath)
+            ? [filePath, generatedFiles[filePath]]
+            : [filePath, projectFiles[filePath].preview ?? '']
+        )
+      );
+      setGeneratedFiles(freshFiles);
+    }
+  }, [activeProjectId, projects, isFileLoaded]);
+
+  useEffect(() => {
+    if (!activeProjectId) {
+      return;
+    }
+    getProjectFiles(activeProjectId);
+  }, [activeProjectId, getProjectFiles]);
+
+  const getFileContent = async ({ id: filePath }: { id: string }) => {
+    if (!activeProjectId) {
+      return '';
+    }
+    try {
+      await getFile(activeProjectId, filePath).then((f: FileContent | null) => {
+        if (!f) {
+          return;
+        }
+        setGeneratedFiles((prev) => ({ ...prev, [filePath]: f?.content ?? '' }));
+      });
+    } catch (error) {
+      console.error('Error fetching file content:', error);
+    }
+  };
 
   // Coming Soon Modal states
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
@@ -58,7 +107,7 @@ export default function AppPage() {
     }
   }, []);
 
-  const handleViewCode = (files: any) => {
+  const handleViewCode = (files: GeneratedFiles) => {
     setGeneratedFiles(files);
     setActiveTab('code');
   };
@@ -234,6 +283,7 @@ This tab will display:
 Start by asking the AI to generate a database schema, then the code will be automatically generated and displayed here.`
                           }
                     }
+                    beforeFileSelect={getFileContent}
                   />
                 </TabsContent>
                 <TabsContent value="database" className="h-full m-0 relative">

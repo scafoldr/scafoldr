@@ -55,6 +55,7 @@ services:
 
   redis:
     container_name: redis
+    image: scafoldr/redis
     build:
       context: ./redis
     ports:

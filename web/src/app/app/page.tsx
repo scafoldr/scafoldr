@@ -114,8 +114,9 @@ export default function AppPage() {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Link href="/" className="hover:opacity-80 transition-opacity cursor-pointer">
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                🏗️ scafoldr
+              <span className="flex items-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <img className="w-[2.5rem]" src="logo.png" alt="Scafoldr logo" />
+                scafoldr
               </span>
             </Link>
           </div>

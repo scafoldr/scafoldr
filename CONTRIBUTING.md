@@ -62,6 +62,24 @@ If you prefer not to use Docker, you can start the application manually:
 
 Ensure all required services (e.g., database) are running and properly configured before starting the application.
 
+## 🐞 Debugging
+
+### Redis Debugging
+
+These commands help you inspect and troubleshoot Redis data storage when running Scafoldr with Docker.
+
+```bash
+# Connect to Redis CLI
+docker exec -it redis redis-cli
+
+# Common debugging commands
+KEYS *                           # List all keys in the database
+HGETALL project:default          # Get all hash fields for a specific key
+HGET project:default example.txt # Get a specific hash field
+HKEYS project:default            # Get all field names in a hash
+TYPE key-name                    # Check the type of a key
+```
+
 ## 🔀 Git Workflow
 
 1. Fork the repository

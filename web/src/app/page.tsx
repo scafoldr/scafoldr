@@ -12,6 +12,7 @@ import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
@@ -42,7 +43,7 @@ export default function LandingPage() {
           <div className="flex items-center space-x-2">
             <Link href="/" className="hover:opacity-80 transition-opacity cursor-pointer">
               <span className="flex items-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                <img className="w-[2.5rem]" src="logo.png" alt="Scafoldr logo" />
+                <Image src="/logo.png" width={40} height={40} alt="Scafoldr logo" />
                 scafoldr
               </span>
             </Link>
@@ -182,7 +183,7 @@ export default function LandingPage() {
           {/* Logo on left */}
           <div className="flex items-center space-x-2">
             <span className="flex items-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              <img className="w-[2.5rem]" src="logo.png" alt="Scafoldr logo" />
+              <Image src="/logo.png" width={40} height={40} alt="Scafoldr logo" />
               scafoldr
             </span>
           </div>

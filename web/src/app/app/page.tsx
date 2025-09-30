@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Code2, Database, Eye, GitBranch, Play, Download, Share } from 'lucide-react';
@@ -163,8 +164,9 @@ export default function AppPage() {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Link href="/" className="hover:opacity-80 transition-opacity cursor-pointer">
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                🏗️ scafoldr
+              <span className="flex items-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <Image src="/logo.png" width={40} height={40} alt="Scafoldr logo" />
+                scafoldr
               </span>
             </Link>
           </div>

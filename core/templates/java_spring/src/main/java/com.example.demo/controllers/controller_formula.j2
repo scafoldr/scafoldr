@@ -1,13 +1,13 @@
 package com.example.controllers;
 
 import com.example.dtos.{{ ClassName }}DTO;
-import com.example.models.{{ ClassName }};
+import com.example.models.{{ ClassName }}Entity;
 import com.example.services.{{ ClassName }}Service;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/{{ path }}")
-public class {{ ClassName }}Controller extends BaseController<{{ ClassName }}, {{ ClassName }}DTO> {
+public class {{ ClassName }}Controller extends BaseController<{{ ClassName }}Entity, {{ ClassName }}DTO> {
     public {{ ClassName }}Controller({{ ClassName }}Service service) {
         super(service, {{ ClassName }}DTO::from);
     }

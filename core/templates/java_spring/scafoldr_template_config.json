@@ -144,8 +144,8 @@
       {
         "name": "entities",
         "description": "JPA Entity classes",
-        "template": "src/main/java/com.example.demo/models/model_formula.j2",
-        "output_path": "src/main/java/com/example/models/{{ ClassName }}.java",
+        "template": "src/main/java/com.example.demo/entities/entity_formula.j2",
+        "output_path": "src/main/java/com/example/entities/{{ ClassName }}Entity.java",
         "context": "entity",
         "enabled": true,
         "variables": {}
@@ -220,7 +220,7 @@
   },
   "validation": {
     "required_templates": [
-      "src/main/java/com.example.demo/models/model_formula.j2",
+      "src/main/java/com.example.demo/entities/entity_formula.j2",
       "src/main/java/com.example.demo/repositories/repository_formula.j2",
       "src/main/java/com.example.demo/services/service_formula.j2",
       "src/main/java/com.example.demo/controllers/controller_formula.j2",

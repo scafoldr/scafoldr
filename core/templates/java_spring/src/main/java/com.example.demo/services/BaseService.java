@@ -1,12 +1,12 @@
 package com.example.services;
 
-import com.example.models.BaseModel;
+import com.example.entity.BaseEntity;
 import com.example.repositories.BaseRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public abstract class BaseService<T extends BaseModel> {
+public abstract class BaseService<T extends BaseEntity> {
 
     protected final BaseRepository<T, Integer> repository;
 

@@ -1,40 +1,105 @@
 import os
-import asyncio
+import threading
 from typing import Optional
 
 from strands.models import Model
 
-import redis.asyncio as redis
-from core.storage.storage_provider import InMemoryStorage, RedisStorage
+from core.storage.storage_provider import RedisStorage
 from core.storage.code_storage import CodeStorage
 
 
-class Config:
-    """Configuration class that reads from environment variables with proper defaults and validation."""
-    def __init__(self):
-        self.ai_provider = self.create_ai_provider()
-        self.code_storage = self.create_code_storage()
+class SingletonMeta(type):
+    """
+    Thread-safe singleton metaclass implementation.
+    This ensures only one instance of Config exists across all threads.
+    """
+    _instances = {}
+    _lock: threading.Lock = threading.Lock()
+    
+    def __call__(cls, *args, **kwargs):
+        # Double-checked locking pattern for thread safety
+        if cls not in cls._instances:
+            with cls._lock:
+                # Check again after acquiring lock
+                if cls not in cls._instances:
+                    instance = super().__call__(*args, **kwargs)
+                    cls._instances[cls] = instance
+        return cls._instances[cls]
 
-    def create_redis_client(self):
-        """Create Redis client instance using configuration."""
-        redis_host = self._get_env("REDIS_HOST", "redis")
-        redis_port = int(self._get_env("REDIS_PORT", "6379"))
-        redis_db = int(self._get_env("REDIS_DB", "0"))
+
+class Config(metaclass=SingletonMeta):
+    """
+    Configuration singleton class that reads from environment variables with proper defaults and validation.
+    
+    Usage:
+        # First call initializes the singleton
+        config = Config()
         
-        return redis.Redis(
-            host=redis_host,
-            port=redis_port,
-            db=redis_db,
-            decode_responses=False  # Keep as bytes for proper handling
-        )
-
-    def create_code_storage(self) -> CodeStorage:
-        """Create code storage instance using Redis."""
-        redis_client = self.create_redis_client()
-        storage_provider = RedisStorage(redis_client)
+        # All subsequent calls return the same instance
+        config2 = Config()
+        assert config is config2  # True
+        
+        # Access the singleton from anywhere
+        ai_provider = Config().ai_provider
+        storage = Config().code_storage
+    """
+    
+    def __init__(self):
+        # Only initialize once
+        if hasattr(self, '_initialized'):
+            return
+            
+        self._initialized = True
+        self._ai_provider = None
+        self._code_storage = None
+        
+        # Initialize components
+        self._setup_components()
+    
+    def _setup_components(self):
+        """Initialize all components during singleton creation."""
+        # Initialize in correct order to handle dependencies
+        self._code_storage = self._create_code_storage()
+        self._ai_provider = self._create_ai_provider()
+    
+    @property
+    def ai_provider(self) -> Model:
+        """Get AI provider instance (lazy initialization if needed)."""
+        if self._ai_provider is None:
+            self._ai_provider = self._create_ai_provider()
+        return self._ai_provider
+    
+    @property
+    def code_storage(self) -> CodeStorage:
+        """Get code storage instance (lazy initialization if needed)."""
+        if self._code_storage is None:
+            self._code_storage = self._create_code_storage()
+        return self._code_storage
+    
+    def _create_code_storage(self) -> CodeStorage:
+        """
+        Create code storage instance using Redis.
+        Uses the get_code_storage singleton factory from code_storage module.
+        """
+        # Create Redis connection parameters instead of passing the client directly
+        redis_params = {
+            'host': self._get_env("REDIS_HOST", "redis"),
+            'port': int(self._get_env("REDIS_PORT", "6379")),
+            'db': int(self._get_env("REDIS_DB", "0")),
+            'password': self._get_optional_env("REDIS_PASSWORD"),
+            'decode_responses': False,
+            'socket_connect_timeout': 5,
+            'socket_timeout': 5,
+            'retry_on_timeout': True,
+            'health_check_interval': 30
+        }
+        
+        # Pass connection parameters instead of client
+        storage_provider = RedisStorage(redis_params)
+        
         return CodeStorage(storage_provider)
-
-    def create_ai_provider(self) -> Model:
+    
+    def _create_ai_provider(self) -> Model:
         """Create AI provider instance using configuration.
 
         To switch to a different AI provider, uncomment the desired provider below
@@ -53,55 +118,6 @@ class Config:
                 "temperature": 0.7,
             }
         )
-
-        # Alternative AI provider example (commented out)
-
-        # Amazon Bedrock - https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/amazon-bedrock/
-        # import boto3
-        # from strands.models import BedrockModel
-
-        # # Create a custom boto3 session
-        # session = boto3.Session(
-        #     aws_access_key_id='your_access_key',
-        #     aws_secret_access_key='your_secret_key',
-        #     aws_session_token='your_session_token',  # If using temporary credentials
-        #     region_name='us-west-2',
-        #     profile_name='your-profile'  # Optional: Use a specific profile
-        # )
-
-        # # Create a Bedrock model with the custom session
-        # return BedrockModel(
-        #     model_id="anthropic.claude-sonnet-4-20250514-v1:0",
-        #     boto_session=session
-        # )
-
-
-        # Ollama - https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/ollama/
-        # from strands.models.ollama import OllamaModel
-
-        # # Create an Ollama model instance
-        # return OllamaModel(
-        #     host="http://localhost:11434",  # Ollama server address
-        #     model_id="llama3.1"               # Specify which model to use
-        # )
-
-        # Anthropic - https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/anthropic/
-        # from strands.models.anthropic import AnthropicModel
-        # from strands_tools import calculator
-
-        # return AnthropicModel(
-        #     client_args={
-        #         "api_key": "<KEY>",
-        #     },
-        #     # **model_config
-        #     max_tokens=1028,
-        #     model_id="claude-sonnet-4-20250514",
-        #     params={
-        #         "temperature": 0.7,
-        #     }
-        # )
-
-
 
     def _get_env(self, key: str, default: str) -> str:
         """Get environment variable with default value."""

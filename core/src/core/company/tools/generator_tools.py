@@ -34,7 +34,7 @@ async def validate_dbml(dbml_schema: str) -> str:
         print("DBML validation successful.")
 
         # TODO: Replace "test-project-id" with actual project ID management from agent context
-        await config.code_storage.save_file("test-project-id", "validation_temp.dbml", dbml_schema)
+        await config.code_storage.save_file("test-project-id", "schema.dbml", dbml_schema)
         print("Saved DBML to code storage for further use.")
 
         return "Success - DBML is valid."

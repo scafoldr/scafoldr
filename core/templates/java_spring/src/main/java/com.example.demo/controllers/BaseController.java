@@ -1,7 +1,7 @@
 package com.example.controllers;
 
 import com.example.dtos.BaseDTO;
-import com.example.entity.BaseEntity;
+import com.example.entities.BaseEntity;
 import com.example.services.BaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,6 @@
 package com.example.services;
 
-import com.example.entity.BaseEntity;
+import com.example.entities.BaseEntity;
 import com.example.repositories.BaseRepository;
 import org.springframework.transaction.annotation.Transactional;
 

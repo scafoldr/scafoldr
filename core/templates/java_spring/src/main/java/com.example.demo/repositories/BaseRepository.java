@@ -1,6 +1,6 @@
 package com.example.repositories;
 
-import com.example.entity.BaseEntity;
+import com.example.entities.BaseEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 

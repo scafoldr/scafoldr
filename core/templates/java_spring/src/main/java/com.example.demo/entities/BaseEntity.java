@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.entities;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
@@ -9,6 +9,6 @@ import lombok.*;
 public abstract class BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Integer id;
 }
 

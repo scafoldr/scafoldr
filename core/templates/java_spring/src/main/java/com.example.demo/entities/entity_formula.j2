@@ -1,4 +1,4 @@
-package com.example.models;
+package com.example.entities;
 
 {% for imp in imports %}
 import {{ imp }};
@@ -11,7 +11,7 @@ import {{ imp }};
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class {{ ClassName }} extends BaseEntity {
+public class {{ ClassName }}Entity extends BaseEntity {
     
 {% for field in fields %}
 {% if field.name != 'id' %}

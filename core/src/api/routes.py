@@ -19,7 +19,6 @@ from models.chat import ChatRequest
 router = APIRouter()
 
 config = Config()
-code_storage = config.code_storage
 
 @router.post(
     "/generate",
@@ -215,7 +214,7 @@ async def sse_code_updates(project_id: str, request: Request):
                 await queue.put(event_data)
         
         # Subscribe to file changes
-        code_storage.on_file_change(on_file_change)
+        config.code_storage.on_file_change(on_file_change)
         
         # Send initial connected event
         yield {
@@ -263,7 +262,7 @@ async def get_file(project_id: str, file_path: str):
     Get specific file content with metadata.
     """
     try:
-        content = await code_storage.get_file(project_id, file_path)
+        content = await config.code_storage.get_file(project_id, file_path)
         if content is None:
             raise HTTPException(
                 status_code=404,
@@ -306,8 +305,8 @@ async def get_project_files(project_id: str):
     Get all files for a project (metadata only, not full content).
     """
     try:
-        files = await code_storage.get_project_files(project_id)
-        
+        files = await config.code_storage.get_project_files(project_id)
+
         # Return metadata for each file, not full content
         result = {}
         for file_path, content in files.items():
@@ -360,8 +359,8 @@ async def save_file(project_id: str, file_path: str, request: Request):
         content = body["content"]
         
         # Save file
-        await code_storage.save_file(project_id, file_path, content)
-        
+        await config.code_storage.save_file(project_id, file_path, content)
+
         # Calculate metadata
         content_hash = hashlib.md5(content.encode()).hexdigest()
         size = len(content)
@@ -399,7 +398,7 @@ async def delete_file(project_id: str, file_path: str):
     """
     try:
         # Check if file exists first
-        content = await code_storage.get_file(project_id, file_path)
+        content = await config.code_storage.get_file(project_id, file_path)
         if content is None:
             raise HTTPException(
                 status_code=404,
@@ -407,8 +406,8 @@ async def delete_file(project_id: str, file_path: str):
             )
         
         # Delete file
-        await code_storage.delete_file(project_id, file_path)
-        
+        await config.code_storage.delete_file(project_id, file_path)
+
         return {
             "success": True,
             "project_id": project_id,
@@ -437,7 +436,7 @@ async def stream_file(project_id: str, file_path: str):
     Stream file content in chunks (for large files).
     """
     try:
-        content = await code_storage.get_file(project_id, file_path)
+        content = await config.code_storage.get_file(project_id, file_path)
         if content is None:
             raise HTTPException(
                 status_code=404,
@@ -518,7 +517,7 @@ async def bulk_save_files(project_id: str, request: Request):
             files[file_path] = content
         
         # Save files in bulk
-        await code_storage.save_files_bulk(project_id, files)
+        await config.code_storage.save_files_bulk(project_id, files)
         
         # Prepare response with metadata
         result = {}

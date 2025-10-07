@@ -48,27 +48,78 @@ class InMemoryStorage(BaseStorageProvider):
 
 
 class RedisStorage(BaseStorageProvider):
-    def __init__(self, redis_client):
-        self.redis = redis_client
+    def __init__(self, redis_params):
+        """
+        Initialize with a Redis connection parameters, a new client will be created for each operation.
+        """
+        self.redis_params = redis_params
+    
+    async def _get_redis_client(self):
+        """Get a Redis client that works with the current event loop"""
+        import redis.asyncio as redis
+        import logging
+        
+        # For safety, always create a new client for the current event loop
+        # This is the most reliable way to avoid event loop conflicts
+        if self.redis_params:
+            return redis.Redis(**self.redis_params)
+        else:
+            # This should never happen, but just in case
+            logging.error("No Redis parameters available")
+            raise ValueError("No Redis client or parameters available")
 
     async def set_file(self, project_id: str, file_path: str, content: str):
+        redis_client = await self._get_redis_client()
         key = f"project:{project_id}"
-        await self.redis.hset(key, file_path, content)
+        await redis_client.hset(key, file_path, content)
+        
+        # Close the client
+        await redis_client.close()
 
     async def get_file(self, project_id: str, file_path: str) -> Optional[str]:
+        redis_client = await self._get_redis_client()
         key = f"project:{project_id}"
-        result = await self.redis.hget(key, file_path)
+        result = await redis_client.hget(key, file_path)
+        
+        # Close the client
+        await redis_client.close()
+
         return result.decode('utf-8') if result else None
 
     async def delete_file(self, project_id: str, file_path: str):
+        redis_client = await self._get_redis_client()
         key = f"project:{project_id}"
-        await self.redis.hdel(key, file_path)
+        await redis_client.hdel(key, file_path)
+
+        # Close the client
+        await redis_client.close()
 
     async def get_project_files(self, project_id: str) -> Dict[str, str]:
+        import logging
+        
+        # Always create a new Redis client for this operation to ensure it uses the current event loop
+        redis_client = await self._get_redis_client()
+
         key = f"project:{project_id}"
-        result = await self.redis.hgetall(key)
-        return {k.decode('utf-8'): v.decode('utf-8') for k, v in result.items()}
+        try:
+            result = await redis_client.hgetall(key)
+            
+            # Close the client:
+            await redis_client.close()
+                
+            return {k.decode('utf-8'): v.decode('utf-8') for k, v in result.items()}
+        except Exception as e:
+            logging.error(f"Error in get_project_files: {str(e)}")
+            
+            # Close the client
+            await redis_client.close()
+                
+            raise
 
     async def delete_project(self, project_id: str):
+        redis_client = await self._get_redis_client()
         key = f"project:{project_id}"
-        await self.redis.delete(key)
+        await redis_client.delete(key)
+        
+        # Close the client
+        await redis_client.close()

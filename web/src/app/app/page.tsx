@@ -108,18 +108,6 @@ export default function AppPage() {
     }
   }, []);
 
-  const handleViewCode = (files: GeneratedFiles) => {
-    setGeneratedFiles(files);
-    setActiveTab('code');
-  };
-
-  const handleViewDB = (dbmlCode?: string) => {
-    if (dbmlCode) {
-      setCurrentDbml(dbmlCode);
-    }
-    setActiveTab('er-diagram');
-  };
-
   const handleUserInteraction = () => {
     setHasUserInteracted(true);
   };
@@ -213,9 +201,6 @@ export default function AppPage() {
         leftPanel={
           <ChatInterface
             initialPrompt={initialPrompt}
-            selectedFramework={selectedFramework}
-            onViewCode={handleViewCode}
-            onViewDB={handleViewDB}
             onUserInteraction={handleUserInteraction}
             onMessageReceived={handleMessageReceived}
           />

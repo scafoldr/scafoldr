@@ -97,7 +97,7 @@ Table products {
   description text
   price decimal
   inventory_count int
-  category_id int [ref: > categories.id]
+  category_id int
   created_at timestamp
 }
 
@@ -108,22 +108,22 @@ Table orders {
   customer_phone varchar
   delivery_address text
   status varchar
-  promo_code_id int [ref: - promo_codes.id]
+  promo_code_id int
   total_amount decimal
   created_at timestamp
 }
 
 Table order_items {
   id serial [pk]
-  order_id int [ref: > orders.id]
-  product_id int [ref: > products.id]
+  order_id int
+  product_id int
   quantity int
   unit_price decimal
 }
 
 Table payments {
   id serial [pk]
-  order_id int [ref: > orders.id]
+  order_id int
   payment_method varchar
   amount decimal
   status varchar
@@ -138,6 +138,12 @@ Table promo_codes {
   usage_limit int
   used_count int
 }
+
+Ref: categories.id < products.category_id
+Ref: promo_codes.id - orders.promo_code_id
+Ref: orders.id < order_items.order_id
+Ref: products.id < order_items.product_id
+Ref: orders.id < payments.order_id
 ```
 
 Remember: ALWAYS validate your DBML using the validate_dbml tool before presenting it to the user. This is a critical step to ensure the quality of your output.

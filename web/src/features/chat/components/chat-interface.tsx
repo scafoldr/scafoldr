@@ -78,9 +78,7 @@ export function ChatInterface({
           </div>
           <div>
             <h3 className="font-semibold text-sm">AI Assistant</h3>
-            <p className="text-xs text-slate-500">
-              {isLoading ? 'Thinking...' : 'Building your app...'}
-            </p>
+            <p className="text-xs text-slate-500">{isLoading ? 'Thinking...' : ''}</p>
           </div>
         </div>
       </div>

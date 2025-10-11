@@ -37,9 +37,9 @@ export interface UpdateOperation {
   content: string;
   timestamp: number;
   // eslint-disable-next-line no-unused-vars
-  resolve: (value: any) => void;
+  resolve: (value: unknown) => void;
   // eslint-disable-next-line no-unused-vars
-  reject: (reason: any) => void;
+  reject: (reason: unknown) => void;
   abortController: AbortController;
 }
 
@@ -67,7 +67,7 @@ class CodeStorageService {
 
   // Update queue for batching changes
   private updateQueue: UpdateOperation[] = [];
-  private updateTimer: NodeJS.Timeout | null = null;
+  private updateTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Optimistic updates tracking
   private optimisticUpdates: Map<string, { original: string | null; updated: string }> = new Map();
@@ -212,7 +212,7 @@ class CodeStorageService {
       signal?: AbortSignal;
       immediate?: boolean;
     } = {}
-  ): Promise<any> {
+  ): Promise<unknown> {
     const cacheKey = this.getFileCacheKey(projectId, filePath);
 
     // Store original content for potential rollback
@@ -222,7 +222,7 @@ class CodeStorageService {
       if (cachedFile) {
         originalContent = cachedFile.data.content;
       }
-    } catch (error) {
+    } catch {
       console.log(`No cached content found for ${filePath}`);
     }
 
@@ -406,7 +406,7 @@ class CodeStorageService {
   /**
    * Process a batch of updates
    */
-  private async processBatch(): void {
+  private async processBatch(): Promise<void> {
     // Clear the timer
     this.updateTimer = null;
 
@@ -432,7 +432,7 @@ class CodeStorageService {
     }
 
     // Process each project batch
-    for (const [projectId, operations] of projectBatches.entries()) {
+    for (const [projectId, operations] of Array.from(projectBatches.entries())) {
       // If there's only one operation, use the single file API
       if (operations.length === 1) {
         const operation = operations[0];
@@ -466,8 +466,9 @@ class CodeStorageService {
           );
 
           // Resolve all operations
+          const typedResult = result as { files: Record<string, unknown> };
           for (const operation of operations) {
-            const fileResult = result.files[operation.filePath];
+            const fileResult = typedResult.files[operation.filePath];
             operation.resolve(fileResult);
           }
         } catch (error) {
@@ -494,7 +495,7 @@ class CodeStorageService {
     filePath: string,
     content: string,
     signal: AbortSignal
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       console.log(`Saving file ${filePath}`);
       const response = await fetch(`/api/code/${projectId}/${filePath}`, {
@@ -534,7 +535,7 @@ class CodeStorageService {
     projectId: string,
     files: Record<string, string>,
     signal: AbortSignal
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       console.log(`Bulk saving ${Object.keys(files).length} files`);
       const response = await fetch(`/api/code/${projectId}/bulk`, {
@@ -578,7 +579,7 @@ class CodeStorageService {
     options: {
       signal?: AbortSignal;
     } = {}
-  ): Promise<any> {
+  ): Promise<unknown> {
     const cacheKey = this.getFileCacheKey(projectId, filePath);
 
     // Create abort controller if not provided
@@ -645,7 +646,7 @@ class CodeStorageService {
     this.projectCache.delete(projectId);
 
     // Also clear all file caches for this project
-    for (const cacheKey of this.fileCache.keys()) {
+    for (const cacheKey of Array.from(this.fileCache.keys())) {
       if (cacheKey.startsWith(`${projectId}:`)) {
         this.fileCache.delete(cacheKey);
       }

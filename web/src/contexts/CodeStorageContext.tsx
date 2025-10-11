@@ -37,28 +37,42 @@ type CodeStorageAction =
 // Context interface
 interface CodeStorageContextType extends CodeStorageState {
   // Project operations
+  // eslint-disable-next-line no-unused-vars
   setActiveProject: (projectId: string) => void;
+  // eslint-disable-next-line no-unused-vars
   clearProject: (projectId: string) => void;
   clearAllProjects: () => void;
 
   // File operations
   getFile: (
+    // eslint-disable-next-line no-unused-vars
     projectId: string,
+    // eslint-disable-next-line no-unused-vars
     filePath: string,
+    // eslint-disable-next-line no-unused-vars
     forceRefresh?: boolean
   ) => Promise<FileContent | null>;
+  // eslint-disable-next-line no-unused-vars
   getProjectFiles: (projectId: string, forceRefresh?: boolean) => Promise<ProjectFiles | null>;
   saveFile: (
+    // eslint-disable-next-line no-unused-vars
     projectId: string,
+    // eslint-disable-next-line no-unused-vars
     filePath: string,
+    // eslint-disable-next-line no-unused-vars
     content: string,
+    // eslint-disable-next-line no-unused-vars
     immediate?: boolean
-  ) => Promise<any>;
-  deleteFile: (projectId: string, filePath: string) => Promise<any>;
+  ) => Promise<unknown>;
+  // eslint-disable-next-line no-unused-vars
+  deleteFile: (projectId: string, filePath: string) => Promise<unknown>;
 
   // Utility methods
+  // eslint-disable-next-line no-unused-vars
   getFileMetadata: (projectId: string, filePath: string) => FileMetadata | null;
+  // eslint-disable-next-line no-unused-vars
   getProjectFilesList: (projectId: string) => string[];
+  // eslint-disable-next-line no-unused-vars
   isFileLoaded: (projectId: string, filePath: string) => boolean;
 }
 
@@ -132,7 +146,10 @@ function codeStorageReducer(state: CodeStorageState, action: CodeStorageAction):
 
       if (project && project.files[action.filePath]) {
         // Create a new files object without the deleted file
-        const { [action.filePath]: _, ...remainingFiles } = project.files;
+        // Using object destructuring to remove the file path while keeping the rest
+        const newFiles = { ...project.files };
+        delete newFiles[action.filePath];
+        const remainingFiles = newFiles;
 
         const updatedProject = {
           ...project,
@@ -200,7 +217,7 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
   });
 
   // Set up SSE connection for real-time updates
-  const { connected, reconnect } = useCodeSync({
+  const { reconnect } = useCodeSync({
     projectId: activeProjectId,
     onConnect: () => {
       dispatch({ type: 'SET_CONNECTION_STATUS', isConnected: true });
@@ -330,7 +347,7 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
       filePath: string,
       content: string,
       immediate = false
-    ): Promise<any> => {
+    ): Promise<unknown> => {
       try {
         const result = await codeStorage.saveFile(projectId, filePath, content, { immediate });
 
@@ -340,7 +357,7 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
             type: 'UPDATE_FILE',
             projectId,
             filePath,
-            metadata: result.metadata
+            metadata: (result as { metadata: FileMetadata }).metadata
           });
         }
 
@@ -355,7 +372,7 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
   );
 
   // Delete a file
-  const deleteFile = useCallback(async (projectId: string, filePath: string): Promise<any> => {
+  const deleteFile = useCallback(async (projectId: string, filePath: string): Promise<unknown> => {
     try {
       const result = await codeStorage.deleteFile(projectId, filePath);
 

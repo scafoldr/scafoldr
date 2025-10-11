@@ -12,6 +12,7 @@ import React, {
 import { codeStorage } from '@/services/codeStorage';
 import { useCodeSync, CodeChange } from '@/hooks/useCodeSync';
 import { ProjectFiles, FileContent, FileMetadata } from '@/services/codeStorage';
+import { useProjectManager } from './project-manager-context';
 
 // State structure for the context
 interface CodeStorageState {
@@ -191,15 +192,16 @@ export interface CodeStorageProviderProps {
 
 // Provider component
 export function CodeStorageProvider({ children, initialProjectId }: CodeStorageProviderProps) {
+  const { activeProjectId } = useProjectManager();
   // Use reducer for state management
   const [state, dispatch] = useReducer(codeStorageReducer, {
     ...initialState,
-    activeProjectId: initialProjectId || 'test-project-id' // Use mock project ID
+    activeProjectId
   });
 
   // Set up SSE connection for real-time updates
   const { connected, reconnect } = useCodeSync({
-    projectId: 'test-project-id',
+    projectId: activeProjectId,
     onConnect: () => {
       dispatch({ type: 'SET_CONNECTION_STATUS', isConnected: true });
     },
@@ -406,10 +408,10 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
 
   // Update SSE connection when active project changes
   useEffect(() => {
-    if (state.activeProjectId && !connected) {
+    if (state.activeProjectId) {
       reconnect();
     }
-  }, [state.activeProjectId, connected, reconnect]);
+  }, [state.activeProjectId, reconnect]);
 
   // Memoize context value to prevent unnecessary rerenders
   const contextValue = useMemo(

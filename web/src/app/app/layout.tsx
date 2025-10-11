@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 import { CodeStorageProvider } from '@/contexts/CodeStorageContext';
+import { ProjectManagerProvider } from '@/contexts/project-manager-context';
 
 export const metadata: Metadata = {
   title: 'Scafoldr - Open Source AI App Generator',
@@ -12,5 +13,11 @@ export default function AppLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  return <CodeStorageProvider>{children}</CodeStorageProvider>;
+  const initialProjectId = Math.random().toString(36).substring(2, 15);
+
+  return (
+    <ProjectManagerProvider initialActiveProjectId={initialProjectId}>
+      <CodeStorageProvider>{children}</CodeStorageProvider>
+    </ProjectManagerProvider>
+  );
 }

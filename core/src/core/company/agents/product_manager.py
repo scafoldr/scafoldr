@@ -53,7 +53,7 @@ class ProductManager(BaseCompanyAgent):
             model=self.ai_provider,
             system_prompt=PRODUCT_MANAGER_PROMPT,
             # callback_handler=None,
-            state={project_id: project_id, conversation_id: conversation_id}
+            state={"project_id": project_id, "conversation_id": conversation_id}
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

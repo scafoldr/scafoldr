@@ -1,4 +1,4 @@
-from strands import tool
+from strands import Agent, tool
 from pydbml import PyDBML
 
 from core.generators.generator_factory import get_generator
@@ -10,13 +10,14 @@ from config.config import Config
 config = Config()
 
 @tool
-async def validate_dbml(dbml_schema: str) -> str:
+async def validate_dbml(agent: Agent, dbml_schema: str) -> str:
     """Validates the provided DBML schema string.
     
     This function checks the syntax and structure of the DBML schema to ensure it adheres
     to the DBML specification. It returns True if the schema is valid, otherwise False.
     
     Args:
+        agent: The agent instance calling this tool
         dbml: A string containing the DBML schema to validate
     Returns:
         A string indicating whether the DBML is valid or an error message if invalid
@@ -31,10 +32,8 @@ async def validate_dbml(dbml_schema: str) -> str:
             print(f"DBML validation failed: No tables found.")
             return "Error - DBML validation failed: No tables found."
 
-        print("DBML validation successful.")
-
-        # TODO: Replace "test-project-id" with actual project ID management from agent context
-        await config.code_storage.save_file("test-project-id", "schema.dbml", dbml_schema)
+        project_id = agent.state.get('project_id')
+        await config.code_storage.save_file(project_id, "schema.dbml", dbml_schema)
         print("Saved DBML to code storage for further use.")
 
         return "Success - DBML is valid."
@@ -45,12 +44,13 @@ async def validate_dbml(dbml_schema: str) -> str:
         return f"Error - DBML validation failed: {str(e)}"
 
 @tool
-async def scaffold_project(project_name: str, dbml_schema: str) -> str:
+async def scaffold_project(agent: Agent, project_name: str, dbml_schema: str) -> str:
     """Generates a complete application scaffold from the provided DBML schema.
     This function uses the generate_backend orchestrator to create a full project
     based on the DBML schema. It returns a summary of the generated project.
 
     Args:
+        agent: The agent instance calling this tool
         project_name: A descriptive name for the project (use snake_case or kebab-case)
         dbml_schema: A string containing the complete DBML schema
     Returns:
@@ -75,8 +75,8 @@ async def scaffold_project(project_name: str, dbml_schema: str) -> str:
         project_files = generate_backend(request)
         print(f"Scaffolded project '{project_name}' with {len(project_files.files)} files.")
 
-        # TODO: Replace "test-project-id" with actual project ID management from agent context 
-        await config.code_storage.save_files_bulk(project_id="test-project-id", files=project_files.files)
+        project_id = agent.state.get('project_id')
+        await config.code_storage.save_files_bulk(project_id=project_id, files=project_files.files)
         print(f"Saved scaffolded project '{project_name}' files to code storage.")
 
         return f"Project '{project_name}' scaffolded successfully with {len(project_files.files)} files."

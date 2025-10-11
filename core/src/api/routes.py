@@ -97,8 +97,7 @@ async def scafoldr_inc_consult_route(request: ChatRequest):
     """
     try:
         conversation_id = request.conversation_id
-        # TODO: At some point allow users to store projects more permanently when #10 is finished
-        project_id = conversation_id
+        project_id = request.project_id
         scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage,
                                        project_id=project_id, conversation_id=conversation_id)
         response = await scafoldr_company.process_request(
@@ -132,8 +131,7 @@ async def scafoldr_inc_consult_stream_route(request: ChatRequest):
     with multi-agent capabilities while maintaining the same streaming API interface.
     """
     conversation_id = request.conversation_id
-    # TODO: At some point allow users to store projects more permanently when #10 is finished
-    project_id = conversation_id
+    project_id = request.project_id
     scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage,
                                    project_id=project_id, conversation_id=conversation_id)
 

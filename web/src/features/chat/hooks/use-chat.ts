@@ -9,6 +9,7 @@ import {
   ScafoldrIncAgent
 } from '../types/chat.types';
 import { sendChatMessageStream, ChatApiError } from '../api/chat.api';
+import { useProjectManager } from '@/contexts/project-manager-context';
 
 interface UseChatOptions {
   initialPrompt?: string;
@@ -17,6 +18,7 @@ interface UseChatOptions {
 
 export function useChat(options: UseChatOptions = {}) {
   const conversationId = useMemo(() => Math.random().toString(), []);
+  const { activeProjectId } = useProjectManager();
   const [chatState, setChatState] = useState<ChatState>({
     messages: [],
     isLoading: false,
@@ -118,7 +120,8 @@ export function useChat(options: UseChatOptions = {}) {
         await sendChatMessageStream(
           {
             userInput,
-            conversationId: chatState.conversationId
+            conversationId: chatState.conversationId,
+            projectId: activeProjectId
           },
           // Handle each chunk as it arrives
           (chunk) => {

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
  * This endpoint proxies SSE connections to the FastAPI backend,
  * maintaining a persistent connection for real-time updates.
  */
-export async function GET() {
+export async function GET(req: Request, { params }: { params: { projectId: string } }) {
   return new Response(
     new ReadableStream({
       async start(controller) {
@@ -14,7 +14,7 @@ export async function GET() {
           // Use Node.js HTTP instead of  next's fetch (which doesn't support streaming well)
           const http = await import('http');
           const url = new URL(
-            `${process.env.CORE_API_BASE_URL}/api/sse/code-updates/test-project-id`
+            `${process.env.CORE_API_BASE_URL}/api/sse/code-updates/${params.projectId}`
           );
 
           const req = http.request(

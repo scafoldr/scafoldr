@@ -26,6 +26,7 @@ import {
 } from '@/components/coming-soon-modal';
 import { useCodeStorage } from '@/contexts/CodeStorageContext';
 import { FileContent } from '@/services/codeStorage';
+import { useProjectManager } from '@/contexts/project-manager-context';
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');
@@ -36,8 +37,9 @@ export default function AppPage() {
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
   const [hasSchemaChanges, setHasSchemaChanges] = useState(false);
   const [hasCodeChanges, setHasCodeChanges] = useState(false);
+  const { activeProjectId } = useProjectManager();
 
-  const { activeProjectId, projects, getFile, getProjectFiles, isFileLoaded } = useCodeStorage();
+  const { projects, getFile, getProjectFiles, isFileLoaded } = useCodeStorage();
 
   // Handler functions for file changes
   const handleFileChange = useCallback((change: CodeChange) => {
@@ -80,7 +82,7 @@ export default function AppPage() {
 
   // Set up SSE connection for file changes
   useCodeSync({
-    projectId: 'test-project-id',
+    projectId: activeProjectId,
     onFileChange: handleFileChange
   });
 

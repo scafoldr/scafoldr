@@ -36,6 +36,7 @@ export interface ChatState {
 export interface ChatApiRequest {
   userInput: string;
   conversationId: string;
+  projectId: string;
 }
 
 export interface ScafoldrIncAgent {

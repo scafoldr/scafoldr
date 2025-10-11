@@ -14,7 +14,6 @@ import { DatabaseViewer } from '@/components/database-viewer';
 import { AppPreview } from '@/components/app-preview';
 import { UserProfileDropdown } from '@/components/user-profile-dropdown';
 import { ResizableLayout } from '@/components/resizable-layout';
-import { PreviewIndicator } from '@/components/preview-indicator';
 import { downloadProjectAsZip } from '@/lib/export-utils';
 import { ChangesIndicator } from '@/components/changes-indicator';
 import { playNotificationSound } from '@/utils/notification';
@@ -35,7 +34,6 @@ export default function AppPage() {
   const [selectedFramework, setSelectedFramework] = useState<string>('nodejs-express-js');
   const [generatedFiles, setGeneratedFiles] = useState<FileMap>({});
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
-  const [hasUserInteracted, setHasUserInteracted] = useState(true);
   const [hasSchemaChanges, setHasSchemaChanges] = useState(false);
   const [hasCodeChanges, setHasCodeChanges] = useState(false);
 
@@ -45,7 +43,7 @@ export default function AppPage() {
   const handleFileChange = useCallback((change: CodeChange) => {
     const { file_path } = change;
     if (file_path.endsWith('schema.dbml') && activeProjectId) {
-      getFile(activeProjectId, file_path).then((file) => {
+      getFile(activeProjectId, 'schema.dbml').then((file) => {
         setCurrentDbml(file?.content ?? '');
         setHasSchemaChanges(true);
         playNotificationSound().catch(console.error);
@@ -153,10 +151,6 @@ export default function AppPage() {
     }
   }, []);
 
-  const handleUserInteraction = () => {
-    setHasUserInteracted(true);
-  };
-
   const handleExport = async () => {
     try {
       setIsExporting(true);
@@ -229,9 +223,7 @@ export default function AppPage() {
 
       {/* Main Content with Resizable Layout */}
       <ResizableLayout
-        leftPanel={
-          <ChatInterface initialPrompt={initialPrompt} onUserInteraction={handleUserInteraction} />
-        }
+        leftPanel={<ChatInterface initialPrompt={initialPrompt} />}
         rightPanel={
           <>
             {/* Tab Navigation */}
@@ -276,11 +268,9 @@ export default function AppPage() {
             <div className="flex-1 overflow-hidden">
               <Tabs value={activeTab} className="h-full">
                 <TabsContent value="er-diagram" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="ER Diagram" show={!hasUserInteracted} />
                   <DynamicERDiagram dbmlCode={currentDbml} />
                 </TabsContent>
                 <TabsContent value="code" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="Code" show={!hasUserInteracted} />
                   <CodeEditor
                     files={
                       Object.keys(generatedFiles).length > 0
@@ -303,11 +293,9 @@ Start by asking the AI to generate a database schema, then the code will be auto
                   />
                 </TabsContent>
                 <TabsContent value="database" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="Database" show={!hasUserInteracted} />
                   <DatabaseViewer />
                 </TabsContent>
                 <TabsContent value="preview" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="Preview" show={!hasUserInteracted} />
                   <AppPreview />
                 </TabsContent>
               </Tabs>

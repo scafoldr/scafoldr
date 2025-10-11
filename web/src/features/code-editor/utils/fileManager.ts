@@ -1,24 +1,5 @@
 import { Directory, File, FileMap, Type } from '../types';
 
-export function findFileByName(rootDir: Directory, filename: string): File | undefined {
-  let targetFile: File | undefined = undefined;
-
-  function findFile(rootDir: Directory, filename: string) {
-    rootDir.files.forEach((file) => {
-      if (file.name === filename) {
-        targetFile = file;
-        return;
-      }
-    });
-    rootDir.dirs.forEach((dir) => {
-      findFile(dir, filename);
-    });
-  }
-
-  findFile(rootDir, filename);
-  return targetFile;
-}
-
 export function sortDir(l: Directory, r: Directory) {
   return l.name.localeCompare(r.name);
 }
@@ -82,4 +63,36 @@ export function convertToTree(fileMap: FileMap): Directory {
   }
 
   return root;
+}
+
+export function findFileByPath(rootDir: Directory, path: string): File | undefined {
+  // Normalize the path by removing leading and trailing slashes
+  const normalizedPath = path.replace(/^\/+|\/+$/g, '');
+
+  // If path is empty, return undefined
+  if (!normalizedPath) return undefined;
+
+  // Split the path into parts
+  const parts = normalizedPath.split('/');
+
+  // Start from the root directory
+  let currentDir: Directory = rootDir;
+
+  // Traverse the directory structure for all parts except the last one (which is the file)
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    // Find the subdirectory with the matching name
+    const nextDir = currentDir.dirs.find((dir) => dir.name === part);
+
+    // If directory not found, return undefined
+    if (!nextDir) return undefined;
+
+    // Move to the next directory
+    currentDir = nextDir;
+  }
+  // The last part is the file name
+  const fileName = parts[parts.length - 1];
+
+  // Find and return the file with the matching name in the current directory
+  return currentDir.files.find((file) => file.name === fileName);
 }

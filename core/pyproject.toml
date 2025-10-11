@@ -10,9 +10,6 @@ authors = [{ name = "Dimitrije Glibic", email = "dimitrije.glibic1@gmail.com" }]
 dependencies = [
     "typer",
     "InquirerPy",
-    "openai",
-    "langchain-openai",
-    "langchain_core",
     "dotenv",
     "pydantic",
     "pydbml",

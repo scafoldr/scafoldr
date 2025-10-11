@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,28 +9,122 @@ import Link from 'next/link';
 import { ProjectSwitcher } from '@/components/project-switcher';
 import { ChatInterface } from '@/features/chat';
 import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
-import { CodeEditor } from '@/features/code-editor';
+import { CodeEditor, FileMap } from '@/features/code-editor';
 import { DatabaseViewer } from '@/components/database-viewer';
 import { AppPreview } from '@/components/app-preview';
 import { UserProfileDropdown } from '@/components/user-profile-dropdown';
 import { ResizableLayout } from '@/components/resizable-layout';
-import { PreviewIndicator } from '@/components/preview-indicator';
 import { downloadProjectAsZip } from '@/lib/export-utils';
+import { ChangesIndicator } from '@/components/changes-indicator';
+import { playNotificationSound } from '@/utils/notification';
+import { useCodeSync, CodeChange } from '@/hooks/useCodeSync';
 import {
   DatabaseComingSoonModal,
   PreviewComingSoonModal,
   DeployComingSoonModal,
   ShareComingSoonModal
 } from '@/components/coming-soon-modal';
+import { useCodeStorage } from '@/contexts/CodeStorageContext';
+import { FileContent } from '@/services/codeStorage';
+import { useProjectManager } from '@/contexts/project-manager-context';
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');
   const [currentProject, setCurrentProject] = useState('Task Manager App');
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>();
   const [selectedFramework, setSelectedFramework] = useState<string>('nodejs-express-js');
-  const [generatedFiles, setGeneratedFiles] = useState<any>({});
+  const [generatedFiles, setGeneratedFiles] = useState<FileMap>({});
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [hasSchemaChanges, setHasSchemaChanges] = useState(false);
+  const [hasCodeChanges, setHasCodeChanges] = useState(false);
+  const { activeProjectId } = useProjectManager();
+
+  const { projects, getFile, getProjectFiles, isFileLoaded } = useCodeStorage();
+
+  // Handler functions for file changes
+  const handleFileChange = useCallback((change: CodeChange) => {
+    const { file_path } = change;
+    if (file_path.endsWith('schema.dbml') && activeProjectId) {
+      getFile(activeProjectId, 'schema.dbml').then((file) => {
+        setCurrentDbml(file?.content ?? '');
+        setHasSchemaChanges(true);
+        playNotificationSound().catch(console.error);
+      });
+    } else {
+      // Any other file change
+      setHasCodeChanges(true);
+      playNotificationSound().catch(console.error);
+    }
+  }, []);
+
+  // Reset functions for change indicators
+  const resetSchemaChanges = useCallback(() => {
+    setHasSchemaChanges(false);
+  }, []);
+
+  const resetCodeChanges = useCallback(() => {
+    setHasCodeChanges(false);
+  }, []);
+
+  // Handle tab changes
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+      // Reset the change indicator for the selected tab
+      if (value === 'er-diagram') {
+        resetSchemaChanges();
+      } else if (value === 'code') {
+        resetCodeChanges();
+      }
+    },
+    [resetSchemaChanges, resetCodeChanges]
+  );
+
+  // Set up SSE connection for file changes
+  useCodeSync({
+    projectId: activeProjectId,
+    onFileChange: handleFileChange
+  });
+
+  useEffect(() => {
+    if (projects.size === 0 || !activeProjectId) {
+      return;
+    }
+    const projectFiles = projects.get(activeProjectId)?.files;
+    if (projectFiles) {
+      const freshFiles = Object.fromEntries(
+        Object.keys(projectFiles).map((filePath) =>
+          isFileLoaded(activeProjectId, filePath)
+            ? [filePath, generatedFiles[filePath]]
+            : [filePath, projectFiles[filePath].preview ?? '']
+        )
+      );
+      setGeneratedFiles(freshFiles);
+    }
+  }, [activeProjectId, projects, isFileLoaded]);
+
+  useEffect(() => {
+    if (!activeProjectId) {
+      return;
+    }
+    getProjectFiles(activeProjectId);
+  }, [activeProjectId, getProjectFiles]);
+
+  const getFileContent = async ({ id: filePath }: { id: string }) => {
+    if (!activeProjectId) {
+      return '';
+    }
+    try {
+      await getFile(activeProjectId, filePath).then((f: FileContent | null) => {
+        if (!f) {
+          return;
+        }
+        setGeneratedFiles((prev) => ({ ...prev, [filePath]: f?.content ?? '' }));
+      });
+    } catch (error) {
+      console.error('Error fetching file content:', error);
+    }
+  };
 
   // Coming Soon Modal states
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
@@ -58,36 +152,6 @@ export default function AppPage() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
-
-  const handleViewCode = (files: any) => {
-    setGeneratedFiles(files);
-    setActiveTab('code');
-  };
-
-  const handleViewDB = (dbmlCode?: string) => {
-    if (dbmlCode) {
-      setCurrentDbml(dbmlCode);
-    }
-    setActiveTab('er-diagram');
-  };
-
-  const handleUserInteraction = () => {
-    setHasUserInteracted(true);
-  };
-
-  const handleMessageReceived = (messageType: string, content?: string) => {
-    // Auto-switch tabs based on message type
-    if (messageType === 'RESULT' || messageType === 'DBML') {
-      // Database/DBML generated - switch to ER Diagram
-      if (content) {
-        setCurrentDbml(content);
-      }
-      setActiveTab('er-diagram');
-    } else if (messageType === 'CODE_GENERATION') {
-      // Code generated - switch to Code tab
-      setActiveTab('code');
-    }
-  };
 
   const handleExport = async () => {
     try {
@@ -161,29 +225,22 @@ export default function AppPage() {
 
       {/* Main Content with Resizable Layout */}
       <ResizableLayout
-        leftPanel={
-          <ChatInterface
-            initialPrompt={initialPrompt}
-            selectedFramework={selectedFramework}
-            onViewCode={handleViewCode}
-            onViewDB={handleViewDB}
-            onUserInteraction={handleUserInteraction}
-            onMessageReceived={handleMessageReceived}
-          />
-        }
+        leftPanel={<ChatInterface initialPrompt={initialPrompt} />}
         rightPanel={
           <>
             {/* Tab Navigation */}
             <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-800">
                   <TabsTrigger value="er-diagram" className="flex items-center space-x-2">
                     <GitBranch className="w-4 h-4" />
                     <span className="hidden sm:inline">ER Diagram</span>
+                    <ChangesIndicator isVisible={hasSchemaChanges} className="ml-1" />
                   </TabsTrigger>
                   <TabsTrigger value="code" className="flex items-center space-x-2">
                     <Code2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Code</span>
+                    <ChangesIndicator isVisible={hasCodeChanges} className="ml-1" />
                   </TabsTrigger>
                   <TabsTrigger
                     value="database"
@@ -213,11 +270,9 @@ export default function AppPage() {
             <div className="flex-1 overflow-hidden">
               <Tabs value={activeTab} className="h-full">
                 <TabsContent value="er-diagram" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="ER Diagram" show={!hasUserInteracted} />
                   <DynamicERDiagram dbmlCode={currentDbml} />
                 </TabsContent>
                 <TabsContent value="code" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="Code" show={!hasUserInteracted} />
                   <CodeEditor
                     files={
                       Object.keys(generatedFiles).length > 0
@@ -236,14 +291,13 @@ This tab will display:
 Start by asking the AI to generate a database schema, then the code will be automatically generated and displayed here.`
                           }
                     }
+                    beforeFileSelect={getFileContent}
                   />
                 </TabsContent>
                 <TabsContent value="database" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="Database" show={!hasUserInteracted} />
                   <DatabaseViewer />
                 </TabsContent>
                 <TabsContent value="preview" className="h-full m-0 relative">
-                  <PreviewIndicator tabName="Preview" show={!hasUserInteracted} />
                   <AppPreview />
                 </TabsContent>
               </Tabs>

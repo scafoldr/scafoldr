@@ -1,5 +1,5 @@
 export async function POST(req: Request) {
-  const { userInput, conversationId } = await req.json();
+  const { userInput, conversationId, projectId } = await req.json();
   const externalUrl = `${process.env.CORE_API_BASE_URL}/scafoldr-inc/consult`;
 
   try {
@@ -10,7 +10,8 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         user_input: userInput,
-        conversation_id: conversationId
+        conversation_id: conversationId,
+        project_id: projectId
       })
     });
 

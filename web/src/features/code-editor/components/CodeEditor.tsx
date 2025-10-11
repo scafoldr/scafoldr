@@ -1,19 +1,52 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { convertToTree } from '../utils/fileManager';
+import { useEffect, useState } from 'react';
+import { convertToTree, findFileByPath } from '../utils/fileManager';
 import { FileTree } from './FileTree';
 import { Code } from './Code';
-import { File, FileMap } from '../types';
+import { Directory, File, FileMap } from '../types';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Download } from 'lucide-react';
 import { downloadProjectAsZip } from '@/lib/export-utils';
 
-export default function CodeEditor({ files }: { files: FileMap }) {
+interface CodeEditorProps {
+  files: FileMap;
+  // eslint-disable-next-line no-unused-vars
+  beforeFileSelect?: (file: File) => Promise<'' | undefined>;
+}
+
+export default function CodeEditor({ files, beforeFileSelect }: CodeEditorProps) {
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
   const [isExporting, setIsExporting] = useState(false);
-  const filesTree = useMemo(() => convertToTree(files), [files]);
+  const [filesTree, setFilesTree] = useState<Directory>({
+    id: 'root',
+    type: 1,
+    name: 'root',
+    parentId: undefined,
+    depth: 0,
+    files: [],
+    dirs: []
+  });
+  // const filesTree = useMemo(() => convertToTree(files), [files]);
+
+  useEffect(() => {
+    setFilesTree(convertToTree(files));
+  }, [files]);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      return;
+    }
+    // Check if selectedFiles is different than one in filesTree
+    const newSelectedFile = findFileByPath(filesTree, selectedFile.id);
+    if (newSelectedFile) {
+      setSelectedFile(newSelectedFile);
+      return;
+    }
+    setSelectedFile(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filesTree]);
 
   const handleDownload = async () => {
     try {
@@ -25,6 +58,13 @@ export default function CodeEditor({ files }: { files: FileMap }) {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleFileSelect = async (file: File) => {
+    if (beforeFileSelect) {
+      await beforeFileSelect(file);
+    }
+    setSelectedFile(file);
   };
 
   return (
@@ -43,7 +83,7 @@ export default function CodeEditor({ files }: { files: FileMap }) {
 
         <ScrollArea className="h-[calc(100%-60px)]">
           <div className="p-2">
-            <FileTree rootDir={filesTree} onSelect={setSelectedFile} selectedFile={selectedFile} />
+            <FileTree rootDir={filesTree} onSelect={handleFileSelect} selectedFile={selectedFile} />
           </div>
         </ScrollArea>
       </div>

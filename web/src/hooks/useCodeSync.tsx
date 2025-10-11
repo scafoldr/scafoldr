@@ -66,12 +66,7 @@ export function useCodeSync({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fileHashesRef = useRef<Record<string, string>>({});
 
-  // Calculate backoff time based on reconnect count (exponential with jitter)
-  const getBackoffTime = useCallback((count: number) => {
-    const baseTime = Math.min(1000 * Math.pow(2, count), 30000); // Max 30 seconds
-    const jitter = Math.random() * 1000; // Add up to 1 second of jitter
-    return baseTime + jitter;
-  }, []);
+  const RECONNECT_TIME = 5000;
 
   // Process a code change event
   const processCodeChange = useCallback(
@@ -225,14 +220,14 @@ export function useCodeSync({
         if (onDisconnect) {
           onDisconnect();
         }
+        console.log('state.reconnectCount', state.reconnectCount);
 
-        // Attempt to reconnect with exponential backoff
-        const reconnectTime = getBackoffTime(state.reconnectCount);
-        console.log(`Reconnecting in ${reconnectTime}ms...`);
+        // Attempt to reconnect
+        console.log(`Reconnecting in ${RECONNECT_TIME}ms...`);
 
         setTimeout(() => {
           connect();
-        }, reconnectTime);
+        }, RECONNECT_TIME);
       };
 
       // Handle 'connected' event
@@ -284,15 +279,14 @@ export function useCodeSync({
       }
 
       // Attempt to reconnect with exponential backoff
-      const reconnectTime = getBackoffTime(state.reconnectCount);
-      console.log(`Reconnecting in ${reconnectTime}ms...`);
+      console.log(`Reconnecting in ${RECONNECT_TIME}ms...`);
 
       setTimeout(() => {
         connect();
-      }, reconnectTime);
+      }, RECONNECT_TIME);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, state.reconnectCount]);
+  }, [projectId]);
 
   // Connect to the SSE endpoint on mount (only if projectId is valid)
   useEffect(() => {

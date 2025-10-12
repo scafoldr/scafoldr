@@ -9,17 +9,12 @@ import { useChat } from '../hooks/use-chat';
 interface ChatInterfaceProps {
   initialPrompt?: string;
   selectedFramework?: string;
-  onViewCode?: (files: any) => void;
-  onViewDB?: (dbmlCode: string) => void;
   onUserInteraction?: () => void;
   onMessageReceived?: (messageType: string, content?: string) => void;
 }
 
 export function ChatInterface({
   initialPrompt,
-  selectedFramework,
-  onViewCode,
-  onViewDB,
   onUserInteraction,
   onMessageReceived
 }: ChatInterfaceProps) {
@@ -82,20 +77,13 @@ export function ChatInterface({
           </div>
           <div>
             <h3 className="font-semibold text-sm">AI Assistant</h3>
-            <p className="text-xs text-slate-500">
-              {isLoading ? 'Thinking...' : 'Building your app...'}
-            </p>
+            <p className="text-xs text-slate-500">{isLoading ? 'Thinking...' : ''}</p>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <ChatHistory
-        messages={messages}
-        selectedFramework={selectedFramework}
-        onViewCode={onViewCode}
-        onViewDB={onViewDB}
-      />
+      <ChatHistory messages={messages} />
 
       {/* Error Display */}
       {error && (

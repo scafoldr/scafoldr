@@ -8,7 +8,8 @@ All specialized agents inherit from BaseCompanyAgent.
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
-
+from strands import Agent
+from strands.models import Model
 
 class AgentResponse(BaseModel):
     """
@@ -34,7 +35,7 @@ class BaseCompanyAgent(ABC):
     to process requests and generate responses.
     """
     
-    def __init__(self, role: str, expertise: List[str], ai_provider):
+    def __init__(self, role: str, expertise: List[str], system_prompt: str, ai_provider: Model, project_id: str, conversation_id: str):
         """
         Initialize the agent with role, expertise, and AI provider.
         
@@ -46,6 +47,9 @@ class BaseCompanyAgent(ABC):
         self.role = role
         self.expertise = expertise
         self.ai_provider = ai_provider
+        self.system_prompt = system_prompt
+        self.project_id=project_id
+        self.conversation_id=conversation_id
     
     @abstractmethod
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:
@@ -61,7 +65,6 @@ class BaseCompanyAgent(ABC):
         """
         pass
     
-    @abstractmethod
     def get_system_prompt(self) -> str:
         """
         Get the system prompt that defines this agent's behavior and expertise.
@@ -69,7 +72,7 @@ class BaseCompanyAgent(ABC):
         Returns:
             System prompt string for the AI provider
         """
-        pass
+        return self.system_prompt
     
     def can_handle_request(self, request_type: str) -> bool:
         """
@@ -95,3 +98,13 @@ class BaseCompanyAgent(ABC):
             "expertise": self.expertise,
             "description": f"I'm a {self.role} specialized in {', '.join(self.expertise)}"
         }
+    
+    @abstractmethod
+    def get_agent(self) -> Agent:
+        """
+        Get the underlying Strands Agent instance.
+        
+        Returns:
+            Strands Agent instance
+        """
+        pass

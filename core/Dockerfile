@@ -1,5 +1,5 @@
 # Stage 1: Base
-FROM python:3.9-slim as base
+FROM python:3.11.5-slim as base
 
 # Set environment variables for Python (common to both dev and prod)
 ENV PYTHONDONTWRITEBYTECODE=1

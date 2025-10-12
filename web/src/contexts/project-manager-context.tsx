@@ -31,12 +31,12 @@ const ProjectManagerContext = createContext<ProjectManagerContextType | undefine
 // Provider props
 export interface ProjectManagerProviderProps {
   children: ReactNode;
-  initialActiveProjectId: string;
+  initialActiveProjectId?: string;
 }
 
 export function ProjectManagerProvider({
   children,
-  initialActiveProjectId
+  initialActiveProjectId = Math.random().toString(36).substring(2, 15)
 }: ProjectManagerProviderProps) {
   const [activeProjectId, setActiveProjectIdState] = useState<string>(initialActiveProjectId);
   const [selectedFramework, setSelectedFrameworkState] = useState<string>('next-js-typescript');

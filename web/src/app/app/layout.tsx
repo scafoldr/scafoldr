@@ -13,10 +13,8 @@ export default function AppLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const initialProjectId = Math.random().toString(36).substring(2, 15);
-
   return (
-    <ProjectManagerProvider initialActiveProjectId={initialProjectId}>
+    <ProjectManagerProvider>
       <CodeStorageProvider>{children}</CodeStorageProvider>
     </ProjectManagerProvider>
   );

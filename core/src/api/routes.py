@@ -98,8 +98,10 @@ async def scafoldr_inc_consult_route(request: ChatRequest):
     try:
         conversation_id = request.conversation_id
         project_id = request.project_id
+        selected_framework = request.selected_framework
         scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage,
-                                       project_id=project_id, conversation_id=conversation_id)
+                                       project_id=project_id, conversation_id=conversation_id,
+                                       selected_framework=selected_framework)
         response = await scafoldr_company.process_request(
             user_request=request.user_input,
             conversation_id=request.conversation_id
@@ -132,8 +134,10 @@ async def scafoldr_inc_consult_stream_route(request: ChatRequest):
     """
     conversation_id = request.conversation_id
     project_id = request.project_id
+    selected_framework = request.selected_framework
     scafoldr_company = ScafoldrInc(ai_provider=config.ai_provider, code_storage=config.code_storage,
-                                   project_id=project_id, conversation_id=conversation_id)
+                                   project_id=project_id, conversation_id=conversation_id,
+                                   selected_framework=selected_framework)
 
     async def generate_stream():
         try:

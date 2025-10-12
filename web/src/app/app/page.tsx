@@ -32,12 +32,11 @@ export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');
   const [currentProject, setCurrentProject] = useState('Task Manager App');
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>();
-  const [selectedFramework, setSelectedFramework] = useState<string>('nodejs-express-js');
   const [generatedFiles, setGeneratedFiles] = useState<FileMap>({});
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
   const [hasSchemaChanges, setHasSchemaChanges] = useState(false);
   const [hasCodeChanges, setHasCodeChanges] = useState(false);
-  const { activeProjectId } = useProjectManager();
+  const { activeProjectId, setSelectedFramework } = useProjectManager();
 
   const { projects, getFile, getProjectFiles, isFileLoaded } = useCodeStorage();
 
@@ -146,7 +145,6 @@ export default function AppPage() {
     if (frameworkParam) {
       setSelectedFramework(frameworkParam);
     }
-
     // Clean up URL after extracting parameters
     if (promptParam || frameworkParam) {
       window.history.replaceState({}, '', window.location.pathname);

@@ -57,11 +57,12 @@ async def scaffold_project(agent: Agent, project_name: str, dbml_schema: str) ->
         A summary string of the generated project files and structure
     """
     database_name = project_name.replace('-', '_') + "_db"
+    selected_framework = agent.state.get('selected_framework')
     
     request = GenerateRequest(
         project_name=project_name,
         database_name=database_name,
-        backend_option='next-js-typescript',
+        backend_option=selected_framework or "next-js-typescript",
         features=[],
         user_input=dbml_schema,
         description=f"Generated project: {project_name}",

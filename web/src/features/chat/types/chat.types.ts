@@ -37,6 +37,7 @@ export interface ChatApiRequest {
   userInput: string;
   conversationId: string;
   projectId: string;
+  selectedFramework: string | null;
 }
 
 export interface ScafoldrIncAgent {

@@ -22,7 +22,7 @@ class ScafoldrInc:
     which routes requests to specialized agents using the "Agents as Tools" pattern.
     """
 
-    def __init__(self, ai_provider: Model, code_storage: CodeStorage, project_id: str, conversation_id: str):
+    def __init__(self, ai_provider: Model, code_storage: CodeStorage, project_id: str, conversation_id: str, selected_framework: str):
         """Initialize the company with AI provider and agents."""
         # Initialize the AI provider
         self.ai_provider = ai_provider
@@ -31,6 +31,7 @@ class ScafoldrInc:
             self.ai_provider,
             project_id=project_id,
             conversation_id=conversation_id,
+            selected_framework=selected_framework
         )
 
         self.code_storage = code_storage

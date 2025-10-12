@@ -8,7 +8,7 @@ from core.company.agents.product_manager import ProductManager
 
 
 class CreateNewProject:
-    def __init__(self, ai_provider: Model, project_id: str = None, conversation_id: str = None):
+    def __init__(self, ai_provider: Model, project_id: str = None, conversation_id: str = None, selected_framework: str = None):
         """
         Initialize the CreateNewProject SOP. This SOP coordinates the efforts of the Product Manager,
         Software Architect, and Senior Engineer to create a new project from scratch.
@@ -21,7 +21,7 @@ class CreateNewProject:
 
         product_manager = ProductManager(ai_provider, project_id=project_id, conversation_id=conversation_id)
         software_architect = SoftwareArchitect(ai_provider, project_id=project_id, conversation_id=conversation_id)
-        engineer = SeniorEngineer(ai_provider, project_id=project_id, conversation_id=conversation_id)
+        engineer = SeniorEngineer(ai_provider, project_id=project_id, conversation_id=conversation_id, selected_framework=selected_framework)
 
         # Build the graph
         builder = GraphBuilder()
@@ -67,6 +67,7 @@ class CreateNewProject:
         Returns:
             The result of the SOP execution
         """
+        print("Executing CreateNewProject SOP...")
         result = self.execute(user_request)
         return str(result)
     

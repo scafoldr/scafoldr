@@ -53,7 +53,7 @@ class ProjectCoordinator(BaseCompanyAgent):
     accomplish specific tasks.
     """
     
-    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, selected_framework: str):
         """
         Initialize the Project Coordinator agent.
         
@@ -70,8 +70,8 @@ class ProjectCoordinator(BaseCompanyAgent):
         )
 
         # Initialize SOPs
-        self.create_new_project = CreateNewProject(ai_provider, project_id=project_id, conversation_id=conversation_id)
-        
+        self.create_new_project = CreateNewProject(ai_provider, project_id=project_id, conversation_id=conversation_id, selected_framework=selected_framework)
+
         # Store available SOPs in a dictionary for easy access
         self.available_sops = {
             "create_new_project": self.create_new_project.create_new_project_tool

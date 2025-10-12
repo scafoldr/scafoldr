@@ -54,7 +54,7 @@ class SeniorEngineer(BaseCompanyAgent):
     code implementation, and technical solutions.
     """
     
-    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str):
+    def __init__(self, ai_provider: Model, project_id: str, conversation_id: str, selected_framework: str):
         """
         Initialize the Senior Engineer agent.
         
@@ -76,7 +76,7 @@ class SeniorEngineer(BaseCompanyAgent):
             system_prompt=ENGINEER_PROMPT,
             # callback_handler=None,
             tools=[scaffold_project],
-            state={"project_id": project_id, "conversation_id": conversation_id}
+            state={"project_id": project_id, "conversation_id": conversation_id, "selected_framework": selected_framework}
         )
     
     async def process_request(self, user_request: str, conversation_id: Optional[str] = None) -> AgentResponse:

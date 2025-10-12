@@ -15,7 +15,6 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({
   initialPrompt,
-  selectedFramework,
   onUserInteraction,
   onMessageReceived
 }: ChatInterfaceProps) {

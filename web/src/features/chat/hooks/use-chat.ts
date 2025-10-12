@@ -13,12 +13,11 @@ import { useProjectManager } from '@/contexts/project-manager-context';
 
 interface UseChatOptions {
   initialPrompt?: string;
-  useStreaming?: boolean;
 }
 
 export function useChat(options: UseChatOptions = {}) {
   const conversationId = useMemo(() => Math.random().toString(), []);
-  const { activeProjectId } = useProjectManager();
+  const { activeProjectId, selectedFramework } = useProjectManager();
   const [chatState, setChatState] = useState<ChatState>({
     messages: [],
     isLoading: false,
@@ -121,7 +120,8 @@ export function useChat(options: UseChatOptions = {}) {
           {
             userInput,
             conversationId: chatState.conversationId,
-            projectId: activeProjectId
+            projectId: activeProjectId,
+            selectedFramework
           },
           // Handle each chunk as it arrives
           (chunk) => {
@@ -154,7 +154,15 @@ export function useChat(options: UseChatOptions = {}) {
         setChatState((prev) => ({ ...prev, isLoading: false }));
       }
     },
-    [chatState.conversationId, chatState.isLoading, addMessage, updateLastMessage, setError]
+    [
+      chatState.conversationId,
+      chatState.isLoading,
+      addMessage,
+      updateLastMessage,
+      setError,
+      activeProjectId,
+      selectedFramework
+    ]
   );
 
   // Choose the appropriate send function based on streaming preference

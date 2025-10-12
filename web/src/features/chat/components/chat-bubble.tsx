@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Bot, User } from 'lucide-react';
 import { Message, MessageType, MessageFrom } from '../types/chat.types';
 import { motion } from 'framer-motion';
+import Markdown from 'react-markdown';
 
 interface ChatBubbleProps {
   message: Message;
@@ -90,7 +91,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
               ? 'bg-blue-500 text-white rounded-br-sm'
               : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-sm'
           }`}>
-          <p className="whitespace-pre-wrap">{message.text}</p>
+          <Markdown>{message.text}</Markdown>
         </div>
         <p className="text-xs text-slate-500 mt-1">
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

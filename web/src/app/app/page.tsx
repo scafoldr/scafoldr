@@ -276,17 +276,7 @@ export default function AppPage() {
                       Object.keys(generatedFiles).length > 0
                         ? generatedFiles
                         : {
-                            'README.md': `# Generated Code
-
-Click "View Code" from a code generation message to see the generated files here.
-
-This tab will display:
-- Generated Node.js Express application files
-- Database models and schemas
-- API routes and controllers
-- Configuration files
-
-Start by asking the AI to generate a database schema, then the code will be automatically generated and displayed here.`
+                            'README.md': `There is no code to display yet. Start a chat on the left to generate code!`
                           }
                     }
                     beforeFileSelect={getFileContent}

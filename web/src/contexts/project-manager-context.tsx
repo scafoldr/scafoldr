@@ -12,7 +12,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo, React
 // State structure for the context
 interface ProjectManagerState {
   activeProjectId: string;
-  selectedFramework: string | null;
+  selectedFramework: string;
 }
 
 // Context interface
@@ -20,7 +20,7 @@ interface ProjectManagerContextType extends ProjectManagerState {
   // eslint-disable-next-line no-unused-vars
   setActiveProjectId: (value: string) => void;
   // eslint-disable-next-line no-unused-vars
-  setSelectedFramework: (value: string | null) => void;
+  setSelectedFramework: (value: string) => void;
 }
 
 // Define initial state
@@ -39,13 +39,13 @@ export function ProjectManagerProvider({
   initialActiveProjectId
 }: ProjectManagerProviderProps) {
   const [activeProjectId, setActiveProjectIdState] = useState<string>(initialActiveProjectId);
-  const [selectedFramework, setSelectedFrameworkState] = useState<string | null>(null);
+  const [selectedFramework, setSelectedFrameworkState] = useState<string>('next-js-typescript');
 
   const setActiveProjectId = useCallback((value: string) => {
     setActiveProjectIdState(value);
   }, []);
 
-  const setSelectedFramework = useCallback((value: string | null) => {
+  const setSelectedFramework = useCallback((value: string) => {
     setSelectedFrameworkState(value);
   }, []);
 

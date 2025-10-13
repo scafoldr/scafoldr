@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 import { FrameworkSelector } from '@/features/framework-selector';
+import { QuickStartPrompts } from '@/components/quick-start-prompts';
 import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { motion } from 'framer-motion';
@@ -19,6 +20,7 @@ export default function LandingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState('next-js-typescript');
+  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,10 +85,19 @@ export default function LandingPage() {
             Let it happen.
           </h1>
 
-          <p className="text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-6 max-w-2xl mx-auto leading-relaxed">
             Transform your ideas into full-stack applications with AI. Generate databases, APIs, and
             frontends from simple descriptions.
           </p>
+
+          {/* Quick Start Templates */}
+          <QuickStartPrompts
+            onSelectPrompt={(promptText, templateId) => {
+              setPrompt(promptText);
+              setSelectedPromptId(templateId);
+            }}
+            selectedPromptId={selectedPromptId}
+          />
 
           {/* CTA Form */}
           <motion.form
@@ -101,7 +112,13 @@ export default function LandingPage() {
                 type="text"
                 placeholder="Describe your app idea... (e.g., 'A task management app with teams and real-time collaboration')"
                 value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                onChange={(e) => {
+                  setPrompt(e.target.value);
+                  // Clear selected template when user manually edits the prompt
+                  if (selectedPromptId) {
+                    setSelectedPromptId(undefined);
+                  }
+                }}
                 className="h-14 pr-48 text-lg bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-lg"
                 disabled={isSubmitting}
               />

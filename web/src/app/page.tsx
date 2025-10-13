@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 import { FrameworkSelector } from '@/features/framework-selector';
+import { QuickStartPrompts } from '@/components/quick-start-prompts';
 import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { motion } from 'framer-motion';
@@ -25,14 +26,11 @@ export default function LandingPage() {
     if (!prompt.trim()) return;
 
     setIsSubmitting(true);
-    // Simulate transition delay
-    setTimeout(() => {
-      const params = new URLSearchParams({
-        prompt: prompt,
-        framework: selectedFramework
-      });
-      window.location.href = '/app?' + params.toString();
-    }, 800);
+    const params = new URLSearchParams({
+      prompt: prompt,
+      framework: selectedFramework
+    });
+    window.location.href = '/app?' + params.toString();
   };
 
   return (
@@ -83,15 +81,27 @@ export default function LandingPage() {
             Let it happen.
           </h1>
 
-          <p className="text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
             Transform your ideas into full-stack applications with AI. Generate databases, APIs, and
             frontends from simple descriptions.
           </p>
 
+          {/* Quick Start Templates */}
+          <QuickStartPrompts
+            onSelectPrompt={(promptText) => {
+              setIsSubmitting(true);
+              const params = new URLSearchParams({
+                prompt: promptText,
+                framework: selectedFramework
+              });
+              window.location.href = '/app?' + params.toString();
+            }}
+          />
+
           {/* CTA Form */}
           <motion.form
             onSubmit={handleSubmit}
-            className="max-w-2xl mx-auto mb-8"
+            className="max-w-2xl mx-auto mb-8 mt-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}>
@@ -101,7 +111,9 @@ export default function LandingPage() {
                 type="text"
                 placeholder="Describe your app idea... (e.g., 'A task management app with teams and real-time collaboration')"
                 value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                onChange={(e) => {
+                  setPrompt(e.target.value);
+                }}
                 className="h-14 pr-48 text-lg bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-lg"
                 disabled={isSubmitting}
               />

@@ -20,21 +20,17 @@ export default function LandingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState('next-js-typescript');
-  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim()) return;
 
     setIsSubmitting(true);
-    // Simulate transition delay
-    setTimeout(() => {
-      const params = new URLSearchParams({
-        prompt: prompt,
-        framework: selectedFramework
-      });
-      window.location.href = '/app?' + params.toString();
-    }, 800);
+    const params = new URLSearchParams({
+      prompt: prompt,
+      framework: selectedFramework
+    });
+    window.location.href = '/app?' + params.toString();
   };
 
   return (
@@ -85,24 +81,27 @@ export default function LandingPage() {
             Let it happen.
           </h1>
 
-          <p className="text-xl text-slate-600 dark:text-slate-400 mb-6 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
             Transform your ideas into full-stack applications with AI. Generate databases, APIs, and
             frontends from simple descriptions.
           </p>
 
           {/* Quick Start Templates */}
           <QuickStartPrompts
-            onSelectPrompt={(promptText, templateId) => {
-              setPrompt(promptText);
-              setSelectedPromptId(templateId);
+            onSelectPrompt={(promptText) => {
+              setIsSubmitting(true);
+              const params = new URLSearchParams({
+                prompt: promptText,
+                framework: selectedFramework
+              });
+              window.location.href = '/app?' + params.toString();
             }}
-            selectedPromptId={selectedPromptId}
           />
 
           {/* CTA Form */}
           <motion.form
             onSubmit={handleSubmit}
-            className="max-w-2xl mx-auto mb-8"
+            className="max-w-2xl mx-auto mb-8 mt-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}>
@@ -114,10 +113,6 @@ export default function LandingPage() {
                 value={prompt}
                 onChange={(e) => {
                   setPrompt(e.target.value);
-                  // Clear selected template when user manually edits the prompt
-                  if (selectedPromptId) {
-                    setSelectedPromptId(undefined);
-                  }
                 }}
                 className="h-14 pr-48 text-lg bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-lg"
                 disabled={isSubmitting}

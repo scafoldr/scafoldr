@@ -173,7 +173,7 @@ export function useCodeSync({
 
     try {
       // Create a new EventSource connection
-      const url = `/api/code/sse/${projectId}?rand=${Math.random()}`; // Random to prevent caching
+      const url = `/api/code/sse/${projectId}`;
       const eventSource = new EventSource(url);
       eventSourceRef.current = eventSource;
 

@@ -58,7 +58,7 @@ export async function GET(req: Request, { params }: { params: { projectId: strin
     {
       headers: {
         'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-store',
         Connection: 'keep-alive'
       }
     }

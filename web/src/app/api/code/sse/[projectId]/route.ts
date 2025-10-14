@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { projectId: strin
           // Use Node.js HTTP instead of  next's fetch (which doesn't support streaming well)
           const http = await import('http');
           const url = new URL(
-            `${process.env.CORE_API_BASE_URL}/api/sse/code-updates/${params.projectId}?random=${Math.random()}` // Random to prevent caching
+            `${process.env.CORE_API_BASE_URL}/api/sse/code-updates/${params.projectId}`
           );
 
           const req = http.request(

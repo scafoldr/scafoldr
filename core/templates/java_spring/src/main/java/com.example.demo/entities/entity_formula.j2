@@ -1,0 +1,25 @@
+package com.example.entities;
+
+{% for imp in imports %}
+import {{ imp }};
+{% endfor %}
+
+@Entity
+@Table(name="{{ table_name }}")
+@Data
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class {{ ClassName }}Entity extends BaseEntity {
+    
+{% for field in fields %}
+{% if field.name != 'id' %}
+{% if field.primaryKey == 'True' %}
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "{{ table_name }}_{{ field.name }}_seq_gen")
+    @SequenceGenerator(name = "{{ table_name }}_{{ field.name }}_gen", sequenceName = "{{ table_name }}_{{ field.name }}_seq", allocationSize = 1)
+{% endif %}
+    private {{ field.type }} {{ field.name }};
+{% endif %}
+{% endfor %}
+}

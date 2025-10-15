@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 // Types for code changes
 export interface CodeChange {
@@ -41,7 +42,7 @@ export interface UseCodeSyncOptions {
  * - Handles reconnection with exponential backoff
  * - Debounces rapid file changes
  * - Only updates state for actual changes (compares hashes)
- * - Cleans up EventSource on unmount
+ * - Cleans up connection on unmount
  */
 export function useCodeSync({
   projectId,
@@ -60,8 +61,8 @@ export function useCodeSync({
     reconnectCount: 0
   });
 
-  // Refs for event source and debounce timer
-  const eventSourceRef = useRef<EventSource | null>(null);
+  // Refs for event source controller and debounce timer
+  const abortControllerRef = useRef<AbortController | null>(null);
   // eslint-disable-next-line no-undef
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fileHashesRef = useRef<Record<string, string>>({});
@@ -160,9 +161,9 @@ export function useCodeSync({
   // Connect to the SSE endpoint
   const connect = useCallback(() => {
     // Clean up any existing connection
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
 
     // Skip connection if projectId is empty or invalid
@@ -171,34 +172,108 @@ export function useCodeSync({
       return;
     }
 
-    try {
-      // Create a new EventSource connection
-      const url = `/api/code/sse/${projectId}`;
-      const eventSource = new EventSource(url);
-      eventSourceRef.current = eventSource;
+    // Create a new AbortController for this connection
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    // Set initial connection state
+    setState((prev) => ({
+      ...prev,
+      connected: false
+    }));
+
+    const url = `/api/code/sse/${projectId}`;
+
+    // Start the fetchEventSource connection
+    fetchEventSource(url, {
+      headers: {
+        'Cache-Control': 'no-store'
+      },
+      signal: abortController.signal,
 
       // Handle connection open
-      eventSource.onopen = () => {
-        console.log('SSE connection established');
-        setState((prev) => ({
-          ...prev,
-          connected: true,
-          error: null,
-          reconnectCount: 0
-        }));
+      onopen: async (response) => {
+        if (response.ok) {
+          console.log('SSE connection established');
+          setState((prev) => ({
+            ...prev,
+            connected: true,
+            error: null,
+            reconnectCount: 0
+          }));
 
-        if (onConnect) {
-          onConnect();
+          if (onConnect) {
+            onConnect();
+          }
+        } else {
+          const errorMsg = `Failed to connect: ${response.status} ${response.statusText}`;
+          console.error(errorMsg);
+
+          setState((prev) => ({
+            ...prev,
+            connected: false,
+            error: errorMsg
+          }));
+
+          if (onError) {
+            onError(errorMsg);
+          }
+
+          // This will trigger onError and retry logic
+          throw new Error(errorMsg);
         }
-      };
+      },
 
-      // Handle connection error
-      eventSource.onerror = (error) => {
+      // Handle incoming events
+      onmessage: (event) => {
+        // Skip empty events
+        if (!event.data) return;
+
+        try {
+          // Process different event types
+          switch (event.event) {
+            case 'connected':
+              try {
+                const data = JSON.parse(event.data);
+                console.log('Connected to code updates:', data);
+              } catch (error) {
+                console.error('Error parsing connected event:', error);
+              }
+              break;
+
+            case 'heartbeat':
+              try {
+                const data = JSON.parse(event.data);
+                console.log('Heartbeat received:', new Date(data.timestamp).toLocaleTimeString());
+              } catch (error) {
+                console.error('Error parsing heartbeat event:', error);
+              }
+              break;
+
+            case 'code_change':
+              try {
+                const change: CodeChange = JSON.parse(event.data);
+
+                // Only process changes for the current project
+                if (change.project_id === projectId) {
+                  debouncedProcessChange(change);
+                }
+              } catch (error) {
+                console.error('Error parsing code_change event:', error);
+              }
+              break;
+
+            default:
+              console.log(`Unknown event type: ${event.event}`, event.data);
+          }
+        } catch (error) {
+          console.error('Error processing event:', error);
+        }
+      },
+
+      // Handle errors
+      onerror: (error) => {
         console.error('SSE connection error:', error);
-
-        // Close the connection
-        eventSource.close();
-        eventSourceRef.current = null;
 
         // Update state
         setState((prev) => {
@@ -220,71 +295,42 @@ export function useCodeSync({
         if (onDisconnect) {
           onDisconnect();
         }
-        console.log('state.reconnectCount', state.reconnectCount);
 
-        // Attempt to reconnect
-        console.log(`Reconnecting in ${RECONNECT_TIME}ms...`);
+        // Return undefined to let the library handle retries
+        // The retry configuration below will control the retry behavior
+      },
 
-        setTimeout(() => {
-          connect();
-        }, RECONNECT_TIME);
-      };
-
-      // Handle 'connected' event
-      eventSource.addEventListener('connected', (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('Connected to code updates:', data);
-        } catch (error) {
-          console.error('Error parsing connected event:', error);
-        }
-      });
-
-      // Handle 'heartbeat' event
-      eventSource.addEventListener('heartbeat', (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('Heartbeat received:', new Date(data.timestamp).toLocaleTimeString());
-        } catch (error) {
-          console.error('Error parsing heartbeat event:', error);
-        }
-      });
-
-      // Handle 'code_change' event
-      eventSource.addEventListener('code_change', (event) => {
-        try {
-          const change: CodeChange = JSON.parse(event.data);
-
-          // Only process changes for the current project
-          if (change.project_id === projectId) {
-            debouncedProcessChange(change);
+      // Configure retry behavior
+      openWhenHidden: true,
+      fetch: (url, options) => {
+        return fetch(url, {
+          ...options,
+          // Retry on these status codes
+          headers: {
+            ...(options?.headers || {}),
+            Accept: 'text/event-stream'
           }
-        } catch (error) {
-          console.error('Error parsing code_change event:', error);
-        }
-      });
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Error creating EventSource:', errorMsg);
+        });
+      }
+    }).catch((error) => {
+      // This catches any errors not handled by onerror
+      console.error('Fatal SSE connection error:', error);
 
       setState((prev) => ({
         ...prev,
         connected: false,
-        error: errorMsg,
+        error: error instanceof Error ? error.message : 'Unknown connection error',
         reconnectCount: prev.reconnectCount + 1
       }));
 
-      if (onError) {
-        onError(errorMsg);
-      }
-
-      // Attempt to reconnect with exponential backoff
-      console.log(`Reconnecting in ${RECONNECT_TIME}ms...`);
-
+      // Attempt to reconnect after a delay
       setTimeout(() => {
-        connect();
+        if (abortControllerRef.current === abortController) {
+          connect();
+        }
       }, RECONNECT_TIME);
-    }
+    });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
@@ -299,10 +345,10 @@ export function useCodeSync({
 
     // Clean up on unmount
     return () => {
-      if (eventSourceRef.current) {
-        console.log('Closing SSE connection');
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
+      if (abortControllerRef.current) {
+        console.log('Aborting SSE connection');
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
       }
 
       if (debounceTimerRef.current) {
@@ -473,16 +519,6 @@ export function useCodeSync({
     [projectId, onError]
   );
 
-  // Manually reconnect to the SSE endpoint
-  const reconnect = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      reconnectCount: 0
-    }));
-
-    connect();
-  }, [connect]);
-
   // Return the hook API
   return {
     connected: state.connected,
@@ -494,7 +530,6 @@ export function useCodeSync({
     saveFile,
     deleteFile,
     fetchAllFiles,
-    saveFiles,
-    reconnect
+    saveFiles
   };
 }

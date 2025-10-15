@@ -217,7 +217,7 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
   });
 
   // Set up SSE connection for real-time updates
-  const { reconnect } = useCodeSync({
+  useCodeSync({
     projectId: activeProjectId,
     onConnect: () => {
       dispatch({ type: 'SET_CONNECTION_STATUS', isConnected: true });
@@ -422,13 +422,6 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
       getProjectFiles(initialProjectId).catch(console.error);
     }
   }, [initialProjectId, getProjectFiles]);
-
-  // Update SSE connection when active project changes
-  useEffect(() => {
-    if (state.activeProjectId) {
-      reconnect();
-    }
-  }, [state.activeProjectId, reconnect]);
 
   // Memoize context value to prevent unnecessary rerenders
   const contextValue = useMemo(

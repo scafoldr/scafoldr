@@ -17,7 +17,6 @@ import { ResizableLayout } from '@/components/resizable-layout';
 import { downloadProjectAsZip } from '@/lib/export-utils';
 import { ChangesIndicator } from '@/components/changes-indicator';
 import { playNotificationSound } from '@/utils/notification';
-import { useCodeSync, CodeChange } from '@/hooks/useCodeSync';
 import {
   DatabaseComingSoonModal,
   PreviewComingSoonModal,
@@ -35,36 +34,44 @@ export default function AppPage() {
   const [initialPrompt, setInitialPrompt] = useState<string | undefined>();
   const [generatedFiles, setGeneratedFiles] = useState<FileMap>({});
   const [currentDbml, setCurrentDbml] = useState<string | undefined>();
-  const [hasSchemaChanges, setHasSchemaChanges] = useState(false);
-  const [hasCodeChanges, setHasCodeChanges] = useState(false);
   const { activeProjectId, setSelectedFramework } = useProjectManager();
 
-  const { projects, getFile, getProjectFiles, isFileLoaded } = useCodeStorage();
+  const {
+    projects,
+    getFile,
+    getProjectFiles,
+    isFileLoaded,
+    hasCodeChanges,
+    hasSchemaChanges,
+    setHasCodeChanges,
+    setHasSchemaChanges
+  } = useCodeStorage();
 
-  // Handler functions for file changes
-  const handleFileChange = useCallback((change: CodeChange) => {
-    const { file_path } = change;
-    if (file_path.endsWith('schema.dbml') && activeProjectId) {
-      getFile(activeProjectId, 'schema.dbml').then((file) => {
-        setCurrentDbml(file?.content ?? '');
-        setHasSchemaChanges(true);
-        playNotificationSound().catch(console.error);
+  useEffect(() => {
+    if (hasSchemaChanges) {
+      getFile(activeProjectId, 'schema.dbml').then((f: FileContent | null) => {
+        if (f) {
+          setCurrentDbml(f.content);
+          playNotificationSound();
+        }
       });
-    } else {
-      // Any other file change
-      setHasCodeChanges(true);
-      playNotificationSound().catch(console.error);
     }
-  }, []);
+  }, [hasSchemaChanges, activeProjectId, getFile]);
+
+  useEffect(() => {
+    if (hasCodeChanges) {
+      playNotificationSound();
+    }
+  }, [hasCodeChanges]);
 
   // Reset functions for change indicators
   const resetSchemaChanges = useCallback(() => {
     setHasSchemaChanges(false);
-  }, []);
+  }, [setHasSchemaChanges]);
 
   const resetCodeChanges = useCallback(() => {
     setHasCodeChanges(false);
-  }, []);
+  }, [setHasCodeChanges]);
 
   // Handle tab changes
   const handleTabChange = useCallback(
@@ -79,12 +86,6 @@ export default function AppPage() {
     },
     [resetSchemaChanges, resetCodeChanges]
   );
-
-  // Set up SSE connection for file changes
-  useCodeSync({
-    projectId: activeProjectId,
-    onFileChange: handleFileChange
-  });
 
   useEffect(() => {
     if (projects.size === 0 || !activeProjectId) {

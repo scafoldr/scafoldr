@@ -21,6 +21,8 @@ interface CodeStorageState {
   isConnected: boolean;
   lastUpdate: Date | null;
   error: string | null;
+  hasSchemaChanges: boolean;
+  hasCodeChanges: boolean;
 }
 
 // Action types for the reducer
@@ -32,7 +34,9 @@ type CodeStorageAction =
   | { type: 'DELETE_FILE'; projectId: string; filePath: string }
   | { type: 'SET_ERROR'; error: string | null }
   | { type: 'CLEAR_PROJECT'; projectId: string }
-  | { type: 'CLEAR_ALL' };
+  | { type: 'CLEAR_ALL' }
+  | { type: 'SET_SCHEMA_CHANGES'; hasChanges: boolean }
+  | { type: 'SET_CODE_CHANGES'; hasChanges: boolean };
 
 // Context interface
 interface CodeStorageContextType extends CodeStorageState {
@@ -42,6 +46,12 @@ interface CodeStorageContextType extends CodeStorageState {
   // eslint-disable-next-line no-unused-vars
   clearProject: (projectId: string) => void;
   clearAllProjects: () => void;
+
+  // Change tracking
+  // eslint-disable-next-line no-unused-vars
+  setHasSchemaChanges: (hasChanges: boolean) => void;
+  // eslint-disable-next-line no-unused-vars
+  setHasCodeChanges: (hasChanges: boolean) => void;
 
   // File operations
   getFile: (
@@ -82,7 +92,9 @@ const initialState: CodeStorageState = {
   activeProjectId: null,
   isConnected: false,
   lastUpdate: null,
-  error: null
+  error: null,
+  hasSchemaChanges: false,
+  hasCodeChanges: false
 };
 
 // Create the context
@@ -196,6 +208,20 @@ function codeStorageReducer(state: CodeStorageState, action: CodeStorageAction):
         lastUpdate: new Date()
       };
 
+    case 'SET_SCHEMA_CHANGES':
+      return {
+        ...state,
+        hasSchemaChanges: action.hasChanges,
+        lastUpdate: new Date()
+      };
+
+    case 'SET_CODE_CHANGES':
+      return {
+        ...state,
+        hasCodeChanges: action.hasChanges,
+        lastUpdate: new Date()
+      };
+
     default:
       return state;
   }
@@ -230,6 +256,12 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
     },
     onFileChange: (change) => {
       handleFileChange(change);
+
+      if (change.file_path === 'schema.dbml') {
+        dispatch({ type: 'SET_SCHEMA_CHANGES', hasChanges: true });
+      } else {
+        dispatch({ type: 'SET_CODE_CHANGES', hasChanges: true });
+      }
     }
   });
 
@@ -284,6 +316,16 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
   const clearAllProjects = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL' });
     codeStorage.clearAllCaches();
+  }, []);
+
+  // Set schema changes flag
+  const setHasSchemaChanges = useCallback((hasChanges: boolean) => {
+    dispatch({ type: 'SET_SCHEMA_CHANGES', hasChanges });
+  }, []);
+
+  // Set code changes flag
+  const setHasCodeChanges = useCallback((hasChanges: boolean) => {
+    dispatch({ type: 'SET_CODE_CHANGES', hasChanges });
   }, []);
 
   // Get a file
@@ -432,6 +474,8 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
       isConnected: state.isConnected,
       lastUpdate: state.lastUpdate,
       error: state.error,
+      hasSchemaChanges: state.hasSchemaChanges,
+      hasCodeChanges: state.hasCodeChanges,
 
       // Methods
       setActiveProject,
@@ -443,7 +487,9 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
       deleteFile,
       getFileMetadata,
       getProjectFilesList,
-      isFileLoaded
+      isFileLoaded,
+      setHasSchemaChanges,
+      setHasCodeChanges
     }),
     [
       state.projects,
@@ -451,6 +497,8 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
       state.isConnected,
       state.lastUpdate,
       state.error,
+      state.hasSchemaChanges,
+      state.hasCodeChanges,
       setActiveProject,
       clearProject,
       clearAllProjects,
@@ -460,7 +508,9 @@ export function CodeStorageProvider({ children, initialProjectId }: CodeStorageP
       deleteFile,
       getFileMetadata,
       getProjectFilesList,
-      isFileLoaded
+      isFileLoaded,
+      setHasSchemaChanges,
+      setHasCodeChanges
     ]
   );
 

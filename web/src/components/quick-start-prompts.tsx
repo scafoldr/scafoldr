@@ -58,7 +58,7 @@ export function QuickStartPrompts({ onSelectPrompt, selectedPromptId }: QuickSta
             className={`flex items-center p-2 rounded-md transition-all w-full ${
               selectedPromptId === template.id
                 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border'
             }`}
             aria-label={`Use template for ${template.prompt}`}
             title={template.prompt}>

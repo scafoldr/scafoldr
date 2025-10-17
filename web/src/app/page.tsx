@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 import { QuickStartPrompts } from '@/components/quick-start-prompts';
-import { ArrowRight, Code2, Database, Zap, Github } from 'lucide-react';
+import { ArrowRight, Zap, Github } from 'lucide-react';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { motion } from 'framer-motion';
 import Link from 'next/link';

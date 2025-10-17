@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Construction, Star, ExternalLink, Heart, Eye, ThumbsUp } from 'lucide-react';
+import { Construction, Star, ExternalLink, Eye, ThumbsUp } from 'lucide-react';
 
 export interface ComingSoonModalProps {
   /** Whether the modal is open */
@@ -54,7 +54,7 @@ export function ComingSoonModal({
           </div>
           <DialogTitle className="text-xl font-semibold text-center">{finalTitle}</DialogTitle>
           <DialogDescription className="text-center">
-            This feature is planned for a future release. We'd love to hear from you about it!
+            This feature is planned for a future release. We&apos;d love to hear from you about it!
           </DialogDescription>
         </DialogHeader>
 
@@ -153,6 +153,21 @@ export const FEATURE_CONFIGS = {
     description:
       'Advanced project management features including creating new projects, switching between projects, renaming, and deleting projects. Currently, you can view existing demo projects but cannot modify them.',
     issueLink: 'https://github.com/scafoldr/scafoldr/issues/10'
+  },
+  createYourOwnTemplate: {
+    featureName: 'Create Your Own Template',
+    description: 'Upload your example project and Scafoldr will create a custom template for you.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/41'
+  },
+  pythonTemplate: {
+    featureName: 'Python Template',
+    description: 'Support for Python projects including FastAPI Framework.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/65'
+  },
+  phpFrameworkTemplate: {
+    featureName: 'PHP Framework Template',
+    description: 'Support for PHP projects including Laravel Framework.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/66'
   }
 } as const;
 
@@ -191,4 +206,22 @@ export function ProjectComingSoonModal(
   props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
 ) {
   return <ComingSoonModal {...props} {...FEATURE_CONFIGS.projectManagement} />;
+}
+
+export function CreateYourOwnTemplateComingSoonModal(
+  props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
+) {
+  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.createYourOwnTemplate} />;
+}
+
+export function PythonTemplateComingSoonModal(
+  props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
+) {
+  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.pythonTemplate} />;
+}
+
+export function PHPFrameworkTemplateComingSoonModal(
+  props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
+) {
+  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.phpFrameworkTemplate} />;
 }

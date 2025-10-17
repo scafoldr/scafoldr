@@ -158,6 +158,16 @@ export const FEATURE_CONFIGS = {
     featureName: 'Create Your Own Template',
     description: 'Upload your example project and Scafoldr will create a custom template for you.',
     issueLink: 'https://github.com/scafoldr/scafoldr/issues/41'
+  },
+  pythonTemplate: {
+    featureName: 'Python Template',
+    description: 'Support for Python projects including FastAPI Framework.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/65'
+  },
+  phpFrameworkTemplate: {
+    featureName: 'PHP Framework Template',
+    description: 'Support for PHP projects including Laravel Framework.',
+    issueLink: 'https://github.com/scafoldr/scafoldr/issues/66'
   }
 } as const;
 
@@ -202,4 +212,16 @@ export function CreateYourOwnTemplateComingSoonModal(
   props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
 ) {
   return <ComingSoonModal {...props} {...FEATURE_CONFIGS.createYourOwnTemplate} />;
+}
+
+export function PythonTemplateComingSoonModal(
+  props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
+) {
+  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.pythonTemplate} />;
+}
+
+export function PHPFrameworkTemplateComingSoonModal(
+  props: Omit<ComingSoonModalProps, 'featureName' | 'description'>
+) {
+  return <ComingSoonModal {...props} {...FEATURE_CONFIGS.phpFrameworkTemplate} />;
 }

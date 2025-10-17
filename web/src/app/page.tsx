@@ -122,7 +122,7 @@ export default function LandingPage() {
                 type="submit"
                 size="lg"
                 disabled={!prompt.trim() || isSubmitting}
-                className="absolute right-2 top-2 h-10 px-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg">
+                className="absolute right-2 top-2 h-10 px-6 bg-gradient-to-r text-white from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg">
                 {isSubmitting ? (
                   <motion.div
                     animate={{ rotate: 360 }}
@@ -145,50 +145,14 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent leading-tight">
+            <h2 className="text-3xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent leading-tight">
               Choose a Template
             </h2>
+
             <TemplateCatalog
               selectedTemplateId={selectedTemplateId}
               setSelectedTemplateId={setSelectedTemplateId}
             />
-          </motion.div>
-
-          {/* Feature Cards */}
-          <motion.div
-            className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mt-32"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}>
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
-                <Database className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Smart Database Design</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                AI generates optimized database schemas with proper relationships and constraints.
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
-                <Code2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Full-Stack Code</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Generate complete applications with modern frameworks and best practices.
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center justify-self-center mb-4">
-                <Zap className="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Instant Preview</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                See your application come to life with real-time previews and live data.
-              </p>
-            </div>
           </motion.div>
         </motion.div>
       </main>

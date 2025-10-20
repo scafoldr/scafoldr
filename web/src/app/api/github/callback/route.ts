@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
   console.log('Usao u accessToken');
   cookies().set('access_token', access_token, { secure: true, httpOnly: true });
-  return new NextResponse('OK');
+  return NextResponse.redirect(new URL('/github/auth-success', 'http://localhost:80'));
 }
 
 const generateAccessToken = async (code: string) => {

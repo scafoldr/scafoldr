@@ -27,6 +27,7 @@ import { useCodeStorage } from '@/contexts/CodeStorageContext';
 import { FileContent } from '@/services/codeStorage';
 import { useProjectManager } from '@/contexts/project-manager-context';
 import ProjectBuildingAnimation from '@/components/project-building-animation';
+import { GithubCreateRepo } from '@/features/github';
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');
@@ -267,6 +268,7 @@ export default function AppPage() {
         </div>
 
         <div className="flex items-center space-x-3">
+          <GithubCreateRepo generatedFiles={generatedFiles} />
           <Button
             variant="outline"
             size="sm"

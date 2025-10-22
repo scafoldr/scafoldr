@@ -14,12 +14,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Github, CheckCircle2 } from 'lucide-react';
-import { authorizeGitHub, createGithubRepo, getAccessToken } from '../api/github.api';
-import { FileMap } from '@/features/code-editor';
+import { createGithubRepo, fetchAllFiles, getAccessToken } from '../api/github.api';
 type PromptProps = {
   isOpen: boolean;
   isLoading: boolean;
-  files: FileMap;
+  activeProjectId: string;
   onClose: () => void;
   // eslint-disable-next-line no-unused-vars
   setIsLoading: (isLoading: boolean) => void;
@@ -28,7 +27,7 @@ type PromptProps = {
 export default function GithubModal({
   isOpen,
   isLoading,
-  files,
+  activeProjectId,
   onClose,
   setIsLoading
 }: PromptProps) {
@@ -39,9 +38,10 @@ export default function GithubModal({
 
   const handleCreateRepository = async () => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
 
       const accessToken = await getAccessToken();
+      const genFiles = await fetchAllFiles(activeProjectId);
 
       console.log('GitHub token acquired:', accessToken);
       const createRepo = await createGithubRepo(
@@ -49,7 +49,7 @@ export default function GithubModal({
         description,
         isPrivate,
         accessToken,
-        files
+        genFiles
       );
 
       setRepositoryCreated(true);
@@ -61,13 +61,6 @@ export default function GithubModal({
   };
 
   const handleClose = () => {
-    const tree = Object.entries(files).map(([path, content]) => ({
-      path,
-      mode: '100644',
-      type: 'blob',
-      content
-    }));
-    console.log(tree);
     onClose();
     setIsLoading(false);
     // Reset state after dialog closes

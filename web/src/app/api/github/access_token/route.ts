@@ -18,9 +18,6 @@ export async function POST(req: Request) {
       redirect_uri: process.env.REDIRECT_URI
     };
 
-    console.log('Sending OAuth exchange request to GitHub...');
-    console.log('Payload:', JSON.stringify(payload, null, 2));
-
     const res = await fetch(externalUrl, {
       method: 'POST',
       headers: {
@@ -29,8 +26,6 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify(payload)
     });
-
-    console.log('GitHub response status:', res.status);
 
     if (!res.ok) {
       let errorMessage = 'OAuth token exchange failed';
@@ -48,7 +43,6 @@ export async function POST(req: Request) {
     }
 
     const responseData = await res.json();
-    console.log('GitHub OAuth success:', responseData);
 
     return Response.json(responseData);
   } catch (error) {

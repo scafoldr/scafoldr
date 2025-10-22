@@ -4,14 +4,12 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
-  console.log('Code', code);
   if (!code) {
     return new Response('No Code');
   }
 
   const access_token = await generateAccessToken(code);
 
-  console.log('Usao u accessToken');
   cookies().set('access_token', access_token, { secure: true, httpOnly: true });
   return NextResponse.redirect(new URL('/github/auth-success', 'http://localhost:80'));
 }
@@ -34,9 +32,6 @@ const generateAccessToken = async (code: string) => {
       redirect_uri: process.env.REDIRECT_URI
     };
 
-    console.log('Sending OAuth exchange request to GitHub...');
-    console.log('Payload:', JSON.stringify(payload, null, 2));
-
     const res = await fetch(externalUrl, {
       method: 'POST',
       headers: {
@@ -45,8 +40,6 @@ const generateAccessToken = async (code: string) => {
       },
       body: JSON.stringify(payload)
     });
-
-    console.log('GitHub response status:', res.status);
 
     if (!res.ok) {
       let errorMessage = 'OAuth token exchange failed';
@@ -61,7 +54,6 @@ const generateAccessToken = async (code: string) => {
     }
 
     const responseData = await res.json();
-    console.log('GitHub OAuth success:', responseData);
 
     return responseData.access_token;
   } catch (error) {

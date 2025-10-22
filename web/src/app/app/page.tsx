@@ -268,7 +268,7 @@ export default function AppPage() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <GithubCreateRepo generatedFiles={generatedFiles} />
+          <GithubCreateRepo activeProjectId={activeProjectId} />
           <Button
             variant="outline"
             size="sm"

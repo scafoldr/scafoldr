@@ -555,3 +555,47 @@ async def bulk_save_files(project_id: str, request: Request):
                 "type": "bulk_save_error"
             }
         )
+
+@router.get("/api/fetch/code/{project_id}")
+async def get_all_project_files(project_id: str):
+    """
+    Get all files for a project, including their full content.
+
+    Args:
+        project_id: The ID of the project.
+        include_metadata: Whether to include hash, size, and timestamp metadata for each file (default: True).
+    """
+    try:
+        # Retrieve all files from storage
+        files = await config.code_storage.get_project_files(project_id)
+        if not files:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No files found for project: {project_id}"
+            )
+
+        # Prepare response
+        result = {}
+        for file_path, content in files.items():
+            result[file_path] = content
+
+        return {
+            "project_id": project_id,
+            "files": result
+        }
+
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+
+        error_details = traceback.format_exc()
+        print(f"ERROR in get_all_project_files: {str(e)}\n{error_details}")
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to retrieve all project files",
+                "message": str(e),
+                "type": "project_all_files_error"
+            }
+        )

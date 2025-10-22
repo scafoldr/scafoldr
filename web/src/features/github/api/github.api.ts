@@ -1,12 +1,9 @@
-// const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
-// const clientSecret = process.env.NEXT_PUBLIC_GITHUB_CLIENT_SECRET;
-// const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-
 import { FileMap } from '@/features/code-editor';
 
 export class GithubApiError extends Error {
   constructor(
     message: string,
+    // eslint-disable-next-line no-unused-vars
     public status?: number
   ) {
     super(message);
@@ -24,7 +21,6 @@ export async function getAccessToken() {
     if (!data.access_token) {
       throw new Error('Access token is null');
     }
-    console.log(data.access_token.value);
     return data.access_token.value;
   } catch (err) {
     console.error('Error:', err);
@@ -42,6 +38,26 @@ export async function authorizeGitHub() {
   window.open(authUrl);
 }
 
+export async function fetchAllFiles(code: string): Promise<FileMap> {
+  try {
+    const res = await fetch(`/api/fetch/code/${code}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json'
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to fetch files');
+    }
+
+    return data.files as FileMap;
+  } catch (err) {
+    console.error('Error occured fetching files\n', err);
+    throw err;
+  }
+}
+
 export async function createGithubRepo(
   name: string,
   description: string,
@@ -53,7 +69,7 @@ export async function createGithubRepo(
     const res = await fetch('https://api.github.com/user/repos', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${accessToken}`, // token koji si dobio kroz OAuth
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
         Accept: 'application/vnd.github+json'
       },
@@ -72,7 +88,6 @@ export async function createGithubRepo(
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await uploadFiles(data.owner.login, data.name, accessToken, files);
 
-    console.log('Repository created:', data.html_url);
     return data;
   } catch (err) {
     console.error('Error:', err);
@@ -80,7 +95,7 @@ export async function createGithubRepo(
 }
 
 async function uploadFiles(owner: string, repo: string, token: string, files: FileMap) {
-  // 1️⃣ Create a tree with all files
+  // Step 1. Create a tree with all files
   const baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -157,6 +172,4 @@ async function uploadFiles(owner: string, repo: string, token: string, files: Fi
     const updateData = await updateRefRes.json();
     throw new Error(`Failed to update reference: ${updateData.message}`);
   }
-
-  console.log(`Uploaded ${blobs.length} files in a single commit`);
 }

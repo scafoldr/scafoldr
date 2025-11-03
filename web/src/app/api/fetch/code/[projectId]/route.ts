@@ -1,6 +1,6 @@
 export async function GET(req: Request, { params }: { params: { projectId: string } }) {
   const projectId = params.projectId;
-  const externalUrl = `${process.env.CORE_API_BASE_URL}/api/fetch/code/${projectId}`;
+  const externalUrl = `${process.env.CORE_API_BASE_URL}/api/code/${projectId}/bulk`;
 
   try {
     const response = await fetch(externalUrl, {

@@ -556,8 +556,8 @@ async def bulk_save_files(project_id: str, request: Request):
             }
         )
 
-@router.get("/api/fetch/code/{project_id}")
-async def get_all_project_files(project_id: str):
+@router.get("/api/code/{project_id}/bulk")
+async def bulk_get_files(project_id: str):
     """
     Get all files for a project, including their full content.
 

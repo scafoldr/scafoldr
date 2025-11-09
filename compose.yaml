@@ -65,7 +65,60 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  rest:
+    container_name: rest
+    image: scafoldr/rest
+    pull_policy: never
+    build:
+      context: ./rest
+      target: dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+      - SPRING_DOCKER_COMPOSE_ENABLED=false
+      - SPRING_PROFILES_ACTIVE=dev
+      - MAVEN_OPTS=-Dmaven.repo.local=/root/.m2/repository
+      - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_SENDER_USERNAME=${EMAIL_SENDER_USERNAME}
+      - EMAIL_SENDER_PASSWORD=${EMAIL_SENDER_PASSWORD}
+    volumes:
+      - ./rest/src:/app/src
+      - ~/.m2:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: [ "/docker-entrypoint.sh" ]
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
 volumes:
   caddy_data:
   caddy_config:
   redis_data:
+  postgres_data:

@@ -27,7 +27,7 @@ COPY pom.xml .
 RUN mvn -q -DskipTests dependency:go-offline
 
 # Install inotify-tools for file watching
-RUN apk add --no-cache inotify-tools
+# RUN apk add --no-cache inotify-tools
 
 # Copy the entrypoint script
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh

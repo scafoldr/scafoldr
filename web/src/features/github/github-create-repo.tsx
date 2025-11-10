@@ -30,7 +30,7 @@ const GithubCreateRepo = ({ activeProjectId }: GithubCreateRepoProps) => {
         const { isAuthorized } = await res.json();
 
         setIsGithubAuthorized(isAuthorized);
-        localStorage.setItem('isGithubAuthorized', 'true');
+        localStorage.setItem('isGithubAuthorized', isAuthorized ? 'true' : 'false');
 
         if (!isAuthorized) {
           timeoutId = setTimeout(checkAuth, 5000);

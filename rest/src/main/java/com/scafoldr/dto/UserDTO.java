@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class UserDTO implements BaseDTO {
+public class UserDTO implements DomainDTO {
 
     private Long id;
 

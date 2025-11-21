@@ -1,4 +1,4 @@
 package com.scafoldr.dto;
 
-public interface BaseDTO {
+public interface DomainDTO {
 }

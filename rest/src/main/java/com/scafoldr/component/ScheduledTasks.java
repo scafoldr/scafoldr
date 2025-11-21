@@ -4,7 +4,6 @@ import com.scafoldr.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import com.scafoldr.service.UserService;
 
 @Component
 @RequiredArgsConstructor

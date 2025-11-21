@@ -3,18 +3,18 @@ package com.scafoldr.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.scafoldr.dto.BaseDTO;
-import com.scafoldr.model.BaseModel;
-import com.scafoldr.service.BaseService;
+import com.scafoldr.dto.DomainDTO;
+import com.scafoldr.model.DomainModel;
+import com.scafoldr.service.DomainService;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public abstract class BaseController<T extends BaseModel, D extends BaseDTO> {
+public abstract class DomainController<T extends DomainModel, D extends DomainDTO> {
 
-    protected final BaseService<T> service;
+    protected final DomainService<T> service;
     protected final Function<T, D> toDTO;
 
     @GetMapping

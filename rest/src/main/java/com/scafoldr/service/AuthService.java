@@ -17,10 +17,10 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 @Service
-public class AuthService extends BaseService<User>{
+public class AuthService {
 
-    private final UserRepository userRepository;
-    private final VerificationCodeRepository codeRepository;
+    private final UserService userService;
+    private final CodeService codeService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtUtil jwtUtil;
@@ -36,10 +36,9 @@ public class AuthService extends BaseService<User>{
     @Value("${verification.code.rate-limit}")
     private int rateLimit;
 
-    public AuthService(UserRepository userRepository, VerificationCodeRepository codeRepository, PasswordEncoder passwordEncoder, EmailService emailService, JwtUtil jwtUtil) {
-        super(userRepository);
-        this.userRepository = userRepository;
-        this.codeRepository = codeRepository;
+    public AuthService(UserRepository userRepository, VerificationCodeRepository codeRepository, UserService userService, CodeService codeService, PasswordEncoder passwordEncoder, EmailService emailService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.codeService = codeService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.jwtUtil = jwtUtil;
@@ -47,19 +46,19 @@ public class AuthService extends BaseService<User>{
 
     @Transactional
     public void sendVerificationCode(String email){
-        User user = userRepository.findByEmail(email)
+        User user = userService.findByEmail(email)
                 .orElseGet(() -> {
                     User newUser = new User();
                     newUser.setEmail(email);
-                    return userRepository.save(newUser);
+                    return userService.create(newUser);
                 });
         LocalDateTime rateLimitTime = LocalDateTime.now().minusHours(1);
-        long recentCodes = codeRepository.countRecentCodesForUser(user, rateLimitTime);
+        long recentCodes = codeService.countRecentCodesForUser(user, rateLimitTime);
         if (recentCodes >= rateLimit) {
             throw new RateLimitExceededException("Rate limit exceeded");
         }
 
-        codeRepository.invalidateCodesForUser(user);
+        codeService.invalidateCodesForUser(user);
         String code = String.format("%06d", random.nextInt(1000000));
         String hashedCode = passwordEncoder.encode(code);
 
@@ -67,40 +66,40 @@ public class AuthService extends BaseService<User>{
         verificationCode.setUser(user);
         verificationCode.setCode(hashedCode);
         verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(codeExpirationMinutes));
-        codeRepository.save(verificationCode);
+        codeService.update(verificationCode.getId(), verificationCode);
 
         emailService.sendVerificationCode(email, code);
     }
     @Transactional
     public String verifyCode(String email, String code) {
-        User user = userRepository.findByEmail(email)
+        User user = userService.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Entity "+ email + "not found"));
 
-        VerificationCode verificationCode = codeRepository
+        VerificationCode verificationCode = codeService
                 .findActiveCodeForUser(user, LocalDateTime.now())
                 .orElseThrow(() -> new EntityNotFoundException("Entity "+ code + "not found"));
 
         if (verificationCode.getAttempts() >= maxAttempts) {
             verificationCode.setUsed(true);
-            codeRepository.save(verificationCode);
+            codeService.update(verificationCode.getId(), verificationCode);
             throw new MaxAttemptsExceededException("Maximum attempts exceeded");
         }
 
         if (!passwordEncoder.matches(code, verificationCode.getCode())) {
             verificationCode.setAttempts(verificationCode.getAttempts() + 1);
-            codeRepository.save(verificationCode);
+            codeService.update(verificationCode.getId(), verificationCode);
             throw new RateLimitExceededException("Rate limit exceeded");
         }
 
         verificationCode.setUsed(true);
-        codeRepository.save(verificationCode);
+        codeService.update(verificationCode.getId(), verificationCode);
 
      return jwtUtil.generateToken(user.getEmail(), user.getId());
     }
 
     @Transactional
     public void cleanupExpiredCodes() {
-        codeRepository.deleteExpiredCodes(LocalDateTime.now());
+        codeService.deleteExpiredCodes(LocalDateTime.now());
     }
 
 }

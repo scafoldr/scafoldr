@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class VerificationCodeDTO implements BaseDTO {
+public class VerificationCodeDTO implements DomainDTO {
 
     private User user;
 
@@ -25,7 +25,7 @@ public class VerificationCodeDTO implements BaseDTO {
     private LocalDateTime createdAt;
 
     @JsonIgnore
-    public VerificationCodeDTO toDto(VerificationCode code){
+    public static VerificationCodeDTO toDto(VerificationCode code){
        VerificationCodeDTO codeDTO = new VerificationCodeDTO();
        codeDTO.setCode(code.getCode());
        codeDTO.setUsed(code.getUsed());

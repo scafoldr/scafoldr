@@ -7,10 +7,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.*;
 import com.scafoldr.dto.AuthRequest;
 import com.scafoldr.dto.AuthResponse;
-import com.scafoldr.dto.UserDTO;
 import com.scafoldr.dto.VerifyRequest;
-import com.scafoldr.model.User;
-import com.scafoldr.service.UserService;
 
 import java.util.Map;
 
@@ -19,12 +16,11 @@ import java.util.Map;
 @CrossOrigin
 @EnableMethodSecurity
 @RequestMapping("/api/v1/auth")
-public class AuthController extends BaseController<User, UserDTO>{
+public class AuthController {
 
     private final AuthService authService;
 
     public AuthController(AuthService service) {
-        super(service, UserDTO::toDto);
         this.authService = service;
     }
 

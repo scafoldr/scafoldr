@@ -1,6 +1,4 @@
 {
-    "cSpell.words": [
-        "dbml",
-        "Scafoldr"
-    ]
+  "cSpell.words": ["dbml", "Scafoldr"],
+  "java.compile.nullAnalysis.mode": "automatic"
 }

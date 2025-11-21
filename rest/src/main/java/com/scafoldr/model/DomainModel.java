@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Setter
 @MappedSuperclass
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
-public abstract class BaseModel implements Serializable {
+public abstract class DomainModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

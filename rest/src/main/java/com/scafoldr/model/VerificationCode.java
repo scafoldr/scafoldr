@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "verification_codes")
-public class VerificationCode extends BaseModel implements Serializable {
+public class VerificationCode extends DomainModel implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

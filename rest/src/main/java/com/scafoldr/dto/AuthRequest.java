@@ -10,7 +10,7 @@ import com.scafoldr.model.AuthenticationDetails;
 @Getter
 @Data
 @Setter
-public class AuthRequest implements BaseDTO, AuthenticationDetails {
+public class AuthRequest implements DomainDTO, AuthenticationDetails {
 
     @Email
     @NotBlank

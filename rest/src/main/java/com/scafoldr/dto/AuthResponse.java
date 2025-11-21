@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 @Setter
 @AllArgsConstructor
-public class AuthResponse implements Serializable, BaseDTO, AuthenticationDetails {
+public class AuthResponse implements Serializable, DomainDTO, AuthenticationDetails {
 
     private String email;
 

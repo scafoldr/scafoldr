@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @CrossOrigin
 @EnableMethodSecurity
-@RequestMapping("/api/v1/code")
+@RequestMapping("/api/v1/verification-code")
 public class VerificationCodeController extends DomainController<VerificationCode, VerificationCodeDTO> {
 
     private final VerificationCodeService verificationCodeService;

@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserService userService;
-    private final CodeService codeService;
+    private final VerificationCodeService codeService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtUtil jwtUtil;
@@ -36,7 +36,7 @@ public class AuthService {
     @Value("${verification.code.rate-limit}")
     private int rateLimit;
 
-    public AuthService(UserRepository userRepository, VerificationCodeRepository codeRepository, UserService userService, CodeService codeService, PasswordEncoder passwordEncoder, EmailService emailService, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, VerificationCodeRepository codeRepository, UserService userService, VerificationCodeService codeService, PasswordEncoder passwordEncoder, EmailService emailService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.codeService = codeService;
         this.passwordEncoder = passwordEncoder;
@@ -60,15 +60,17 @@ public class AuthService {
 
         codeService.invalidateCodesForUser(user);
         String code = String.format("%06d", random.nextInt(1000000));
+        System.out.println(code);
         String hashedCode = passwordEncoder.encode(code);
 
         VerificationCode verificationCode = new VerificationCode();
+        System.out.println(verificationCode.getId());
         verificationCode.setUser(user);
         verificationCode.setCode(hashedCode);
         verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(codeExpirationMinutes));
-        codeService.update(verificationCode.getId(), verificationCode);
+        codeService.create(verificationCode);
 
-        emailService.sendVerificationCode(email, code);
+//        emailService.sendVerificationCode(email, code);
     }
     @Transactional
     public String verifyCode(String email, String code) {

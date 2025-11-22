@@ -25,4 +25,17 @@ public class UserDTO implements DomainDTO {
         userDTO.setCreatedAt(user.getCreatedAt());
         return userDTO;
     }
+
+    @JsonIgnore
+    public static User toEntity(UserDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        User user = new User();
+        user.setId(dto.getId());
+        user.setEmail(dto.getEmail());
+        user.setCreatedAt(dto.getCreatedAt());
+        return user;
+    }
 }

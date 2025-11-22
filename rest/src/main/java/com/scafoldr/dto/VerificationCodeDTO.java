@@ -35,4 +35,20 @@ public class VerificationCodeDTO implements DomainDTO {
        codeDTO.setExpiresAt(code.getExpiresAt());
        return codeDTO;
     }
+
+    @JsonIgnore
+    public static VerificationCode toEntity(VerificationCodeDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setCode(dto.getCode());
+        verificationCode.setUsed(dto.getUsed());
+        verificationCode.setUser(dto.getUser());
+        verificationCode.setAttempts(dto.getAttempts());
+        verificationCode.setCreatedAt(dto.getCreatedAt());
+        verificationCode.setExpiresAt(dto.getExpiresAt());
+        return verificationCode;
+    }
 }

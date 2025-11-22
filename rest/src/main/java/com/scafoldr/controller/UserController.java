@@ -16,7 +16,7 @@ public class UserController extends DomainController<User, UserDTO> {
     private final UserService userService;
 
     public UserController(UserService service) {
-        super(service, UserDTO::toDto);
+        super(service, UserDTO::toDto, UserDTO::toEntity);
         this.userService = service;
 
     }

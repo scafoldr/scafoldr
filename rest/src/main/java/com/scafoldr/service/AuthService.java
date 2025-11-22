@@ -60,7 +60,6 @@ public class AuthService {
 
         codeService.invalidateCodesForUser(user);
         String code = String.format("%06d", random.nextInt(1000000));
-        System.out.println(code);
         String hashedCode = passwordEncoder.encode(code);
 
         VerificationCode verificationCode = new VerificationCode();
@@ -70,7 +69,7 @@ public class AuthService {
         verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(codeExpirationMinutes));
         codeService.create(verificationCode);
 
-//        emailService.sendVerificationCode(email, code);
+        emailService.sendVerificationCode(email, code);
     }
     @Transactional
     public String verifyCode(String email, String code) {

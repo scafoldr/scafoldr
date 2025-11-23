@@ -74,11 +74,11 @@ public class AuthService {
     @Transactional
     public String verifyCode(String email, String code) {
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Entity "+ email + "not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Entity "+ email + " not found"));
 
         VerificationCode verificationCode = codeService
                 .findActiveCodeForUser(user, LocalDateTime.now())
-                .orElseThrow(() -> new EntityNotFoundException("Entity "+ code + "not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Entity "+ code + " not found"));
 
         if (verificationCode.getAttempts() >= maxAttempts) {
             verificationCode.setUsed(true);

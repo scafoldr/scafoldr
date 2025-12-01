@@ -14,7 +14,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import TemplateCatalog from '@/features/templates/templates-catalog';
 import { TEMPLATES } from '@/features/templates/constants/templates';
-import { UserProfileDropdown } from '@/components/user-profile-dropdown';
+import { UserProfileDropdown } from '@/features/auth';
 
 export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
@@ -24,7 +24,6 @@ export default function LandingPage() {
 
   useEffect(() => {
     const data = getClientSideCookie('auth');
-    console.log(data);
     if (data) {
       setIsSignedIn(true);
     } else {

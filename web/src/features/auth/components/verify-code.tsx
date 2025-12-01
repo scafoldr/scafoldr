@@ -12,9 +12,10 @@ interface VerifyCodeProps {
   email: string;
   onBack: () => void;
   onResend: (e: React.FormEvent) => void;
+  params: string;
 }
 
-export function VerifyCode({ email, onBack, onResend }: VerifyCodeProps) {
+export function VerifyCode({ email, params, onBack, onResend }: VerifyCodeProps) {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -64,7 +65,7 @@ export function VerifyCode({ email, onBack, onResend }: VerifyCodeProps) {
     const data = await verifyCode(verificationCode, email);
     if (data) {
       setIsLoading(false);
-      window.location.href = '/';
+      window.location.href = '/app?' + params;
     }
   };
 

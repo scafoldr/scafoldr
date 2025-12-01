@@ -16,7 +16,8 @@ export function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/app')) {
     if (!token) {
-      return NextResponse.redirect(new URL('/auth', request.url));
+      const params = request.nextUrl.searchParams;
+      return NextResponse.redirect(new URL(`/auth?${params}`, request.url));
     }
   }
 

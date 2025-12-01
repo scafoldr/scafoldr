@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Code2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -13,7 +13,15 @@ import { SendCode, VerifyCode } from '@/features/auth';
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [params, setParams] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams) {
+      setParams(urlParams.toString());
+    }
+  }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +85,7 @@ export default function AuthPage() {
                 <VerifyCode
                   key="verify-code"
                   email={email}
+                  params={params}
                   onBack={handleBackToEmail}
                   onResend={handleEmailSubmit}
                 />

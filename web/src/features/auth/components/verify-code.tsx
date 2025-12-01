@@ -65,7 +65,8 @@ export function VerifyCode({ email, params, onBack, onResend }: VerifyCodeProps)
     const data = await verifyCode(verificationCode, email);
     if (data) {
       setIsLoading(false);
-      window.location.href = '/app?' + params;
+      if (params) window.location.href = '/app?' + params;
+      else window.location.href = '/';
     }
   };
 

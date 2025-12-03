@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Code2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,8 +15,13 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const [redirectRoute, setRedirectRoute] = useState('');
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/';
+
+  useEffect(() => {
+    const url = searchParams.get('redirect') || '/';
+    setRedirectRoute(url);
+  }, [searchParams]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +85,7 @@ export default function AuthPage() {
                 <VerifyCode
                   key="verify-code"
                   email={email}
-                  urlRoute={redirectTo}
+                  urlRoute={redirectRoute}
                   onBack={handleBackToEmail}
                   onResend={handleEmailSubmit}
                 />

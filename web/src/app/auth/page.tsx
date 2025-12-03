@@ -9,19 +9,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { sendCode } from '../../features/auth/api/auth.api';
 import { SendCode, VerifyCode } from '@/features/auth';
+import { useSearchParams } from 'next/navigation';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [params, setParams] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams) {
-      setParams(urlParams.toString());
-    }
-  }, []);
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +80,7 @@ export default function AuthPage() {
                 <VerifyCode
                   key="verify-code"
                   email={email}
-                  params={params}
+                  urlRoute={redirectTo}
                   onBack={handleBackToEmail}
                   onResend={handleEmailSubmit}
                 />

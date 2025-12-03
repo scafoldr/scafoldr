@@ -9,19 +9,19 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { sendCode } from '../../features/auth/api/auth.api';
 import { SendCode, VerifyCode } from '@/features/auth';
-import { useSearchParams } from 'next/navigation';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [redirectRoute, setRedirectRoute] = useState('');
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const url = searchParams.get('redirect') || '/';
-    setRedirectRoute(url);
-  }, [searchParams]);
+    const urlRoute = new URLSearchParams(window.location.search);
+    if (urlRoute) {
+      setRedirectRoute(urlRoute.get('redirect') || '/');
+    }
+  }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

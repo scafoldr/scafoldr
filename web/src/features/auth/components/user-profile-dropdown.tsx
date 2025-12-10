@@ -1,6 +1,7 @@
 'use client';
 
-import * as React from 'react';
+import type React from 'react';
+import { useState, useEffect } from 'react';
 import { User, LogOut, Settings, Moon, Sun, Monitor } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -16,13 +17,53 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 
 export function UserProfileDropdown() {
   const { setTheme } = useTheme();
-  const [showAuthModal, setShowAuthModal] = React.useState(false);
+  const [email, setEmail] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
+  useEffect(() => {
+    const data = getClientSideCookie('auth');
+    if (!data) return;
+    const obj = parseJwt(data);
+    setEmail(obj.sub);
+  }, [email]);
+
+  const handleLogOut = () => {
+    document.cookie = 'auth' + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    setEmail('');
+    window.location.href = '/auth';
+  };
+  const parseJwt = (token: string) => {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  };
+
+  const getClientSideCookie = (name: string) => {
+    const cookieString = document.cookie;
+    const cookies = cookieString.split('; ');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      if (cookie.startsWith(`${name}=`)) {
+        return cookie.substring(name.length + 1);
+      }
+    }
+    return undefined;
+  };
   return (
     <>
       <DropdownMenu>
@@ -39,8 +80,7 @@ export function UserProfileDropdown() {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">John Doe</p>
-              <p className="text-xs leading-none text-muted-foreground">john.doe@example.com</p>
+              <p className="text-sm font-medium leading-none">{email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -70,7 +110,7 @@ export function UserProfileDropdown() {
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowAuthModal(true)}>
+          <DropdownMenuItem onClick={handleLogOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Log out
           </DropdownMenuItem>

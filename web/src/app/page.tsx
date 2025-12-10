@@ -2,11 +2,10 @@
 
 import type React from 'react';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { AuthComingSoonModal } from '@/components/coming-soon-modal';
 import { QuickStartPrompts } from '@/components/quick-start-prompts';
 import { ArrowRight, Zap, Github } from 'lucide-react';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
@@ -15,12 +14,34 @@ import Link from 'next/link';
 import Image from 'next/image';
 import TemplateCatalog from '@/features/templates/templates-catalog';
 import { TEMPLATES } from '@/features/templates/constants/templates';
+import { UserProfileDropdown } from '@/features/auth';
 
 export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(TEMPLATES[0].id);
+
+  useEffect(() => {
+    const data = getClientSideCookie('auth');
+    if (data) {
+      setIsSignedIn(true);
+    } else {
+      setIsSignedIn(false);
+    }
+  }, [isSignedIn]);
+
+  const getClientSideCookie = (name: string) => {
+    const cookieString = document.cookie;
+    const cookies = cookieString.split('; ');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      if (cookie.startsWith(`${name}=`)) {
+        return cookie.substring(name.length + 1);
+      }
+    }
+    return undefined;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +53,9 @@ export default function LandingPage() {
       framework: selectedTemplateId
     });
     window.location.href = '/app?' + params.toString();
+  };
+  const handleSignIn = async () => {
+    window.location.href = '/auth';
   };
 
   return (
@@ -59,9 +83,13 @@ export default function LandingPage() {
               </Button>
             </Link>
             <ThemeToggle />
-            <Button variant="outline" size="sm" onClick={() => setShowAuthModal(true)}>
-              Sign In
-            </Button>
+            {isSignedIn ? (
+              <UserProfileDropdown />
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleSignIn}>
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -188,9 +216,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-
-      {/* Auth Coming Soon Modal */}
-      <AuthComingSoonModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </div>
   );
 }

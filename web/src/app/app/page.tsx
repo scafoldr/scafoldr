@@ -12,7 +12,6 @@ import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
 import { CodeEditor, FileMap } from '@/features/code-editor';
 import { DatabaseViewer } from '@/components/database-viewer';
 import { AppPreview } from '@/components/app-preview';
-import { UserProfileDropdown } from '@/components/user-profile-dropdown';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { downloadProjectAsZip } from '@/lib/export-utils';
 import { ChangesIndicator } from '@/components/changes-indicator';
@@ -28,6 +27,7 @@ import { FileContent } from '@/services/codeStorage';
 import { useProjectManager } from '@/contexts/project-manager-context';
 import ProjectBuildingAnimation from '@/components/project-building-animation';
 import { GithubCreateRepo } from '@/features/github';
+import { UserProfileDropdown } from '@/features/auth';
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('er-diagram');

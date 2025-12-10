@@ -35,6 +35,7 @@ export function UserProfileDropdown() {
   const handleLogOut = () => {
     document.cookie = 'auth' + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     setEmail('');
+    window.location.href = '/auth';
   };
   const parseJwt = (token: string) => {
     const base64Url = token.split('.')[1];

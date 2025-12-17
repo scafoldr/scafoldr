@@ -1,0 +1,11 @@
+# Database connection (target database)
+driver=org.postgresql.Driver
+url=jdbc:postgresql://<POSTGRES_HOST>:5432/<POSTGRES_DB>
+username=
+password=
+
+# Reference URL - simplified
+referenceUrl=hibernate:spring:com.scafoldr.model?dialect=org.hibernate.dialect.PostgreSQLDialect
+referenceDriver=liquibase.ext.hibernate.database.connection.HibernateDriver
+
+diffTypes=tables,columns,views,primaryKeys,uniqueConstraints,indexes,foreignKeys,sequences

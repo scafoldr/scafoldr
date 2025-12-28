@@ -10,7 +10,13 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false
 });
 
-export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
+export const Code = ({
+  selectedFile,
+  onFileEdit
+}: {
+  selectedFile: File | undefined;
+  onFileEdit?: (value: string) => void;
+}) => {
   const { resolvedTheme } = useTheme();
   const code = selectedFile?.content ?? '// Select a file to view its content';
   const fileName = selectedFile?.name ?? 'index.js';
@@ -45,8 +51,13 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
         value={code}
         beforeMount={handleBeforeMount}
         theme={monacoTheme}
+        onChange={(value) => {
+          if (onFileEdit && value !== undefined) {
+            onFileEdit(value);
+          }
+        }}
         options={{
-          readOnly: true,
+          readOnly: !onFileEdit,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           fontSize: 14,

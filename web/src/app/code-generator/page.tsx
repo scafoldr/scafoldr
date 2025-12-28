@@ -79,7 +79,7 @@ export default function CodeGeneratorPage() {
     <div className="h-full flex flex-col relative">
       {/* DBML Editor - takes full height when AI chat is hidden */}
       <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden">
-        <Code selectedFile={dbmlFile} />
+        <Code selectedFile={dbmlFile} onFileEdit={setDbmlCode} />
       </div>
 
       {/* AI Chat Panel - slides up from bottom */}

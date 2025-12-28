@@ -10,6 +10,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        heartbeat: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '25%': { transform: 'scale(1.03)' },
+          '50%': { transform: 'scale(1)' },
+          '75%': { transform: 'scale(1.03)' }
+        }
+      },
+      animation: {
+        heartbeat: 'heartbeat 4s ease-in-out infinite'
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

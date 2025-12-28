@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import { File } from '../types';
+import { registerDBMLLanguage } from '../languages/dbml';
+import { Monaco } from '@monaco-editor/react';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false
@@ -13,6 +15,10 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
   const code = selectedFile?.content ?? '// Select a file to view its content';
   const fileName = selectedFile?.name ?? 'index.js';
 
+  // Register DBML language on component mount
+  const handleBeforeMount = (monaco: Monaco) => {
+    registerDBMLLanguage(monaco);
+  };
   let language = fileName.split('.').pop();
 
   if (language === 'js' || language === 'jsx') language = 'javascript';
@@ -24,6 +30,7 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
   else if (language === 'json') language = 'json';
   else if (language === 'sql') language = 'sql';
   else if (language === 'php') language = 'php';
+  else if (language === 'dbml') language = 'dbml';
 
   // Determine Monaco theme based on current theme
   // Use resolvedTheme to handle 'system' theme properly
@@ -36,6 +43,7 @@ export const Code = ({ selectedFile }: { selectedFile: File | undefined }) => {
         width="100%"
         language={language}
         value={code}
+        beforeMount={handleBeforeMount}
         theme={monacoTheme}
         options={{
           readOnly: true,

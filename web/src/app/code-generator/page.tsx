@@ -3,11 +3,14 @@
 import React, { useState } from 'react';
 import AppHeader from '@/layout/app-header';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Code2, MessageSquare, X, ChevronRight } from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { Code } from '@/features/code-editor/components/Code';
 import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
 import { DbmlAssistant } from '@/features/dbml-assistant';
+import TemplateCatalog from '@/features/templates/templates-catalog';
+import { TEMPLATES } from '@/features/templates/constants/templates';
 
 // Sample DBML for initial state
 const sampleDbml = `
@@ -47,11 +50,8 @@ export default function CodeGeneratorPage() {
     new Set(['diagram'] as ('diagram' | 'codeForm' | 'results')[])
   );
   const [codeFormData, setCodeFormData] = useState({
-    framework: 'nextjs',
-    language: 'typescript',
-    includeAuth: true,
-    includeCrud: true,
-    outputPath: './generated'
+    selectedTemplateId: TEMPLATES[0].id,
+    projectName: ''
   });
 
   // Create a mock file object for the Code component
@@ -208,101 +208,65 @@ export default function CodeGeneratorPage() {
   // Code generation form panel
   const codeFormPanel = (
     <div className="flex-1 p-6 bg-white dark:bg-slate-900 overflow-y-auto h-full">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Generate Code</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            Configure Generation
+          </h2>
           <p className="text-slate-600 dark:text-slate-400">
-            Configure your code generation options
+            Select a framework template and enter your project name
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Project Name */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Project Name
+            </label>
+            <Input
+              type="text"
+              value={codeFormData.projectName}
+              onChange={(e) =>
+                setCodeFormData((prev) => ({ ...prev, projectName: e.target.value }))
+              }
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              placeholder="my-awesome-project"
+            />
+          </div>
+
           {/* Framework Selection */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Framework
-            </label>
-            <select
-              value={codeFormData.framework}
-              onChange={(e) => setCodeFormData((prev) => ({ ...prev, framework: e.target.value }))}
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-              <option value="nextjs">Next.js</option>
-              <option value="express">Express.js</option>
-              <option value="spring">Spring Boot</option>
-            </select>
-          </div>
-
-          {/* Language Selection */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Language
-            </label>
-            <select
-              value={codeFormData.language}
-              onChange={(e) => setCodeFormData((prev) => ({ ...prev, language: e.target.value }))}
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-              <option value="typescript">TypeScript</option>
-              <option value="javascript">JavaScript</option>
-              <option value="java">Java</option>
-            </select>
-          </div>
-
-          {/* Options */}
-          <div className="space-y-3">
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                checked={codeFormData.includeAuth}
-                onChange={(e) =>
-                  setCodeFormData((prev) => ({ ...prev, includeAuth: e.target.checked }))
-                }
-                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm text-slate-700 dark:text-slate-300">
-                Include Authentication
-              </span>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
+              Select Framework Template
             </label>
 
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                checked={codeFormData.includeCrud}
-                onChange={(e) =>
-                  setCodeFormData((prev) => ({ ...prev, includeCrud: e.target.checked }))
-                }
-                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm text-slate-700 dark:text-slate-300">
-                Include CRUD Operations
-              </span>
-            </label>
-          </div>
-
-          {/* Output Path */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Output Path
-            </label>
-            <input
-              type="text"
-              value={codeFormData.outputPath}
-              onChange={(e) => setCodeFormData((prev) => ({ ...prev, outputPath: e.target.value }))}
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="./generated"
+            <TemplateCatalog
+              selectedTemplateId={codeFormData.selectedTemplateId}
+              setSelectedTemplateId={(templateId) =>
+                setCodeFormData((prev) => ({ ...prev, selectedTemplateId: templateId }))
+              }
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-3 pt-4">
-          <Button onClick={handleBackToDiagram} variant="outline" className="flex-1">
-            Back
-          </Button>
+        <div className="space-y-3 pt-6">
           <Button
             onClick={handleGenerateCode}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
-            Generate
+            disabled={!codeFormData.projectName.trim()}
+            size="lg"
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed py-4 text-lg font-semibold">
+            Generate Code
           </Button>
+          <div className="flex justify-center">
+            <Button
+              onClick={handleBackToDiagram}
+              variant="ghost"
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-transparent hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+              Back to Diagram
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import AppHeader from '@/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Code2, MessageSquare, X, ChevronRight } from 'lucide-react';
+import { Code2, MessageSquare, X, ChevronRight, Github } from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { Code } from '@/features/code-editor/components/Code';
 import { CodeEditor } from '@/features/code-editor';
@@ -146,7 +146,7 @@ export default function CodeGeneratorPage() {
   const Breadcrumbs = () => {
     const allSteps = [
       { id: 'diagram', label: 'Schema Diagram' },
-      { id: 'codeForm', label: 'Configure Generation' },
+      { id: 'codeForm', label: 'Scaffold Code' },
       { id: 'results', label: 'Generated Code' }
     ];
 
@@ -405,7 +405,7 @@ export class UserModel {
 
   // Right panel with smooth transitions
   const rightPanel = (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden relative">
       {/* Breadcrumbs */}
       <Breadcrumbs />
 
@@ -445,6 +445,22 @@ export class UserModel {
         {currentRightPanel === 'codeForm' && codeFormPanel}
         {currentRightPanel === 'results' && resultsPanel}
       </div>
+
+      {/* Floating Create Repository Button - positioned relative to entire right panel */}
+      {currentRightPanel === 'results' && (
+        <div className="absolute bottom-4 right-4 z-30">
+          <Button
+            onClick={() => {
+              // TODO: Implement create repository functionality
+              console.log('Create Repository clicked');
+            }}
+            size="lg"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-3000 animate-heartbeat hover:animate-none font-medium">
+            <Github className="w-5 h-5 mr-2" />
+            Create Repository
+          </Button>
+        </div>
+      )}
     </div>
   );
 

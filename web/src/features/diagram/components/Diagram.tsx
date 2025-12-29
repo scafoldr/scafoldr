@@ -18,6 +18,7 @@ export interface DiagramRef {
   zoomOut: () => void;
   resetZoom: () => void;
   fitToScreen: () => void;
+  downloadDiagram: (projectName?: string) => void;
 }
 
 // --------------------- Diagram Component ---------------------
@@ -29,6 +30,10 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 3;
   const SCALE_FACTOR = 1.2;
+
+  // Export constants
+  const EXPORT_PADDING = 40;
+  const EXPORT_PIXEL_RATIO = 2;
 
   const [sceneWidth, setSceneWidth] = useState(710);
   const [sceneHeight, setSceneHeight] = useState(626);
@@ -90,12 +95,82 @@ const Diagram = forwardRef<DiagramRef, DiagramProps>(({ initialDiagram }, ref) =
     setPosition({ x: centerX, y: centerY });
   }, [diagram.tables, sceneWidth, sceneHeight]);
 
+  const downloadDiagram = useCallback((projectName?: string) => {
+    if (!stageRef.current || !diagram.tables.length || !containerRef.current) return;
+
+    try {
+      const stage = stageRef.current;
+      const container = containerRef.current;
+
+      const currentScale = stage.scaleX();
+      const currentPosition = { x: stage.x(), y: stage.y() };
+
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
+
+      diagram.tables.forEach((table) => {
+        minX = Math.min(minX, table.position.x);
+        minY = Math.min(minY, table.position.y);
+        maxX = Math.max(maxX, table.position.x + table.width);
+        maxY = Math.max(maxY, table.position.y + table.height);
+      });
+
+      const contentWidth = maxX - minX;
+      const contentHeight = maxY - minY;
+
+      const scaleX = (sceneWidth - EXPORT_PADDING * 2) / contentWidth;
+      const scaleY = (sceneHeight - EXPORT_PADDING * 2) / contentHeight;
+      const tempScale = Math.min(scaleX, scaleY, MAX_SCALE);
+
+      const centerX = (sceneWidth - contentWidth * tempScale) / 2 - minX * tempScale;
+      const centerY = (sceneHeight - contentHeight * tempScale) / 2 - minY * tempScale;
+
+      container.style.visibility = 'hidden';
+
+      stage.scale({ x: tempScale, y: tempScale });
+      stage.position({ x: centerX, y: centerY });
+      stage.batchDraw();
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const sanitizedProjectName = projectName
+        ? projectName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+        : 'er-diagram';
+      const filename = `${sanitizedProjectName}-${timestamp}.png`;
+
+      const dataURL = stage.toDataURL({
+        pixelRatio: EXPORT_PIXEL_RATIO,
+        mimeType: 'image/png'
+      });
+
+      stage.scale({ x: currentScale, y: currentScale });
+      stage.position(currentPosition);
+      stage.batchDraw();
+
+      container.style.visibility = 'visible';
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Failed to download diagram:', error);
+      if (containerRef.current) {
+        containerRef.current.style.visibility = 'visible';
+      }
+    }
+  }, [diagram.tables, sceneWidth, sceneHeight]);
+
   // --------------------- Expose methods ---------------------
   useImperativeHandle(ref, () => ({
     zoomIn,
     zoomOut,
     resetZoom,
-    fitToScreen
+    fitToScreen,
+    downloadDiagram
   }));
 
   // --------------------- Auto fit ---------------------

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Code2, MessageSquare, X, ChevronRight } from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { Code } from '@/features/code-editor/components/Code';
+import { CodeEditor } from '@/features/code-editor';
 import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
 import { DbmlAssistant } from '@/features/dbml-assistant';
 import TemplateCatalog from '@/features/templates/templates-catalog';
@@ -272,40 +273,47 @@ export default function CodeGeneratorPage() {
     </div>
   );
 
+  // Mock generated files for the CodeEditor (FileMap format: Record<string, string>)
+  const generatedFiles = {
+    'src/models/User.ts': `export interface User {
+  id: number;
+  username: string;
+  email: string;
+  created_at: Date;
+}
+
+export class UserModel {
+  constructor(
+    public id: number,
+    public username: string,
+    public email: string,
+    public created_at: Date = new Date()
+  ) {}
+
+  static fromJSON(json: any): UserModel {
+    return new UserModel(
+      json.id,
+      json.username,
+      json.email,
+      new Date(json.created_at)
+    );
+  }
+
+  toJSON(): any {
+    return {
+      id: this.id,
+      username: this.username,
+      email: this.email,
+      created_at: this.created_at.toISOString()
+    };
+  }
+}`
+  };
+
   // Results panel
   const resultsPanel = (
-    <div className="flex-1 p-6 bg-white dark:bg-slate-900 overflow-y-auto h-full">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-            Code Generated Successfully!
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Your code has been generated and is ready for download
-          </p>
-        </div>
-
-        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
-          <h3 className="font-medium text-slate-900 dark:text-white mb-2">Generated Files:</h3>
-          <ul className="space-y-1 text-sm text-slate-600 dark:text-slate-400">
-            <li>• src/models/User.ts</li>
-            <li>• src/models/Post.ts</li>
-            <li>• src/models/Comment.ts</li>
-            <li>• src/api/routes/users.ts</li>
-            <li>• src/api/routes/posts.ts</li>
-            <li>• src/api/routes/comments.ts</li>
-          </ul>
-        </div>
-
-        <div className="flex space-x-3">
-          <Button onClick={handleBackToDiagram} variant="outline" className="flex-1">
-            Back to Diagram
-          </Button>
-          <Button className="flex-1 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white">
-            Download Code
-          </Button>
-        </div>
-      </div>
+    <div className="h-full w-full">
+      <CodeEditor files={generatedFiles} />
     </div>
   );
 

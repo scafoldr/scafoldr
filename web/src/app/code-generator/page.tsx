@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import AppHeader from '@/layout/app-header';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Code2, MessageSquare, X } from 'lucide-react';
+import { Code2, MessageSquare, X, ChevronRight } from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { Code } from '@/features/code-editor/components/Code';
 import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
+import { DbmlAssistant } from '@/features/dbml-assistant';
 
 // Sample DBML for initial state
 const sampleDbml = `
@@ -37,10 +37,22 @@ Table comments {
 
 export default function CodeGeneratorPage() {
   const [dbmlCode, setDbmlCode] = useState(sampleDbml);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
+  const [currentRightPanel, setCurrentRightPanel] = useState<'diagram' | 'codeForm' | 'results'>(
+    'diagram'
+  );
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [visitedPanels, setVisitedPanels] = useState<Set<'diagram' | 'codeForm' | 'results'>>(
+    new Set(['diagram'] as ('diagram' | 'codeForm' | 'results')[])
+  );
+  const [codeFormData, setCodeFormData] = useState({
+    framework: 'nextjs',
+    language: 'typescript',
+    includeAuth: true,
+    includeCrud: true,
+    outputPath: './generated'
+  });
 
   // Create a mock file object for the Code component
   const dbmlFile = {
@@ -52,21 +64,92 @@ export default function CodeGeneratorPage() {
     depth: 1
   };
 
-  // Handle AI generation (placeholder for now)
-  const handleAiGenerate = () => {
-    setIsGenerating(true);
-    // Simulate API call
+  // Handle scaffold code generation - switch to form panel
+  const handleScaffoldCode = () => {
+    setIsTransitioning(true);
     setTimeout(() => {
-      setIsGenerating(false);
-      // For now, just append the prompt as a comment to the DBML
-      setDbmlCode((prev) => `// AI Prompt: ${aiPrompt}\n${prev}`);
-      setAiPrompt('');
-    }, 1500);
+      setCurrentRightPanel('codeForm');
+      setVisitedPanels((prev) => new Set([...Array.from(prev), 'codeForm' as const]));
+      setIsTransitioning(false);
+    }, 150);
   };
 
-  // Handle scaffold code generation (placeholder for now)
-  const handleScaffoldCode = () => {
-    alert('Scaffold code functionality will be implemented in the future.');
+  // Handle form submission
+  const handleGenerateCode = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentRightPanel('results');
+      setVisitedPanels((prev) => new Set([...Array.from(prev), 'results' as const]));
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  // Handle back to diagram
+  const handleBackToDiagram = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentRightPanel('diagram');
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  // Handle breadcrumb navigation
+  const handleBreadcrumbClick = (panel: 'diagram' | 'codeForm' | 'results') => {
+    if (panel !== currentRightPanel && visitedPanels.has(panel)) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentRightPanel(panel);
+        setIsTransitioning(false);
+      }, 150);
+    }
+  };
+
+  // Breadcrumb component
+  const Breadcrumbs = () => {
+    const allSteps = [
+      { id: 'diagram', label: 'Schema Diagram' },
+      { id: 'codeForm', label: 'Configure Generation' },
+      { id: 'results', label: 'Generated Code' }
+    ];
+
+    // Filter to show only visited steps
+    const availableSteps = allSteps.filter((step) =>
+      visitedPanels.has(step.id as 'diagram' | 'codeForm' | 'results')
+    );
+
+    return (
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
+        <div className="flex items-center space-x-2 text-sm">
+          {availableSteps.map((step, index) => {
+            const isActive = currentRightPanel === step.id;
+            const isClickable = visitedPanels.has(step.id as 'diagram' | 'codeForm' | 'results');
+
+            return (
+              <div key={step.id} className="flex items-center">
+                {index > 0 && <ChevronRight className="w-4 h-4 text-slate-400 mx-2" />}
+                <button
+                  onClick={() =>
+                    handleBreadcrumbClick(step.id as 'diagram' | 'codeForm' | 'results')
+                  }
+                  className={`
+                    px-3 py-1 rounded transition-colors
+                    ${
+                      isActive
+                        ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
+                        : isClickable
+                          ? 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          : 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    }
+                  `}
+                  disabled={!isClickable}>
+                  {step.label}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   // Toggle AI chat panel
@@ -100,34 +183,7 @@ export default function CodeGeneratorPage() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex-1 p-2 overflow-y-auto">
-              <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg mb-2 max-w-[80%]">
-                <p className="text-sm">How can I help you with your database schema?</p>
-              </div>
-            </div>
-            <div className="p-2 border-t border-slate-200 dark:border-slate-800">
-              <div className="flex gap-2">
-                <Textarea
-                  placeholder="Describe your database schema..."
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  className="min-h-[60px] resize-none text-sm"
-                />
-                <Button
-                  onClick={handleAiGenerate}
-                  disabled={isGenerating || !aiPrompt.trim()}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white self-end">
-                  {isGenerating ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                      <span>Generating...</span>
-                    </div>
-                  ) : (
-                    <span>Send</span>
-                  )}
-                </Button>
-              </div>
-            </div>
+            <DbmlAssistant setDbmlCode={setDbmlCode} />
           </div>
         )}
       </div>
@@ -149,28 +205,185 @@ export default function CodeGeneratorPage() {
     </div>
   );
 
-  // Right panel with diagram
-  const rightPanel = (
-    <div className="h-full relative">
-      {/* Dynamic ER Diagram */}
-      <DynamicERDiagram dbmlCode={dbmlCode} />
+  // Code generation form panel
+  const codeFormPanel = (
+    <div className="flex-1 p-6 bg-white dark:bg-slate-900 overflow-y-auto h-full">
+      <div className="max-w-md mx-auto space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Generate Code</h2>
+          <p className="text-slate-600 dark:text-slate-400">
+            Configure your code generation options
+          </p>
+        </div>
 
-      {/* Floating Scaffold Button */}
-      <div className="absolute bottom-4 right-4 z-20">
-        <Button
-          onClick={handleScaffoldCode}
-          size="lg"
-          className={`
-            bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
-            shadow-lg transition-all duration-3000 ease-in-out
-            ${isButtonHovered ? 'scale-105 shadow-xl' : ''}
-            animate-heartbeat hover:animate-none
-          `}
-          onMouseEnter={() => setIsButtonHovered(true)}
-          onMouseLeave={() => setIsButtonHovered(false)}>
-          <Code2 className="w-5 h-5 mr-2" />
-          Scaffold Code
-        </Button>
+        <div className="space-y-4">
+          {/* Framework Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Framework
+            </label>
+            <select
+              value={codeFormData.framework}
+              onChange={(e) => setCodeFormData((prev) => ({ ...prev, framework: e.target.value }))}
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+              <option value="nextjs">Next.js</option>
+              <option value="express">Express.js</option>
+              <option value="spring">Spring Boot</option>
+            </select>
+          </div>
+
+          {/* Language Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Language
+            </label>
+            <select
+              value={codeFormData.language}
+              onChange={(e) => setCodeFormData((prev) => ({ ...prev, language: e.target.value }))}
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+              <option value="typescript">TypeScript</option>
+              <option value="javascript">JavaScript</option>
+              <option value="java">Java</option>
+            </select>
+          </div>
+
+          {/* Options */}
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                checked={codeFormData.includeAuth}
+                onChange={(e) =>
+                  setCodeFormData((prev) => ({ ...prev, includeAuth: e.target.checked }))
+                }
+                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-slate-700 dark:text-slate-300">
+                Include Authentication
+              </span>
+            </label>
+
+            <label className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                checked={codeFormData.includeCrud}
+                onChange={(e) =>
+                  setCodeFormData((prev) => ({ ...prev, includeCrud: e.target.checked }))
+                }
+                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-slate-700 dark:text-slate-300">
+                Include CRUD Operations
+              </span>
+            </label>
+          </div>
+
+          {/* Output Path */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Output Path
+            </label>
+            <input
+              type="text"
+              value={codeFormData.outputPath}
+              onChange={(e) => setCodeFormData((prev) => ({ ...prev, outputPath: e.target.value }))}
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              placeholder="./generated"
+            />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-3 pt-4">
+          <Button onClick={handleBackToDiagram} variant="outline" className="flex-1">
+            Back
+          </Button>
+          <Button
+            onClick={handleGenerateCode}
+            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
+            Generate
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Results panel
+  const resultsPanel = (
+    <div className="flex-1 p-6 bg-white dark:bg-slate-900 overflow-y-auto h-full">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            Code Generated Successfully!
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400">
+            Your code has been generated and is ready for download
+          </p>
+        </div>
+
+        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+          <h3 className="font-medium text-slate-900 dark:text-white mb-2">Generated Files:</h3>
+          <ul className="space-y-1 text-sm text-slate-600 dark:text-slate-400">
+            <li>• src/models/User.ts</li>
+            <li>• src/models/Post.ts</li>
+            <li>• src/models/Comment.ts</li>
+            <li>• src/api/routes/users.ts</li>
+            <li>• src/api/routes/posts.ts</li>
+            <li>• src/api/routes/comments.ts</li>
+          </ul>
+        </div>
+
+        <div className="flex space-x-3">
+          <Button onClick={handleBackToDiagram} variant="outline" className="flex-1">
+            Back to Diagram
+          </Button>
+          <Button className="flex-1 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white">
+            Download Code
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Right panel with smooth transitions
+  const rightPanel = (
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
+
+      {/* Panel Container with smooth transitions */}
+      <div
+        className={`
+          flex-1 transition-all duration-300 ease-in-out
+          ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}
+        `}>
+        {currentRightPanel === 'diagram' && (
+          <div className="h-full relative">
+            {/* Dynamic ER Diagram */}
+            <DynamicERDiagram dbmlCode={dbmlCode} />
+
+            {/* Floating Scaffold Button */}
+            <div className="absolute bottom-4 right-4 z-20">
+              <Button
+                onClick={handleScaffoldCode}
+                size="lg"
+                className={`
+                  bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
+                  shadow-lg transition-all duration-3000 ease-in-out
+                  ${isButtonHovered ? 'scale-105 shadow-xl' : ''}
+                  animate-heartbeat hover:animate-none
+                `}
+                onMouseEnter={() => setIsButtonHovered(true)}
+                onMouseLeave={() => setIsButtonHovered(false)}>
+                <Code2 className="w-5 h-5 mr-2" />
+                Scaffold Code
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {currentRightPanel === 'codeForm' && codeFormPanel}
+        {currentRightPanel === 'results' && resultsPanel}
       </div>
     </div>
   );

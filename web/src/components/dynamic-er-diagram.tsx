@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Maximize, Download } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 
 // Sample DBML for demonstration
 const sampleDbml = `
@@ -113,9 +113,10 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
         <Button variant="outline" size="sm" onClick={handleFitToScreen} title="Fit to Screen">
           <Maximize className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="sm" title="Download">
+        {/* TODO: Allow downloading of diagram as image https://github.com/scafoldr/scafoldr/issues/97 */}
+        {/* <Button variant="outline" size="sm" title="Download">
           <Download className="w-4 h-4" />
-        </Button>
+        </Button> */}
       </div>
 
       {/* Interactive Diagram */}

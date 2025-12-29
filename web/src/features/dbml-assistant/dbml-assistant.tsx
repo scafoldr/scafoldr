@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
+import DbmlMessage from './components/dbml-message';
 
 interface DbmlAssistantProps {
   // eslint-disable-next-line no-unused-vars
@@ -10,6 +11,39 @@ interface DbmlAssistantProps {
 const DbmlAssistant = ({ setDbmlCode }: DbmlAssistantProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
+  const [activeSchemaId, setActiveSchemaId] = useState<string>('schema1');
+
+  // Example DBML schemas
+  const schemas = {
+    schema1: {
+      id: 'schema1',
+      version: '1',
+      code: `Table users {
+  id integer [primary key]
+  username varchar
+  email varchar [unique]
+  created_at timestamp
+}
+
+Table posts {
+  id integer [primary key]
+  title varchar
+  content text
+  user_id integer [ref: > users.id]
+  created_at timestamp
+}`
+    },
+    schema2: {
+      id: 'schema2',
+      version: '2',
+      code: `Table old_users {
+  id integer [primary key]
+  name varchar
+  email varchar
+}`
+    }
+  };
+
   // Handle AI generation (placeholder for now)
   const handleAiGenerate = () => {
     setIsGenerating(true);
@@ -22,12 +56,28 @@ const DbmlAssistant = ({ setDbmlCode }: DbmlAssistantProps) => {
     }, 1500);
   };
 
+  const handleSchemaClick = (schemaId: string, dbmlCode: string) => {
+    setActiveSchemaId(schemaId);
+    setDbmlCode(dbmlCode);
+  };
+
   return (
     <>
       <div className="flex-1 p-2 overflow-y-auto">
         <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg mb-2 max-w-[80%]">
           <p className="text-sm">How can I help you with your database schema?</p>
         </div>
+
+        {/* DBML Schema Messages */}
+        {Object.values(schemas).map((schema) => (
+          <DbmlMessage
+            key={schema.id}
+            dbmlCode={schema.code}
+            version={schema.version}
+            onClick={() => handleSchemaClick(schema.id, schema.code)}
+            isActive={activeSchemaId === schema.id}
+          />
+        ))}
       </div>
       <div className="p-2 border-t border-slate-200 dark:border-slate-800">
         <div className="flex gap-2">

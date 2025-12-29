@@ -189,7 +189,7 @@ export default function AppPage() {
       <div className="flex-1 overflow-hidden">
         <Tabs value={activeTab} className="h-full">
           <TabsContent value="er-diagram" className="h-full m-0 relative">
-            <DynamicERDiagram dbmlCode={currentDbml} />
+            <DynamicERDiagram dbmlCode={currentDbml} projectName={currentProject} />
           </TabsContent>
           <TabsContent value="code" className="h-full m-0 relative">
             <CodeEditor

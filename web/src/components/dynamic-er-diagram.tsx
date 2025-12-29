@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Download } from 'lucide-react';
 
 // Sample DBML for demonstration
 const sampleDbml = `
@@ -45,9 +45,10 @@ Table comments {
 
 interface DynamicERDiagramProps {
   dbmlCode?: string;
+  projectName?: string;
 }
 
-export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
+export function DynamicERDiagram({ dbmlCode, projectName }: DynamicERDiagramProps) {
   const [diagram, setDiagram] = useState<any>({ tables: [], relationships: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [DiagramComponent, setDiagramComponent] = useState<any>(null);
@@ -92,6 +93,12 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
     }
   };
 
+  const handleDownload = () => {
+    if (diagramRef.current) {
+      diagramRef.current.downloadDiagram(projectName);
+    }
+  };
+
   if (isLoading || !DiagramComponent) {
     return (
       <div className="h-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
@@ -113,10 +120,9 @@ export function DynamicERDiagram({ dbmlCode }: DynamicERDiagramProps) {
         <Button variant="outline" size="sm" onClick={handleFitToScreen} title="Fit to Screen">
           <Maximize className="w-4 h-4" />
         </Button>
-        {/* TODO: Allow downloading of diagram as image https://github.com/scafoldr/scafoldr/issues/97 */}
-        {/* <Button variant="outline" size="sm" title="Download">
+        <Button variant="outline" size="sm" onClick={handleDownload} title="Download as PNG">
           <Download className="w-4 h-4" />
-        </Button> */}
+        </Button>
       </div>
 
       {/* Interactive Diagram */}

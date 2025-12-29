@@ -372,6 +372,7 @@ export class UserModel {
         defaultLeftWidth={500}
         minLeftWidth={350}
         maxLeftWidth={800}
+        showLeftPanel={currentRightPanel === 'diagram'}
       />
     </div>
   );

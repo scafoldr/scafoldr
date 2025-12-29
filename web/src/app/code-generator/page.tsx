@@ -12,6 +12,8 @@ import { DynamicERDiagram } from '@/components/dynamic-er-diagram';
 import { DbmlAssistant } from '@/features/dbml-assistant';
 import TemplateCatalog from '@/features/templates/templates-catalog';
 import { TEMPLATES } from '@/features/templates/constants/templates';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Parser } from '@dbml/core';
 
 // Sample DBML for initial state
 const sampleDbml = `
@@ -47,13 +49,38 @@ export default function CodeGeneratorPage() {
     'diagram'
   );
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [visitedPanels, setVisitedPanels] = useState<Set<'diagram' | 'codeForm' | 'results'>>(
-    new Set(['diagram'] as ('diagram' | 'codeForm' | 'results')[])
-  );
   const [codeFormData, setCodeFormData] = useState({
     selectedTemplateId: TEMPLATES[0].id,
     projectName: ''
   });
+  const [hasGeneratedCode, setHasGeneratedCode] = useState(false);
+
+  // DBML validation function
+  const validateDbml = (dbml: string): { isValid: boolean; error?: string } => {
+    if (!dbml.trim()) {
+      return { isValid: false, error: 'DBML code is empty' };
+    }
+
+    try {
+      const parser = new Parser();
+      const db = parser.parse(dbml, 'dbml');
+
+      // Check if we have at least one table
+      if (db.schemas.length === 0 || db.schemas[0].tables.length === 0) {
+        return { isValid: false, error: 'DBML must contain at least one table' };
+      }
+
+      return { isValid: true };
+    } catch (error) {
+      return {
+        isValid: false,
+        error: error instanceof Error ? error.message : 'Invalid DBML syntax'
+      };
+    }
+  };
+
+  // Get current DBML validation state
+  const dbmlValidation = validateDbml(dbmlCode);
 
   // Create a mock file object for the Code component
   const dbmlFile = {
@@ -67,10 +94,12 @@ export default function CodeGeneratorPage() {
 
   // Handle scaffold code generation - switch to form panel
   const handleScaffoldCode = () => {
+    // Only allow if DBML code is valid
+    if (!dbmlValidation.isValid) return;
+
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentRightPanel('codeForm');
-      setVisitedPanels((prev) => new Set([...Array.from(prev), 'codeForm' as const]));
       setIsTransitioning(false);
     }, 150);
   };
@@ -80,7 +109,7 @@ export default function CodeGeneratorPage() {
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentRightPanel('results');
-      setVisitedPanels((prev) => new Set([...Array.from(prev), 'results' as const]));
+      setHasGeneratedCode(true);
       setIsTransitioning(false);
     }, 150);
   };
@@ -96,7 +125,15 @@ export default function CodeGeneratorPage() {
 
   // Handle breadcrumb navigation
   const handleBreadcrumbClick = (panel: 'diagram' | 'codeForm' | 'results') => {
-    if (panel !== currentRightPanel && visitedPanels.has(panel)) {
+    // Check if step is enabled
+    const isStepEnabled = (stepId: string) => {
+      if (stepId === 'diagram') return true; // Always enabled
+      if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
+      if (stepId === 'results') return hasGeneratedCode; // Enabled if code has been generated
+      return false;
+    };
+
+    if (panel !== currentRightPanel && isStepEnabled(panel)) {
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentRightPanel(panel);
@@ -113,43 +150,92 @@ export default function CodeGeneratorPage() {
       { id: 'results', label: 'Generated Code' }
     ];
 
-    // Filter to show only visited steps
-    const availableSteps = allSteps.filter((step) =>
-      visitedPanels.has(step.id as 'diagram' | 'codeForm' | 'results')
-    );
+    // Check if step is enabled based on business rules
+    const isStepEnabled = (stepId: string) => {
+      if (stepId === 'diagram') return true; // Always enabled
+      if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
+      if (stepId === 'results') return hasGeneratedCode; // Enabled if code has been generated
+      return false;
+    };
+
+    // Get tooltip message for disabled steps
+    const getTooltipMessage = (stepId: string) => {
+      if (stepId === 'codeForm' && !dbmlValidation.isValid) {
+        return (
+          dbmlValidation.error || 'Please provide valid DBML code to enable configuration step'
+        );
+      }
+      if (stepId === 'results' && !hasGeneratedCode) {
+        return 'Complete the configuration step to enable generated code view';
+      }
+      return '';
+    };
+
+    // Show all steps, but disable based on rules
+    const availableSteps = allSteps;
 
     return (
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
-        <div className="flex items-center space-x-2 text-sm">
-          {availableSteps.map((step, index) => {
-            const isActive = currentRightPanel === step.id;
-            const isClickable = visitedPanels.has(step.id as 'diagram' | 'codeForm' | 'results');
+      <TooltipProvider>
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div className="flex items-center space-x-2 text-sm">
+            {availableSteps.map((step, index) => {
+              const isActive = currentRightPanel === step.id;
+              const isEnabled = isStepEnabled(step.id);
+              const tooltipMessage = getTooltipMessage(step.id);
 
-            return (
-              <div key={step.id} className="flex items-center">
-                {index > 0 && <ChevronRight className="w-4 h-4 text-slate-400 mx-2" />}
-                <button
-                  onClick={() =>
-                    handleBreadcrumbClick(step.id as 'diagram' | 'codeForm' | 'results')
-                  }
-                  className={`
-                    px-3 py-1 rounded transition-colors
-                    ${
-                      isActive
-                        ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
-                        : isClickable
-                          ? 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-                          : 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                    }
-                  `}
-                  disabled={!isClickable}>
-                  {step.label}
-                </button>
-              </div>
-            );
-          })}
+              return (
+                <div key={step.id} className="flex items-center">
+                  {index > 0 && <ChevronRight className="w-4 h-4 text-slate-400 mx-2" />}
+                  {!isEnabled && tooltipMessage ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() =>
+                            handleBreadcrumbClick(step.id as 'diagram' | 'codeForm' | 'results')
+                          }
+                          className={`
+                            px-3 py-1 rounded transition-colors
+                            ${
+                              isActive
+                                ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
+                                : isEnabled
+                                  ? 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                  : 'text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-50'
+                            }
+                          `}
+                          disabled={!isEnabled}>
+                          {step.label}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{tooltipMessage}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        handleBreadcrumbClick(step.id as 'diagram' | 'codeForm' | 'results')
+                      }
+                      className={`
+                        px-3 py-1 rounded transition-colors
+                        ${
+                          isActive
+                            ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
+                            : isEnabled
+                              ? 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                              : 'text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-50'
+                        }
+                      `}
+                      disabled={!isEnabled}>
+                      {step.label}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
     );
   };
 
@@ -338,12 +424,14 @@ export class UserModel {
             <div className="absolute bottom-4 right-4 z-20">
               <Button
                 onClick={handleScaffoldCode}
+                disabled={!dbmlValidation.isValid}
                 size="lg"
                 className={`
                   bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
                   shadow-lg transition-all duration-3000 ease-in-out
-                  ${isButtonHovered ? 'scale-105 shadow-xl' : ''}
-                  animate-heartbeat hover:animate-none
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none
+                  ${isButtonHovered && dbmlValidation.isValid ? 'scale-105 shadow-xl' : ''}
+                  ${dbmlValidation.isValid ? 'animate-heartbeat hover:animate-none' : ''}
                 `}
                 onMouseEnter={() => setIsButtonHovered(true)}
                 onMouseLeave={() => setIsButtonHovered(false)}>

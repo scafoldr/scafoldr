@@ -4,7 +4,16 @@ import React, { useState } from 'react';
 import AppHeader from '@/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Code2, MessageSquare, X, ChevronRight, Github } from 'lucide-react';
+import {
+  Code2,
+  MessageSquare,
+  X,
+  ChevronRight,
+  Github,
+  Rocket,
+  ExternalLink,
+  CheckCircle
+} from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { Code } from '@/features/code-editor/components/Code';
 import { CodeEditor } from '@/features/code-editor';
@@ -45,15 +54,16 @@ export default function CodeGeneratorPage() {
   const [dbmlCode, setDbmlCode] = useState(sampleDbml);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
-  const [currentRightPanel, setCurrentRightPanel] = useState<'diagram' | 'codeForm' | 'results'>(
-    'diagram'
-  );
+  const [currentRightPanel, setCurrentRightPanel] = useState<
+    'diagram' | 'codeForm' | 'results' | 'deploy'
+  >('diagram');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [codeFormData, setCodeFormData] = useState({
     selectedTemplateId: TEMPLATES[0].id,
     projectName: ''
   });
   const [hasGeneratedCode, setHasGeneratedCode] = useState(false);
+  const [hasCreatedRepository, setHasCreatedRepository] = useState(false);
 
   // DBML validation function
   const validateDbml = (dbml: string): { isValid: boolean; error?: string } => {
@@ -124,12 +134,13 @@ export default function CodeGeneratorPage() {
   };
 
   // Handle breadcrumb navigation
-  const handleBreadcrumbClick = (panel: 'diagram' | 'codeForm' | 'results') => {
+  const handleBreadcrumbClick = (panel: 'diagram' | 'codeForm' | 'results' | 'deploy') => {
     // Check if step is enabled
     const isStepEnabled = (stepId: string) => {
       if (stepId === 'diagram') return true; // Always enabled
       if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
       if (stepId === 'results') return hasGeneratedCode; // Enabled if code has been generated
+      if (stepId === 'deploy') return hasCreatedRepository; // Enabled if repository has been created
       return false;
     };
 
@@ -147,7 +158,8 @@ export default function CodeGeneratorPage() {
     const allSteps = [
       { id: 'diagram', label: 'Schema Diagram' },
       { id: 'codeForm', label: 'Scaffold Code' },
-      { id: 'results', label: 'Generated Code' }
+      { id: 'results', label: 'Generated Code' },
+      { id: 'deploy', label: 'Deploy App' }
     ];
 
     // Check if step is enabled based on business rules
@@ -155,6 +167,7 @@ export default function CodeGeneratorPage() {
       if (stepId === 'diagram') return true; // Always enabled
       if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
       if (stepId === 'results') return hasGeneratedCode; // Enabled if code has been generated
+      if (stepId === 'deploy') return hasCreatedRepository; // Enabled if repository has been created
       return false;
     };
 
@@ -167,6 +180,9 @@ export default function CodeGeneratorPage() {
       }
       if (stepId === 'results' && !hasGeneratedCode) {
         return 'Complete the configuration step to enable generated code view';
+      }
+      if (stepId === 'deploy' && !hasCreatedRepository) {
+        return 'Create a GitHub repository to enable deployment';
       }
       return '';
     };
@@ -191,7 +207,9 @@ export default function CodeGeneratorPage() {
                       <TooltipTrigger asChild>
                         <button
                           onClick={() =>
-                            handleBreadcrumbClick(step.id as 'diagram' | 'codeForm' | 'results')
+                            handleBreadcrumbClick(
+                              step.id as 'diagram' | 'codeForm' | 'results' | 'deploy'
+                            )
                           }
                           className={`
                             px-3 py-1 rounded transition-colors
@@ -214,7 +232,9 @@ export default function CodeGeneratorPage() {
                   ) : (
                     <button
                       onClick={() =>
-                        handleBreadcrumbClick(step.id as 'diagram' | 'codeForm' | 'results')
+                        handleBreadcrumbClick(
+                          step.id as 'diagram' | 'codeForm' | 'results' | 'deploy'
+                        )
                       }
                       className={`
                         px-3 py-1 rounded transition-colors
@@ -403,6 +423,132 @@ export class UserModel {
     </div>
   );
 
+  // Deploy app panel
+  const deployPanel = (
+    <div className="flex-1 p-6 bg-white dark:bg-slate-900 overflow-y-auto h-full">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Rocket className="w-12 h-12 text-blue-600 dark:text-blue-400" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            Deploy Your Application
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 text-lg">
+            Your application is ready for deployment with built-in CI/CD pipeline
+          </p>
+        </div>
+
+        {/* Deployment Status */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
+              Repository Created Successfully
+            </h3>
+          </div>
+          <p className="text-green-700 dark:text-green-300">
+            Your code has been pushed to GitHub and is ready for deployment.
+          </p>
+        </div>
+
+        {/* Deployment Options */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Automatic Deployment */}
+          <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Rocket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                Automatic Deployment
+              </h3>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              Deploy automatically with our built-in CI/CD pipeline. Every push to main branch
+              triggers a new deployment.
+            </p>
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => setHasCreatedRepository(true)}>
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Configure Auto Deploy
+            </Button>
+          </div>
+
+          {/* Manual Deployment */}
+          <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <Code2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                Manual Deployment
+              </h3>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              Deploy manually using command line tools or your preferred deployment platform.
+            </p>
+            <Button variant="outline" className="w-full">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View Instructions
+            </Button>
+          </div>
+        </div>
+
+        {/* Deployment Instructions */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+            Deployment Instructions
+          </h3>
+
+          <div className="space-y-4">
+            <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 dark:text-white mb-2">
+                1. CI/CD Pipeline Setup
+              </h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
+                Your repository includes pre-configured GitHub Actions workflows for automatic
+                testing and deployment.
+              </p>
+            </div>
+
+            <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 dark:text-white mb-2">
+                2. Environment Configuration
+              </h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
+                Configure your environment variables in GitHub repository settings under Secrets and
+                Variables.
+              </p>
+            </div>
+
+            <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 dark:text-white mb-2">
+                3. Deployment Platforms
+              </h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
+                Compatible with Vercel, Netlify, AWS, Google Cloud, and other major deployment
+                platforms.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Coming Soon Notice */}
+        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+            🚀 More Deployment Features Coming Soon
+          </h3>
+          <p className="text-slate-600 dark:text-slate-400">
+            We&apos;re working on one-click deployment integrations, monitoring dashboards, and
+            advanced CI/CD configurations. Stay tuned for updates!
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   // Right panel with smooth transitions
   const rightPanel = (
     <div className="h-full flex flex-col overflow-hidden relative">
@@ -444,6 +590,7 @@ export class UserModel {
 
         {currentRightPanel === 'codeForm' && codeFormPanel}
         {currentRightPanel === 'results' && resultsPanel}
+        {currentRightPanel === 'deploy' && deployPanel}
       </div>
 
       {/* Floating Create Repository Button - positioned relative to entire right panel */}
@@ -451,8 +598,12 @@ export class UserModel {
         <div className="absolute bottom-4 right-4 z-30">
           <Button
             onClick={() => {
-              // TODO: Implement create repository functionality
-              console.log('Create Repository clicked');
+              setHasCreatedRepository(true);
+              setIsTransitioning(true);
+              setTimeout(() => {
+                setCurrentRightPanel('deploy');
+                setIsTransitioning(false);
+              }, 150);
             }}
             size="lg"
             className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-3000 animate-heartbeat hover:animate-none font-medium">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppHeader from '@/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,8 @@ import {
   Github,
   Rocket,
   ExternalLink,
-  CheckCircle
+  CheckCircle,
+  AlertCircleIcon
 } from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
 import { Code } from '@/features/code-editor/components/Code';
@@ -23,6 +24,8 @@ import TemplateCatalog from '@/features/templates/templates-catalog';
 import { TEMPLATES } from '@/features/templates/constants/templates';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Parser } from '@dbml/core';
+import { useScaffoldCode } from '@/hooks/use-scaffold-code';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Sample DBML for initial state
 const sampleDbml = `
@@ -60,10 +63,11 @@ export default function CodeGeneratorPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [codeFormData, setCodeFormData] = useState({
     selectedTemplateId: TEMPLATES[0].id,
-    projectName: ''
+    projectName: 'my-awesome-project'
   });
-  const [hasGeneratedCode, setHasGeneratedCode] = useState(false);
   const [hasCreatedRepository, setHasCreatedRepository] = useState(false);
+
+  const { data, isLoading, error, fetchData } = useScaffoldCode();
 
   // DBML validation function
   const validateDbml = (dbml: string): { isValid: boolean; error?: string } => {
@@ -114,14 +118,23 @@ export default function CodeGeneratorPage() {
     }, 150);
   };
 
-  // Handle form submission
-  const handleGenerateCode = () => {
+  useEffect(() => {
+    if (!data) return;
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentRightPanel('results');
-      setHasGeneratedCode(true);
       setIsTransitioning(false);
     }, 150);
+  }, [data, isLoading, error]);
+
+  // Handle form submission
+  const handleGenerateCode = async () => {
+    await fetchData({
+      projectId: 'project-id-placeholder',
+      projectName: codeFormData.projectName,
+      dbmlCode,
+      framework: codeFormData.selectedTemplateId
+    });
   };
 
   // Handle back to diagram
@@ -133,17 +146,17 @@ export default function CodeGeneratorPage() {
     }, 150);
   };
 
+  // Check if step is enabled
+  const isStepEnabled = (stepId: string) => {
+    if (stepId === 'diagram') return true; // Always enabled
+    if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
+    if (stepId === 'results') return !!data; // Enabled if code has been generated
+    if (stepId === 'deploy') return hasCreatedRepository; // Enabled if repository has been created
+    return false;
+  };
+
   // Handle breadcrumb navigation
   const handleBreadcrumbClick = (panel: 'diagram' | 'codeForm' | 'results' | 'deploy') => {
-    // Check if step is enabled
-    const isStepEnabled = (stepId: string) => {
-      if (stepId === 'diagram') return true; // Always enabled
-      if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
-      if (stepId === 'results') return hasGeneratedCode; // Enabled if code has been generated
-      if (stepId === 'deploy') return hasCreatedRepository; // Enabled if repository has been created
-      return false;
-    };
-
     if (panel !== currentRightPanel && isStepEnabled(panel)) {
       setIsTransitioning(true);
       setTimeout(() => {
@@ -162,15 +175,6 @@ export default function CodeGeneratorPage() {
       { id: 'deploy', label: 'Deploy App' }
     ];
 
-    // Check if step is enabled based on business rules
-    const isStepEnabled = (stepId: string) => {
-      if (stepId === 'diagram') return true; // Always enabled
-      if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
-      if (stepId === 'results') return hasGeneratedCode; // Enabled if code has been generated
-      if (stepId === 'deploy') return hasCreatedRepository; // Enabled if repository has been created
-      return false;
-    };
-
     // Get tooltip message for disabled steps
     const getTooltipMessage = (stepId: string) => {
       if (stepId === 'codeForm' && !dbmlValidation.isValid) {
@@ -178,7 +182,7 @@ export default function CodeGeneratorPage() {
           dbmlValidation.error || 'Please provide valid DBML code to enable configuration step'
         );
       }
-      if (stepId === 'results' && !hasGeneratedCode) {
+      if (stepId === 'results' && !data) {
         return 'Complete the configuration step to enable generated code view';
       }
       if (stepId === 'deploy' && !hasCreatedRepository) {
@@ -357,14 +361,25 @@ export default function CodeGeneratorPage() {
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircleIcon />
+            <AlertTitle>Unable to generate code.</AlertTitle>
+            <AlertDescription>
+              <p>{error}</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Action Buttons */}
         <div className="space-y-3 pt-6">
           <Button
             onClick={handleGenerateCode}
-            disabled={!codeFormData.projectName.trim()}
+            disabled={!codeFormData.projectName.trim() || isLoading}
             size="lg"
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed py-4 text-lg font-semibold">
-            Generate Code
+            {isLoading ? 'Loading...' : 'Generate Code'}
           </Button>
           <div className="flex justify-center">
             <Button
@@ -379,47 +394,10 @@ export default function CodeGeneratorPage() {
     </div>
   );
 
-  // Mock generated files for the CodeEditor (FileMap format: Record<string, string>)
-  const generatedFiles = {
-    'src/models/User.ts': `export interface User {
-  id: number;
-  username: string;
-  email: string;
-  created_at: Date;
-}
-
-export class UserModel {
-  constructor(
-    public id: number,
-    public username: string,
-    public email: string,
-    public created_at: Date = new Date()
-  ) {}
-
-  static fromJSON(json: any): UserModel {
-    return new UserModel(
-      json.id,
-      json.username,
-      json.email,
-      new Date(json.created_at)
-    );
-  }
-
-  toJSON(): any {
-    return {
-      id: this.id,
-      username: this.username,
-      email: this.email,
-      created_at: this.created_at.toISOString()
-    };
-  }
-}`
-  };
-
   // Results panel
-  const resultsPanel = (
+  const resultsPanel = !!data && (
     <div className="h-full w-full">
-      <CodeEditor files={generatedFiles} />
+      <CodeEditor files={data} />
     </div>
   );
 

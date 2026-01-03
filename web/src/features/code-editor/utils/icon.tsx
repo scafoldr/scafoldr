@@ -8,7 +8,8 @@ import {
   FolderOpen,
   File as FileIcon,
   Coffee,
-  SlidersVertical
+  SlidersVertical,
+  Braces
 } from 'lucide-react';
 import { SiDocker } from '@icons-pack/react-simple-icons';
 
@@ -21,8 +22,8 @@ function getIconHelper() {
   cache.set('mjs', <Code className="w-4 h-4 text-yellow-500" />);
   cache.set('cjs', <Code className="w-4 h-4 text-green-700" />);
   cache.set('css', <Code className="w-4 h-4 text-purple-500" />);
-  cache.set('json', <Database className="w-4 h-4 text-green-500" />);
-  cache.set('jsonc', <Database className="w-4 h-4 text-green-500" />);
+  cache.set('json', <Braces className="w-4 h-4 text-orange-300" />);
+  cache.set('jsonc', <Braces className="w-4 h-4 text-orange-300" />);
   cache.set('html', <Code className="w-4 h-4 text-orange-500" />);
   cache.set('png', <Image className="w-4 h-4 text-gray-500" />);
   cache.set('jpg', <Image className="w-4 h-4 text-gray-500" />);

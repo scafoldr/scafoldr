@@ -33,7 +33,7 @@ Table users {
   id integer [primary key]
   username varchar [not null]
   email varchar [unique, not null]
-  created_at timestamp [default: \`now()\`]
+  created_at timestamp [default: 'now()']
 }
 
 Table posts {
@@ -41,7 +41,7 @@ Table posts {
   title varchar [not null]
   content text
   user_id integer [ref: > users.id]
-  created_at timestamp [default: \`now()\`]
+  created_at timestamp [default: 'now()']
 }
 
 Table comments {
@@ -49,7 +49,7 @@ Table comments {
   content text [not null]
   post_id integer [ref: > posts.id]
   user_id integer [ref: > users.id]
-  created_at timestamp [default: \`now()\`]
+  created_at timestamp [default: 'now()']
 }
 `;
 

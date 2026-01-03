@@ -70,7 +70,7 @@ export default function CodeEditor({ files, beforeFileSelect }: CodeEditorProps)
   return (
     <div className="h-full flex">
       {/* File Explorer */}
-      <div className="w-64 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+      <div className="w-64 h-full border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
         <div className="p-3 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">Files</h3>
@@ -81,10 +81,8 @@ export default function CodeEditor({ files, beforeFileSelect }: CodeEditorProps)
           </div>
         </div>
 
-        <ScrollArea className="h-[calc(100%-60px)]">
-          <div className="p-2">
-            <FileTree rootDir={filesTree} onSelect={handleFileSelect} selectedFile={selectedFile} />
-          </div>
+        <ScrollArea className="h-[calc(100vh-12rem)] overflow-y-auto p-2">
+          <FileTree rootDir={filesTree} onSelect={handleFileSelect} selectedFile={selectedFile} />
         </ScrollArea>
       </div>
 

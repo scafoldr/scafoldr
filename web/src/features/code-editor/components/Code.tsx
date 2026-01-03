@@ -15,6 +15,7 @@ export const Code = ({
   onFileEdit
 }: {
   selectedFile: File | undefined;
+  // eslint-disable-next-line no-unused-vars
   onFileEdit?: (value: string) => void;
 }) => {
   const { resolvedTheme } = useTheme();

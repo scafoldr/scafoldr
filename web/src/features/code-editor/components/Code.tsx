@@ -27,16 +27,21 @@ export const Code = ({
   };
   let language = fileName.split('.').pop();
 
-  if (language === 'js' || language === 'jsx') language = 'javascript';
+  if (language === 'js' || language === 'jsx' || language === 'mjs' || language === 'cjs')
+    language = 'javascript';
   else if (language === 'ts' || language === 'tsx') language = 'typescript';
   else if (language === 'java') language = 'java';
   else if (language === 'py') language = 'python';
   else if (language === 'css') language = 'css';
   else if (language === 'html') language = 'html';
-  else if (language === 'json') language = 'json';
+  else if (language === 'json' || language === 'jsonc') language = 'json';
   else if (language === 'sql') language = 'sql';
   else if (language === 'php') language = 'php';
   else if (language === 'dbml') language = 'dbml';
+  else if (language === 'md') language = 'markdown';
+  else if (language === 'Dockerfile') language = 'dockerfile';
+  else if (language === 'env' || language === 'local' || language === 'example')
+    language = 'dotenv';
 
   // Determine Monaco theme based on current theme
   // Use resolvedTheme to handle 'system' theme properly

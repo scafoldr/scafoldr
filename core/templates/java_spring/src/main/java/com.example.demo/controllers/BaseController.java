@@ -1,14 +1,18 @@
 package com.example.controllers;
 
 import com.example.dtos.BaseDTO;
-import com.example.models.BaseModel; import com.example.services.BaseService; import lombok.RequiredArgsConstructor; import org.springframework.http.ResponseEntity; import org.springframework.web.bind.annotation.*;
+import com.example.entities.BaseEntity;
+import com.example.services.BaseService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
-public abstract class BaseController<T extends BaseModel, D extends BaseDTO> {
+public abstract class BaseController<T extends BaseEntity, D extends BaseDTO> {
 
     protected final BaseService<T> service;
     protected final Function<T, D> toDTO;

@@ -200,6 +200,7 @@ export function MessageInput({
       <div className="relative flex w-full items-center space-x-2">
         <div className="relative flex-1">
           <textarea
+            name="message"
             aria-label="Write your prompt here"
             placeholder={placeholder}
             ref={textAreaRef}

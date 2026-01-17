@@ -12,14 +12,31 @@ const config: Config = {
     extend: {
       keyframes: {
         heartbeat: {
-          '0%, 100%': { transform: 'scale(1)' },
-          '25%': { transform: 'scale(1.03)' },
-          '50%': { transform: 'scale(1)' },
-          '75%': { transform: 'scale(1.03)' }
+          '0%, 100%': {
+            transform: 'scale(1)'
+          },
+          '25%': {
+            transform: 'scale(1.03)'
+          },
+          '50%': {
+            transform: 'scale(1)'
+          },
+          '75%': {
+            transform: 'scale(1.03)'
+          }
+        },
+        'typing-dot-bounce': {
+          '0%,40%': {
+            transform: 'translateY(0)'
+          },
+          '20%': {
+            transform: 'translateY(-0.25rem)'
+          }
         }
       },
       animation: {
-        heartbeat: 'heartbeat 4s ease-in-out infinite'
+        heartbeat: 'heartbeat 4s ease-in-out infinite',
+        'typing-dot-bounce': 'typing-dot-bounce 1.25s ease-out infinite'
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -61,6 +78,12 @@ const config: Config = {
           '3': 'hsl(var(--chart-3))',
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))'
+        },
+        shiki: {
+          light: 'var(--shiki-light)',
+          'light-bg': 'var(--shiki-light-bg)',
+          dark: 'var(--shiki-dark)',
+          'dark-bg': 'var(--shiki-dark-bg)'
         }
       },
       borderRadius: {

@@ -9,7 +9,6 @@ from core.dbml_ai_assistant.prompt import DBML_AI_AGENT_PROMPT
 
 config = Config()
 
-
 class DbmlAiAgent:
     def __init__(self):
         self.agent = Agent(

@@ -1,0 +1,89 @@
+databaseChangeLog:
+- changeSet:
+    id: 1768923658053-1
+    author: root
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: users_pkey
+            name: id
+            type: BIGINT
+        - column:
+            name: created_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: email
+            type: VARCHAR(255)
+        tableName: users
+- changeSet:
+    id: 1768923658053-2
+    author: root (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: email
+        constraintName: uk6dotkott2kjsp8vw4d0m25fb7
+        tableName: users
+- changeSet:
+    id: 1768923658053-3
+    author: root
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: verification_codes_pkey
+            name: id
+            type: BIGINT
+        - column:
+            name: attempts
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            name: created_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: expires_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: used
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: BIGINT
+        tableName: verification_codes
+- changeSet:
+    id: 1768923658053-4
+    author: root (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: verification_codes
+        constraintName: fka4qo6nts1xd94owirq5evcpda
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: users
+        validate: true
+

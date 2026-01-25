@@ -1,5 +1,5 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/001-create-tables.yaml
+      file: db/changelog/001-create-users-and-verification-tables.yaml
   - include:
-      file: db/changelog/002-create-project-table.yaml
+      file: db/changelog/002-create-project-and-user-project-tables.yaml

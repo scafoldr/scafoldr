@@ -93,6 +93,12 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - EMAIL_SENDER_USERNAME=${EMAIL_SENDER_USERNAME}
       - EMAIL_SENDER_PASSWORD=${EMAIL_SENDER_PASSWORD}
+      # PostgreSQL environment variables
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./rest/src:/app/src
       - ~/.m2:/root/.m2

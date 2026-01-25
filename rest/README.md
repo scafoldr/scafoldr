@@ -108,6 +108,22 @@ The master changelog ([`db.changelog-master.yaml`](src/main/resources/db/changel
 
 Migrations run automatically on application startup when [`spring.liquibase.enabled=true`](src/main/resources/application.properties:16) is set.
 
+### Sync Existing Database with Migrations
+
+For users who have existing tables in the database before migrations were implemented, you need to mark the first migration as already executed to avoid conflicts:
+
+**Mark first migration as executed (for existing databases):**
+```bash
+./mvnw liquibase:changelogSync
+```
+
+**In Docker environment:**
+```bash
+docker exec -it rest mvn liquibase:changelogSync
+```
+
+This command tells Liquibase that all changesets in the changelog have already been applied to the database, preventing it from trying to recreate existing tables.
+
 ## Useful Commands
 
 ### Local Development
@@ -186,9 +202,6 @@ docker exec -it postgres psql -U postgres -d scafoldr -c "SELECT * FROM database
 - `JWT_SECRET` - JWT signing secret
 - `EMAIL_SENDER_USERNAME` - SMTP username
 - `EMAIL_SENDER_PASSWORD` - SMTP password
-
-**Liquibase Configuration:**
-Copy [`liquibase.properties.example`](src/main/resources/liquibase.properties.example) to `liquibase.properties` and update with your database credentials for local development.
 
 ### Build and Test
 

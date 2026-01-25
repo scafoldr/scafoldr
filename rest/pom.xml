@@ -142,6 +142,10 @@
 				<artifactId>liquibase-maven-plugin</artifactId>
 				<version>${liquibase.version}</version>
 				<configuration>
+					<url>jdbc:postgresql://${env.POSTGRES_HOST}:${env.POSTGRES_PORT}/${env.POSTGRES_DB}</url>
+        			<username>${env.POSTGRES_USER}</username>
+			        <password>${env.POSTGRES_PASSWORD}</password>
+
 					<propertyFile>src/main/resources/liquibase.properties</propertyFile>
 					<diffChangeLogFile>/app/src/main/resources/db/changelog/diff-changelog-${maven.build.timestamp}.yaml</diffChangeLogFile>
 					<referenceUrl>hibernate:spring:com.scafoldr.model?dialect=org.hibernate.dialect.PostgreSQLDialect

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,8 +12,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "project")
-public class Project extends DomainModel implements Serializable {
-
+public class Project extends DomainModel {
 
     @Column(name = "name")
     private String name;

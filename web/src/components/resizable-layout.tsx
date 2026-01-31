@@ -8,6 +8,7 @@ interface ResizableLayoutProps {
   defaultLeftWidth?: number;
   minLeftWidth?: number;
   maxLeftWidth?: number;
+  showLeftPanel?: boolean;
 }
 
 export function ResizableLayout({
@@ -15,7 +16,8 @@ export function ResizableLayout({
   rightPanel,
   defaultLeftWidth = 320,
   minLeftWidth = 280,
-  maxLeftWidth = 600
+  maxLeftWidth = 600,
+  showLeftPanel = true
 }: ResizableLayoutProps) {
   const [leftWidth, setLeftWidth] = useState(defaultLeftWidth);
   const [isResizing, setIsResizing] = useState(false);
@@ -70,18 +72,27 @@ export function ResizableLayout({
     <div ref={containerRef} className="flex-1 flex overflow-hidden">
       {/* Left Panel */}
       <div
-        style={{ width: leftWidth }}
-        className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col">
-        {leftPanel}
+        style={{
+          width: showLeftPanel ? leftWidth : 0
+        }}
+        className={`
+          border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col
+          transition-all duration-300 ease-in-out
+          ${showLeftPanel ? '' : 'overflow-hidden'}
+        `}>
+        {showLeftPanel && leftPanel}
       </div>
 
       {/* Resize Handle */}
       <div
-        onMouseDown={handleMouseDown}
-        className={`w-1 bg-slate-200 dark:bg-slate-700 hover:bg-blue-500 dark:hover:bg-blue-400 cursor-col-resize transition-colors ${
-          isResizing ? 'bg-blue-500 dark:bg-blue-400' : ''
-        }`}
-        style={{ minWidth: '4px' }}
+        onMouseDown={showLeftPanel ? handleMouseDown : undefined}
+        className={`
+          bg-slate-200 dark:bg-slate-700 cursor-col-resize transition-all duration-300 ease-in-out
+          ${showLeftPanel ? 'w-1 hover:bg-blue-500 dark:hover:bg-blue-400' : 'w-0'}
+          ${isResizing ? 'bg-blue-500 dark:bg-blue-400' : ''}
+          ${!showLeftPanel ? 'pointer-events-none' : ''}
+        `}
+        style={{ minWidth: showLeftPanel ? '4px' : '0px' }}
       />
 
       {/* Right Panel */}

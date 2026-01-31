@@ -44,9 +44,9 @@ const TemplateCatalog = ({
 
   return (
     <div>
-      <div className="flex flex-row flex-wrap -mx-2">
+      <div className="flex flex-row flex-wrap flex-1 -mx-2">
         {TEMPLATES.map((template) => (
-          <div className="basis-full md:basis-1/2 lg:basis-1/3 p-2" key={template.id}>
+          <div className="basis-full md:basis-1/2 xl:basis-1/3 p-2" key={template.id}>
             <TemplateCard
               key={template.id}
               template={template}
@@ -57,7 +57,7 @@ const TemplateCatalog = ({
             />
           </div>
         ))}
-        <div className="basis-full md:basis-1/2 lg:basis-1/3 p-2">
+        <div className="basis-full md:basis-1/2 xl:basis-1/3 p-2">
           <CreateYourOwnTemplate onClick={() => setIsCreateYourOwnTemplateModalOpen(true)} />
         </div>
       </div>

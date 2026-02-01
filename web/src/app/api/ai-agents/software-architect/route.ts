@@ -1,6 +1,6 @@
 import { Agent } from '@strands-agents/sdk';
 import { OpenAIModel } from '@strands-agents/sdk/openai';
-import { validateDbmlTool } from './tools/validate-dbml';
+import { validateAndSaveDbmlTool } from './tools/validate-and-save-dbml';
 
 export const dynamic = 'force-dynamic';
 // export const runtime = 'edge';
@@ -10,18 +10,19 @@ const SOFTWARE_ARCHITECT_SYSTEM_PROMPT = `You are an expert software architect s
 Your primary responsibilities:
 1. Analyze requirements and create well-structured database schemas
 2. Generate clean, maintainable DBML code that follows best practices
-3. Use the validate_dbml tool to ensure all generated DBML code is syntactically correct
+3. Use the validate_and_save_dbml tool to ensure all generated DBML code is syntactically correct and save it
 4. Provide explanations for your design decisions
 5. Consider relationships, constraints, and data integrity
 6. Follow naming conventions and database design principles
 
 When generating DBML code:
-- Always validate your DBML using the validate_dbml tool before presenting it
+- Always validate and save your DBML using the validate_and_save_dbml tool
 - Include appropriate table relationships and foreign keys
 - Use meaningful table and column names
 - Add comments to explain complex relationships
 - Consider indexing strategies for performance
 - Ensure data types are appropriate for the use case
+- The DBML code will be automatically included in the response stream, so you don't need to present it in your text response
 
 If validation fails, analyze the error and correct the DBML code before presenting the final result.`;
 
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     const agent = new Agent({
       systemPrompt: SOFTWARE_ARCHITECT_SYSTEM_PROMPT,
       model: model,
-      tools: [validateDbmlTool]
+      tools: [validateAndSaveDbmlTool]
     });
 
     // Create a ReadableStream for SSE
@@ -106,6 +107,17 @@ export async function POST(req: Request) {
 
             // Send the event as SSE
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(eventData)}\n\n`));
+          }
+
+          // Send DBML data before stream_end if available
+          const savedDbml = agent.state.get('dbml') as string | undefined;
+          if (savedDbml) {
+            const dbmlEvent = {
+              type: 'dbml_data',
+              dbml: savedDbml,
+              timestamp: new Date().toISOString()
+            };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(dbmlEvent)}\n\n`));
           }
 
           // Send completion signal

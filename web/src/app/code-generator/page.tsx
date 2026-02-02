@@ -73,7 +73,7 @@ export default function CodeGeneratorPage() {
   // Wrapper function to update DBML code and force diagram re-render
   const handleDbmlCodeChange = (newCode: string) => {
     setDbmlCode(newCode);
-    setDiagramKey(prev => prev + 1);
+    setDiagramKey((prev) => prev + 1);
   };
 
   // DBML validation function

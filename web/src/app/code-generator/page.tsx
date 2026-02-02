@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Rocket,
   ExternalLink,
-  CheckCircle,
   AlertCircleIcon
 } from 'lucide-react';
 import { ResizableLayout } from '@/components/resizable-layout';
@@ -66,7 +65,6 @@ export default function CodeGeneratorPage() {
     selectedTemplateId: TEMPLATES[0].id,
     projectName: 'my-awesome-project'
   });
-  const [hasCreatedRepository, setHasCreatedRepository] = useState(false);
 
   const { data, isLoading, error, fetchData } = useScaffoldCode();
 
@@ -158,7 +156,7 @@ export default function CodeGeneratorPage() {
     if (stepId === 'diagram') return true; // Always enabled
     if (stepId === 'codeForm') return dbmlValidation.isValid; // Enabled if DBML code is valid
     if (stepId === 'results') return !!data; // Enabled if code has been generated
-    if (stepId === 'deploy') return hasCreatedRepository; // Enabled if repository has been created
+    if (stepId === 'deploy') return !!data; // Enabled if code has been generated
     return false;
   };
 
@@ -192,8 +190,8 @@ export default function CodeGeneratorPage() {
       if (stepId === 'results' && !data) {
         return 'Complete the configuration step to enable generated code view';
       }
-      if (stepId === 'deploy' && !hasCreatedRepository) {
-        return 'Create a GitHub repository to enable deployment';
+      if (stepId === 'deploy' && !data) {
+        return 'Generate code to enable deployment view';
       }
       return '';
     };
@@ -460,115 +458,38 @@ export default function CodeGeneratorPage() {
             Deploy Your Application
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-lg">
-            Your application is ready for deployment with built-in CI/CD pipeline
+            Your code has been pushed to GitHub successfully
           </p>
         </div>
-
-        {/* Deployment Status */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+        {/* Coming Soon Notice */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-8">
           <div className="flex items-center gap-3 mb-4">
-            <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
-            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
-              Repository Created Successfully
+            <Rocket className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">
+              Deployment Features Coming Soon
             </h3>
           </div>
-          <p className="text-green-700 dark:text-green-300">
-            Your code has been pushed to GitHub and is ready for deployment.
+          <p className="text-slate-700 dark:text-slate-300 mb-6 text-lg">
+            Automated deployment features are currently in planning. We&apos;re working on one-click
+            deployment integrations, CI/CD pipelines, and monitoring dashboards.
           </p>
-        </div>
-
-        {/* Deployment Options */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Automatic Deployment */}
-          <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <Rocket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                Automatic Deployment
-              </h3>
-            </div>
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-blue-200 dark:border-blue-700">
+            <h4 className="font-semibold text-slate-900 dark:text-white mb-3">
+              Help us prioritize this feature!
+            </h4>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Deploy automatically with our built-in CI/CD pipeline. Every push to main branch
-              triggers a new deployment.
+              Show your support by starring the repository and engaging with the deployment feature
+              issue:
             </p>
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => setHasCreatedRepository(true)}>
+              onClick={() =>
+                window.open('https://github.com/scafoldr/scafoldr/issues/11', '_blank')
+              }>
               <ExternalLink className="w-4 h-4 mr-2" />
-              Configure Auto Deploy
+              View Issue #11 on GitHub
             </Button>
           </div>
-
-          {/* Manual Deployment */}
-          <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <Code2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                Manual Deployment
-              </h3>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Deploy manually using command line tools or your preferred deployment platform.
-            </p>
-            <Button variant="outline" className="w-full">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              View Instructions
-            </Button>
-          </div>
-        </div>
-
-        {/* Deployment Instructions */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-            Deployment Instructions
-          </h3>
-
-          <div className="space-y-4">
-            <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-              <h4 className="font-medium text-slate-900 dark:text-white mb-2">
-                1. CI/CD Pipeline Setup
-              </h4>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Your repository includes pre-configured GitHub Actions workflows for automatic
-                testing and deployment.
-              </p>
-            </div>
-
-            <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-              <h4 className="font-medium text-slate-900 dark:text-white mb-2">
-                2. Environment Configuration
-              </h4>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Configure your environment variables in GitHub repository settings under Secrets and
-                Variables.
-              </p>
-            </div>
-
-            <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-              <h4 className="font-medium text-slate-900 dark:text-white mb-2">
-                3. Deployment Platforms
-              </h4>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Compatible with Vercel, Netlify, AWS, Google Cloud, and other major deployment
-                platforms.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Coming Soon Notice */}
-        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-            🚀 More Deployment Features Coming Soon
-          </h3>
-          <p className="text-slate-600 dark:text-slate-400">
-            We&apos;re working on one-click deployment integrations, monitoring dashboards, and
-            advanced CI/CD configurations. Stay tuned for updates!
-          </p>
         </div>
       </div>
     </div>

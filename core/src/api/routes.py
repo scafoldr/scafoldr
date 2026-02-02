@@ -12,8 +12,6 @@ from datetime import datetime
 from config.config import Config
 from core.orchestrator import generate_backend
 from core.company.scafoldr_inc import ScafoldrInc
-from core.dbml_ai_assistant.dbml_ai_agent import DbmlAiAgent
-from models.dbml_ai_agent import DbmlAIAgentRequest
 from core.storage.code_storage import CodeChange
 from models.generate import GenerateRequest, GenerateResponse
 from models.chat import ChatRequest
@@ -588,73 +586,3 @@ async def bulk_get_files(project_id: str):
                 "type": "project_all_files_error"
             }
         )
-    
-@router.post("/api/dbml-ai-agent")
-async def dbml_ai_agent_route(request: DbmlAIAgentRequest):
-    """
-    Endpoint for the DBML AI Agent.
-    
-    This endpoint processes user requests related to database design
-    and architecture using the DBML AI agent.
-    """
-    try:
-        conversation_id = request.conversation_id
-        dbml_agent = DbmlAiAgent()
-        response = await dbml_agent.process_prompt(
-            prompt=request.prompt,
-            conversation_id=conversation_id
-        )
-        return response
-    except Exception as e:
-        error_details = traceback.format_exc()
-        print(f"DETAILED ERROR in /dbml-ai-agent endpoint:")
-        print(f"Exception type: {type(e).__name__}")
-        print(f"Exception message: {str(e)}")
-        print(f"Full traceback:\n{error_details}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "DBML AI Agent processing failed",
-                "message": str(e),
-                "type": "dbml_agent_error",
-                "traceback": error_details
-            }
-        )
-    
-@router.post("/api/dbml-ai-agent/stream")
-async def dbml_ai_agent_stream_route(request: DbmlAIAgentRequest):
-    """
-    Streaming version of the DBML AI Agent endpoint.
-    
-    This endpoint processes user requests related to database design
-    and architecture using the DBML AI agent with streaming responses.
-    """
-    conversation_id = request.conversation_id
-    dbml_agent = DbmlAiAgent()
-
-    async def generate_stream():
-        try:
-            async for chunk in dbml_agent.stream_process_prompt(
-                prompt=request.prompt,
-                conversation_id=conversation_id
-            ):
-                # Ensure each chunk is properly formatted and flushed
-                if chunk and chunk.strip():
-                    yield f"data: {chunk}\n\n"
-
-        except Exception as e:
-            print(f"Exception type: {type(e).__name__}")
-            print(f"Exception message: {str(e)}")
-            
-            yield f"Error: {str(e)}"
-    
-    return StreamingResponse(
-        generate_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"  # Disable nginx buffering
-        }
-    )

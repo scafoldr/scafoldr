@@ -55,6 +55,7 @@ Table comments {
 
 export default function CodeGeneratorPage() {
   const [dbmlCode, setDbmlCode] = useState(sampleDbml);
+  const [diagramKey, setDiagramKey] = useState(0);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
   const [currentRightPanel, setCurrentRightPanel] = useState<
@@ -68,6 +69,12 @@ export default function CodeGeneratorPage() {
   const [hasCreatedRepository, setHasCreatedRepository] = useState(false);
 
   const { data, isLoading, error, fetchData } = useScaffoldCode();
+
+  // Wrapper function to update DBML code and force diagram re-render
+  const handleDbmlCodeChange = (newCode: string) => {
+    setDbmlCode(newCode);
+    setDiagramKey(prev => prev + 1);
+  };
 
   // DBML validation function
   const validateDbml = (dbml: string): { isValid: boolean; error?: string } => {
@@ -273,7 +280,7 @@ export default function CodeGeneratorPage() {
     <div className="h-full flex flex-col relative">
       {/* DBML Editor - takes full height when AI chat is hidden */}
       <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden">
-        <Code selectedFile={dbmlFile} onFileEdit={setDbmlCode} />
+        <Code selectedFile={dbmlFile} onFileEdit={handleDbmlCodeChange} />
       </div>
 
       {/* AI Chat Panel - slides up from bottom */}
@@ -294,7 +301,7 @@ export default function CodeGeneratorPage() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <DbmlAssistant setDbmlCode={setDbmlCode} />
+            <DbmlAssistant setDbmlCode={handleDbmlCodeChange} />
           </div>
         )}
       </div>
@@ -542,7 +549,7 @@ export default function CodeGeneratorPage() {
         {currentRightPanel === 'diagram' && (
           <div className="h-full relative">
             {/* Dynamic ER Diagram */}
-            <DynamicERDiagram dbmlCode={dbmlCode} />
+            <DynamicERDiagram key={diagramKey} dbmlCode={dbmlCode} />
 
             {/* Floating Scaffold Button */}
             <div className="absolute bottom-4 right-4 z-20">

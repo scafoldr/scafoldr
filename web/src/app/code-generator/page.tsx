@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import AppHeader from '@/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Parser } from '@dbml/core';
 import { useScaffoldCode } from '@/hooks/use-scaffold-code';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import MinimalAppHeader from '@/layout/minimal-app-header';
 
 // Sample DBML for initial state
 const sampleDbml = `
@@ -614,7 +614,7 @@ export default function CodeGeneratorPage() {
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       {/* Top Bar */}
-      <AppHeader activeProjectId={'Test project'} generatedFiles={{}} />
+      <MinimalAppHeader />
 
       {/* Breadcrumbs - Full Width */}
       <Breadcrumbs />

@@ -58,9 +58,9 @@ export default function CodeGeneratorPage() {
   const [diagramKey, setDiagramKey] = useState(0);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
-  const [currentRightPanel, setCurrentRightPanel] = useState<
-    'diagram' | 'codeForm' | 'results' | 'deploy'
-  >('diagram');
+  const [currentPanel, setCurrentPanel] = useState<'diagram' | 'codeForm' | 'results' | 'deploy'>(
+    'diagram'
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [codeFormData, setCodeFormData] = useState({
     selectedTemplateId: TEMPLATES[0].id,
@@ -120,7 +120,7 @@ export default function CodeGeneratorPage() {
 
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentRightPanel('codeForm');
+      setCurrentPanel('codeForm');
       setIsTransitioning(false);
     }, 150);
   };
@@ -129,7 +129,7 @@ export default function CodeGeneratorPage() {
     if (!data) return;
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentRightPanel('results');
+      setCurrentPanel('results');
       setIsTransitioning(false);
     }, 150);
   }, [data, isLoading, error]);
@@ -148,7 +148,7 @@ export default function CodeGeneratorPage() {
   const handleBackToDiagram = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentRightPanel('diagram');
+      setCurrentPanel('diagram');
       setIsTransitioning(false);
     }, 150);
   };
@@ -164,10 +164,10 @@ export default function CodeGeneratorPage() {
 
   // Handle breadcrumb navigation
   const handleBreadcrumbClick = (panel: 'diagram' | 'codeForm' | 'results' | 'deploy') => {
-    if (panel !== currentRightPanel && isStepEnabled(panel)) {
+    if (panel !== currentPanel && isStepEnabled(panel)) {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentRightPanel(panel);
+        setCurrentPanel(panel);
         setIsTransitioning(false);
       }, 150);
     }
@@ -203,10 +203,10 @@ export default function CodeGeneratorPage() {
 
     return (
       <TooltipProvider>
-        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-3">
           <div className="flex items-center space-x-2 text-sm">
             {availableSteps.map((step, index) => {
-              const isActive = currentRightPanel === step.id;
+              const isActive = currentPanel === step.id;
               const isEnabled = isStepEnabled(step.id);
               const tooltipMessage = getTooltipMessage(step.id);
 
@@ -275,51 +275,91 @@ export default function CodeGeneratorPage() {
     setShowAiChat(!showAiChat);
   };
 
-  // Left panel with DBML editor and AI chat
-  const leftPanel = (
-    <div className="h-full flex flex-col relative">
-      {/* DBML Editor - takes full height when AI chat is hidden */}
-      <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden">
-        <Code selectedFile={dbmlFile} onFileEdit={handleDbmlCodeChange} />
-      </div>
+  // DBML Panel with resizable layout (DBML editor + diagram)
+  const dbmlPanel = (
+    <div className="h-full flex flex-col">
+      <ResizableLayout
+        leftPanel={
+          <div className="h-full flex flex-col relative">
+            {/* DBML Editor - takes full height when AI chat is hidden */}
+            <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden">
+              <Code selectedFile={dbmlFile} onFileEdit={handleDbmlCodeChange} />
+            </div>
 
-      {/* AI Chat Panel - slides up from bottom */}
-      <div
-        className={`
-          absolute bottom-0 left-0 right-0 
-          bg-white dark:bg-slate-900 
-          border-t border-slate-200 dark:border-slate-800 
-          rounded-t-lg shadow-lg 
-          transition-all duration-300 ease-in-out
-          ${showAiChat ? 'h-[40%]' : 'h-0 opacity-0 pointer-events-none'}
-      `}>
-        {showAiChat && (
-          <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between p-2 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="text-sm font-medium">AI Assistant</h3>
-              <Button variant="ghost" size="sm" onClick={toggleAiChat} className="h-6 w-6 p-0">
-                <X className="h-4 w-4" />
+            {/* AI Chat Panel - slides up from bottom */}
+            <div
+              className={`
+                absolute bottom-0 left-0 right-0
+                bg-white dark:bg-slate-900
+                border-t border-slate-200 dark:border-slate-800
+                rounded-t-lg shadow-lg
+                transition-all duration-300 ease-in-out
+                ${showAiChat ? 'h-[40%]' : 'h-0 opacity-0 pointer-events-none'}
+            `}>
+              {showAiChat && (
+                <div className="h-full flex flex-col">
+                  <div className="flex items-center justify-between p-2 border-b border-slate-200 dark:border-slate-800">
+                    <h3 className="text-sm font-medium">AI Assistant</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleAiChat}
+                      className="h-6 w-6 p-0">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <DbmlAssistant setDbmlCode={handleDbmlCodeChange} />
+                </div>
+              )}
+            </div>
+
+            {/* AI Chat Button - More accent and visible */}
+            {!showAiChat && (
+              <div className="absolute bottom-4 left-4 z-10">
+                <Button
+                  onClick={toggleAiChat}
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
+                           shadow-lg hover:shadow-xl transition-all duration-300
+                           hover:animate-none
+                           font-medium">
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  AI Assistant
+                </Button>
+              </div>
+            )}
+          </div>
+        }
+        rightPanel={
+          <div className="h-full relative">
+            {/* Dynamic ER Diagram */}
+            <DynamicERDiagram key={diagramKey} dbmlCode={dbmlCode} />
+
+            {/* Floating Scaffold Button */}
+            <div className="absolute bottom-4 right-4 z-20">
+              <Button
+                onClick={handleScaffoldCode}
+                disabled={!dbmlValidation.isValid}
+                size="lg"
+                className={`
+                  bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
+                  shadow-lg transition-all duration-3000 ease-in-out
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none
+                  ${isButtonHovered && dbmlValidation.isValid ? 'scale-105 shadow-xl' : ''}
+                  ${dbmlValidation.isValid ? 'animate-heartbeat hover:animate-none' : ''}
+                `}
+                onMouseEnter={() => setIsButtonHovered(true)}
+                onMouseLeave={() => setIsButtonHovered(false)}>
+                <Code2 className="w-5 h-5 mr-2" />
+                Scaffold Code
               </Button>
             </div>
-            <DbmlAssistant setDbmlCode={handleDbmlCodeChange} />
           </div>
-        )}
-      </div>
-
-      {/* AI Chat Button - More accent and visible */}
-      {!showAiChat && (
-        <div className="absolute bottom-4 left-4 z-10">
-          <Button
-            onClick={toggleAiChat}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
-                     shadow-lg hover:shadow-xl transition-all duration-300
-                     hover:animate-none
-                     font-medium">
-            <MessageSquare className="w-5 h-5 mr-2" />
-            AI Assistant
-          </Button>
-        </div>
-      )}
+        }
+        defaultLeftWidth={500}
+        minLeftWidth={350}
+        maxLeftWidth={800}
+        showLeftPanel={true}
+      />
     </div>
   );
 
@@ -534,59 +574,30 @@ export default function CodeGeneratorPage() {
     </div>
   );
 
-  // Right panel with smooth transitions
-  const rightPanel = (
+  // Main content panel with smooth transitions
+  const mainContentPanel = (
     <div className="h-full flex flex-col overflow-hidden relative">
-      {/* Breadcrumbs */}
-      <Breadcrumbs />
-
       {/* Panel Container with smooth transitions */}
       <div
         className={`
           flex-1 transition-all duration-300 ease-in-out
           ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}
         `}>
-        {currentRightPanel === 'diagram' && (
-          <div className="h-full relative">
-            {/* Dynamic ER Diagram */}
-            <DynamicERDiagram key={diagramKey} dbmlCode={dbmlCode} />
-
-            {/* Floating Scaffold Button */}
-            <div className="absolute bottom-4 right-4 z-20">
-              <Button
-                onClick={handleScaffoldCode}
-                disabled={!dbmlValidation.isValid}
-                size="lg"
-                className={`
-                  bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white
-                  shadow-lg transition-all duration-3000 ease-in-out
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none
-                  ${isButtonHovered && dbmlValidation.isValid ? 'scale-105 shadow-xl' : ''}
-                  ${dbmlValidation.isValid ? 'animate-heartbeat hover:animate-none' : ''}
-                `}
-                onMouseEnter={() => setIsButtonHovered(true)}
-                onMouseLeave={() => setIsButtonHovered(false)}>
-                <Code2 className="w-5 h-5 mr-2" />
-                Scaffold Code
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {currentRightPanel === 'codeForm' && codeFormPanel}
-        {currentRightPanel === 'results' && resultsPanel}
-        {currentRightPanel === 'deploy' && deployPanel}
+        {currentPanel === 'diagram' && dbmlPanel}
+        {currentPanel === 'codeForm' && codeFormPanel}
+        {currentPanel === 'results' && resultsPanel}
+        {currentPanel === 'deploy' && deployPanel}
       </div>
 
-      {/* Floating Create Repository Button - positioned relative to entire right panel */}
-      {currentRightPanel === 'results' && (
+      {/* Floating Create Repository Button - positioned relative to entire panel */}
+      {currentPanel === 'results' && (
         <div className="absolute bottom-4 right-4 z-30">
           <Button
             onClick={() => {
               setHasCreatedRepository(true);
               setIsTransitioning(true);
               setTimeout(() => {
-                setCurrentRightPanel('deploy');
+                setCurrentPanel('deploy');
                 setIsTransitioning(false);
               }, 150);
             }}
@@ -605,15 +616,11 @@ export default function CodeGeneratorPage() {
       {/* Top Bar */}
       <AppHeader activeProjectId={'Test project'} generatedFiles={{}} />
 
-      {/* Main Content with Resizable Layout */}
-      <ResizableLayout
-        leftPanel={leftPanel}
-        rightPanel={rightPanel}
-        defaultLeftWidth={500}
-        minLeftWidth={350}
-        maxLeftWidth={800}
-        showLeftPanel={currentRightPanel === 'diagram'}
-      />
+      {/* Breadcrumbs - Full Width */}
+      <Breadcrumbs />
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-hidden">{mainContentPanel}</div>
     </div>
   );
 }

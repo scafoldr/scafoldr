@@ -8,7 +8,6 @@ import {
   MessageSquare,
   X,
   ChevronRight,
-  Github,
   Rocket,
   ExternalLink,
   CheckCircle,
@@ -26,6 +25,7 @@ import { Parser } from '@dbml/core';
 import { useScaffoldCode } from '@/hooks/use-scaffold-code';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import MinimalAppHeader from '@/layout/minimal-app-header';
+import { GithubCreateRepo } from '@/features/github';
 
 // Sample DBML for initial state
 const sampleDbml = `
@@ -592,20 +592,7 @@ export default function CodeGeneratorPage() {
       {/* Floating Create Repository Button - positioned relative to entire panel */}
       {currentPanel === 'results' && (
         <div className="absolute bottom-4 right-4 z-30">
-          <Button
-            onClick={() => {
-              setHasCreatedRepository(true);
-              setIsTransitioning(true);
-              setTimeout(() => {
-                setCurrentPanel('deploy');
-                setIsTransitioning(false);
-              }, 150);
-            }}
-            size="lg"
-            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-3000 animate-heartbeat hover:animate-none font-medium">
-            <Github className="w-5 h-5 mr-2" />
-            Create Repository
-          </Button>
+          <GithubCreateRepo activeProjectId="test project" variant="green" size="lg" />
         </div>
       )}
     </div>

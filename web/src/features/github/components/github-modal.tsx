@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Github, CheckCircle2 } from 'lucide-react';
-import { createGithubRepo, fetchAllFiles, getAccessToken } from '../api/github.api';
+import { Github, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  createGithubRepo,
+  fetchAllFiles,
+  getAccessToken,
+  authorizeGitHub
+} from '../api/github.api';
+
 type PromptProps = {
   isOpen: boolean;
   isLoading: boolean;
@@ -35,26 +41,86 @@ export default function GithubModal({
   const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [repositoryCreated, setRepositoryCreated] = useState(false);
+  const [needsAuthorization, setNeedsAuthorization] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check authorization status when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/github/check_access_token');
+        const { isAuthorized } = await res.json();
+        setNeedsAuthorization(!isAuthorized);
+      } catch (err) {
+        console.error('Failed to check authorization:', err);
+        setNeedsAuthorization(true);
+      }
+    };
+
+    checkAuth();
+  }, [isOpen]);
+
+  // Poll for authorization completion
+  useEffect(() => {
+    if (!isCheckingAuth) return;
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/github/check_access_token');
+        const { isAuthorized } = await res.json();
+
+        if (isAuthorized) {
+          setNeedsAuthorization(false);
+          setIsCheckingAuth(false);
+          setError(null);
+        } else {
+          timeoutId = setTimeout(checkAuth, 3000);
+        }
+      } catch (err) {
+        console.error('Failed to check token:', err);
+        timeoutId = setTimeout(checkAuth, 3000);
+      }
+    };
+
+    checkAuth();
+
+    return () => clearTimeout(timeoutId);
+  }, [isCheckingAuth]);
+
+  const handleAuthorize = () => {
+    setIsCheckingAuth(true);
+    setError(null);
+    authorizeGitHub();
+  };
 
   const handleCreateRepository = async () => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
+      setError(null);
 
       const accessToken = await getAccessToken();
+
+      if (!accessToken) {
+        setNeedsAuthorization(true);
+        setError('GitHub authorization required. Please authorize and try again.');
+        setIsLoading(false);
+        return;
+      }
+
       const genFiles = await fetchAllFiles(activeProjectId);
 
       console.log('GitHub token acquired:', accessToken);
-      const createRepo = await createGithubRepo(
-        repositoryName,
-        description,
-        isPrivate,
-        accessToken,
-        genFiles
-      );
+      await createGithubRepo(repositoryName, description, isPrivate, accessToken, genFiles);
 
       setRepositoryCreated(true);
     } catch (err) {
       console.error('Error creating repository:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create repository');
     } finally {
       setIsLoading(false);
     }
@@ -63,12 +129,15 @@ export default function GithubModal({
   const handleClose = () => {
     onClose();
     setIsLoading(false);
+    setIsCheckingAuth(false);
     // Reset state after dialog closes
     setTimeout(() => {
       setRepositoryCreated(false);
       setRepositoryName('');
       setDescription('');
       setIsPrivate(false);
+      setNeedsAuthorization(false);
+      setError(null);
     }, 300);
   };
 
@@ -94,6 +163,35 @@ export default function GithubModal({
             </div>
           )}
 
+          {error && (
+            <div className="flex items-center gap-2 p-4 bg-red-900/30 border border-red-700 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+              <span className="text-red-300 text-sm">{error}</span>
+            </div>
+          )}
+
+          {needsAuthorization && (
+            <div className="flex flex-col gap-3 p-4 bg-yellow-900/30 border border-yellow-700 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-yellow-400" />
+                <span className="text-yellow-300 font-medium">Authorization Required</span>
+              </div>
+              <p className="text-yellow-200 text-sm">
+                {isCheckingAuth
+                  ? 'Waiting for GitHub authorization... Please complete the authorization in the popup window.'
+                  : 'You need to authorize GitHub access before creating a repository.'}
+              </p>
+              {!isCheckingAuth && (
+                <Button
+                  onClick={handleAuthorize}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white w-fit">
+                  <Github className="w-4 h-4 mr-2" />
+                  Authorize GitHub
+                </Button>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="repo-name" className="text-white text-sm font-medium">
               Repository Name
@@ -104,6 +202,7 @@ export default function GithubModal({
               onChange={(e) => setRepositoryName(e.target.value)}
               placeholder="my-awesome-project"
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
+              disabled={needsAuthorization}
             />
           </div>
 
@@ -118,6 +217,7 @@ export default function GithubModal({
               placeholder="A brief description of your project"
               rows={4}
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 resize-none"
+              disabled={needsAuthorization}
             />
           </div>
 
@@ -127,6 +227,7 @@ export default function GithubModal({
               checked={isPrivate}
               onCheckedChange={(checked) => setIsPrivate(checked as boolean)}
               className="border-gray-600 data-[state=checked]:bg-blue-600"
+              disabled={needsAuthorization}
             />
             <Label htmlFor="private" className="text-white text-sm cursor-pointer">
               Make repository private
@@ -150,10 +251,10 @@ export default function GithubModal({
           </Button>
           <Button
             onClick={handleCreateRepository}
-            disabled={!repositoryName || isLoading}
-            className="bg-blue-600 hover:bg-blue-700 text-white">
+            disabled={!repositoryName || isLoading || needsAuthorization}
+            className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">
             <Github className="w-4 h-4 mr-2" />
-            Create Repository
+            {isLoading ? 'Creating...' : 'Create Repository'}
           </Button>
         </div>
       </DialogContent>

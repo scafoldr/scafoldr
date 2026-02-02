@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ProjectSwitcher } from '@/components/project-switcher';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Star } from 'lucide-react';
 
 const MinimalAppHeader = () => {
   const [currentProject, setCurrentProject] = useState('Task Manager App');
@@ -27,6 +29,15 @@ const MinimalAppHeader = () => {
       </div>
 
       <div className="flex items-center space-x-3">
+        <Link href="https://github.com/scafoldr/scafoldr" target="_blank" rel="noopener noreferrer">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <Star className="h-4 w-4" />
+            <span>Star us on GitHub</span>
+          </Button>
+        </Link>
         <UserProfileDropdown />
       </div>
     </header>

@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Chat } from '@/components/ui/chat';
-import { type Message } from '@/components/ui/chat-message';
-import DbmlMessage from './components/dbml-message';
+import { ChatContainer, ChatForm } from '@/components/ui/chat';
+import { ChatMessages } from '@/components/ui/chat';
+import { MessageInput } from '@/components/ui/message-input';
 import { useDbmlAiAgent } from './hooks/use-dbml-ai-agent';
+import { DbmlMessage as DbmlMessageType } from './types/message';
+import { DbmlMessageList } from './components/dbml-message-list';
 
 interface DbmlAssistantProps {
   // eslint-disable-next-line no-unused-vars
@@ -10,12 +12,12 @@ interface DbmlAssistantProps {
 }
 
 const DbmlAssistant = ({ setDbmlCode }: DbmlAssistantProps) => {
-  const { data, isLoading, isStreaming, invokeAgent } = useDbmlAiAgent({
+  const { data, dbmlData, isLoading, isStreaming, invokeAgent } = useDbmlAiAgent({
     conversationId: 'default',
     projectId: 'project1'
   });
 
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<DbmlMessageType[]>([
     {
       id: '1',
       role: 'assistant',
@@ -24,38 +26,6 @@ const DbmlAssistant = ({ setDbmlCode }: DbmlAssistantProps) => {
     }
   ]);
   const [input, setInput] = useState('');
-  const [activeSchemaId, setActiveSchemaId] = useState<string>('schema1');
-
-  // Example DBML schemas
-  const schemas = {
-    schema1: {
-      id: 'schema1',
-      version: '1',
-      code: `Table users {
-  id integer [primary key]
-  username varchar
-  email varchar [unique]
-  created_at timestamp
-}
-
-Table posts {
-  id integer [primary key]
-  title varchar
-  content text
-  user_id integer [ref: > users.id]
-  created_at timestamp
-}`
-    },
-    schema2: {
-      id: 'schema2',
-      version: '2',
-      code: `Table old_users {
-  id integer [primary key]
-  name varchar
-  email varchar
-}`
-    }
-  };
 
   // Update messages when AI agent responds
   useEffect(() => {
@@ -66,12 +36,15 @@ Table posts {
         if (lastMessage && lastMessage.role === 'assistant') {
           // Update the thinking message with actual response
           return prev.map((msg, index) =>
-            index === prev.length - 1 ? { ...msg, content: data, createdAt: new Date() } : msg
+            index === prev.length - 1
+              ? { ...msg, content: data, dbmlData: dbmlData || undefined, createdAt: new Date() }
+              : msg
           );
         }
+        return prev;
       });
     }
-  }, [data]);
+  }, [data, dbmlData]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -84,7 +57,7 @@ Table posts {
       if (!input.trim()) return;
 
       // Add user message
-      const userMessage: Message = {
+      const userMessage: DbmlMessageType = {
         id: Date.now().toString(),
         role: 'user',
         content: input,
@@ -92,7 +65,7 @@ Table posts {
       };
 
       // Add thinking message
-      const thinkingMessage: Message = {
+      const thinkingMessage: DbmlMessageType = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: 'Thinking...',
@@ -110,42 +83,47 @@ Table posts {
     [input, invokeAgent]
   );
 
-  const handleSchemaClick = (schemaId: string, dbmlCode: string) => {
-    setActiveSchemaId(schemaId);
-    setDbmlCode(dbmlCode);
-  };
-
   const stop = useCallback(() => {
     // Implementation for stopping generation if needed
   }, []);
 
+  const handleDbmlClick = useCallback(
+    (dbmlCode: string) => {
+      setDbmlCode(dbmlCode);
+    },
+    [setDbmlCode]
+  );
+
   return (
     <div className="flex flex-col h-full">
-      {/* DBML Schema Messages - Show above chat */}
-      {/* <div className="p-2 border-b border-slate-200 dark:border-slate-800">
-        <div className="flex flex-col gap-2">
-          {Object.values(schemas).map((schema) => (
-            <DbmlMessage
-              key={schema.id}
-              dbmlCode={schema.code}
-              version={schema.version}
-              onClick={() => handleSchemaClick(schema.id, schema.code)}
-              isActive={activeSchemaId === schema.id}
-            />
-          ))}
-        </div>
-      </div> */}
-
-      {/* Chat Component */}
+      {/* Chat Component with DBML Messages */}
       <div className="flex-1 min-h-0 p-2 content-end">
-        <Chat
-          messages={messages}
-          input={input}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-          isGenerating={isLoading || isStreaming}
-          stop={stop}
-        />
+        <ChatContainer>
+          {messages.length > 0 ? (
+            <ChatMessages messages={messages}>
+              <DbmlMessageList
+                messages={messages}
+                isTyping={isLoading || isStreaming}
+                onDbmlClick={handleDbmlClick}
+              />
+            </ChatMessages>
+          ) : null}
+
+          <ChatForm
+            className="mt-auto"
+            isPending={isLoading || isStreaming}
+            handleSubmit={handleSubmit}>
+            {() => (
+              <MessageInput
+                value={input}
+                onChange={handleInputChange}
+                allowAttachments={false}
+                stop={stop}
+                isGenerating={isLoading || isStreaming}
+              />
+            )}
+          </ChatForm>
+        </ChatContainer>
       </div>
     </div>
   );

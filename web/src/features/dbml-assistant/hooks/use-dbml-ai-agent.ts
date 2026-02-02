@@ -5,8 +5,14 @@ interface DbmlAIAgentRequest {
   conversationId?: string;
   projectId?: string;
 }
+
+export interface DbmlData {
+  dbml: string;
+}
+
 export function useDbmlAiAgent(params: DbmlAIAgentRequest) {
   const [data, setData] = useState<string | null>(null);
+  const [dbmlData, setDbmlData] = useState<DbmlData | null>(null);
 
   // different states for loading and streaming, streaming will
   // become true when first data chunk is received while loading
@@ -21,10 +27,11 @@ export function useDbmlAiAgent(params: DbmlAIAgentRequest) {
     setIsLoading(true);
     setError(null);
     setData(null);
+    setDbmlData(null);
     setIsStreaming(false);
 
     try {
-      await fetchEventSource('/api/dbml-ai-agent/stream', {
+      await fetchEventSource('/api/ai-agents/software-architect', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -35,7 +42,15 @@ export function useDbmlAiAgent(params: DbmlAIAgentRequest) {
           project_id: params.projectId
         }),
         onmessage(event) {
-          setData((prev) => (prev ? prev + event.data : event.data));
+          const data = JSON.parse(event.data);
+          if (data.type === 'text_delta') {
+            setData((prev) => (prev ? prev + data.content : data.content));
+          }
+          if (data.type === 'dbml_data') {
+            setDbmlData({
+              dbml: data.dbml
+            });
+          }
           if (!isStreaming) {
             setIsStreaming(true);
           }
@@ -54,5 +69,5 @@ export function useDbmlAiAgent(params: DbmlAIAgentRequest) {
     }
   };
 
-  return { data, isLoading, isStreaming, error, invokeAgent };
+  return { data, dbmlData, isLoading, isStreaming, error, invokeAgent };
 }

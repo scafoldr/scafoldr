@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1769014056821-1
+      author: ogisa
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_project
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: DATETIME
+            tableName: project
+  - changeSet:
+      id: 1769014056821-2
+      author: ogisa
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user_project
+                  name: project_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user_project
+                  name: user_id
+                  type: BIGINT
+            tableName: user_project
+  - changeSet:
+      id: 1769014056821-3
+      author: ogisa
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: project_id
+            baseTableName: user_project
+            constraintName: fk_usepro_on_project
+            referencedColumnNames: id
+            referencedTableName: project
+  - changeSet:
+      id: 1769014056821-4
+      author: ogisa
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: user_project
+            constraintName: fk_usepro_on_user
+            referencedColumnNames: id
+            referencedTableName: users
+

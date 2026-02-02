@@ -28,14 +28,25 @@ export async function getAccessToken() {
 }
 
 export async function authorizeGitHub() {
-  const scope = 'repo';
-  const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+  try {
+    // Fetch GitHub config from server-side API
+    const configRes = await fetch('/api/github/config');
+    const config = await configRes.json();
 
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(
-    redirectUri!
-  )}&scope=${scope}`;
+    if (!configRes.ok || !config.clientId) {
+      throw new Error('Failed to fetch GitHub configuration');
+    }
 
-  window.open(authUrl);
+    const scope = 'repo';
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${config.clientId}&redirect_uri=${encodeURIComponent(
+      config.redirectUri
+    )}&scope=${scope}`;
+
+    window.open(authUrl);
+  } catch (err) {
+    console.error('Error initiating GitHub authorization:', err);
+    throw err;
+  }
 }
 
 export async function fetchAllFiles(code: string): Promise<FileMap> {

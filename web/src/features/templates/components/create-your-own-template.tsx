@@ -7,7 +7,7 @@ interface CreateYourOwnTemplateProps {
 
 const CreateYourOwnTemplate = ({ onClick }: CreateYourOwnTemplateProps) => (
   <Card
-    className={`bg-slate-200 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow hover:cursor-pointer `}
+    className={`min-w-[280px] bg-slate-200 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow hover:cursor-pointer`}
     onClick={onClick}>
     <div className="flex items-center justify-center h-[80px] py-2">
       <PencilRuler size={'100%'} />

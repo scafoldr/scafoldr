@@ -1,59 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import GithubModal from './components/github-modal';
-import { FileMap } from '@/features/code-editor';
 import { Button } from '@/components/ui/button';
 import { Github } from 'lucide-react';
-import AuthorizeGitHub from './components/authorize-github';
 
 interface GithubCreateRepoProps {
   activeProjectId: string;
+  variant?: 'default' | 'green';
+  size?: 'sm' | 'lg' | 'default';
+  className?: string;
 }
 
-const GithubCreateRepo = ({ activeProjectId }: GithubCreateRepoProps) => {
-  //Github Create repository states
-  const [isGithubAuthorized, setIsGithubAuthorized] = useState(false);
+const GithubCreateRepo = ({
+  activeProjectId,
+  variant = 'default',
+  size = 'sm',
+  className
+}: GithubCreateRepoProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAuthorizedModalOpen, setIsAuthorizedModalOpen] = useState(false);
   const [isLoadingGithub, setIsLoadingGithub] = useState(false);
 
-  useEffect(() => {
-    if (localStorage.getItem('isGithubAuthorized') == 'true') {
-      setIsGithubAuthorized(true);
-    }
+  const buttonStyles = {
+    default: 'h-8 px-3 text-sm font-medium bg-transparent',
+    green:
+      'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-3000 animate-heartbeat hover:animate-none font-medium'
+  };
 
-    if (!isAuthorizedModalOpen) return;
-    let timeoutId: NodeJS.Timeout;
-
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/github/check_access_token');
-        const { isAuthorized } = await res.json();
-
-        setIsGithubAuthorized(isAuthorized);
-        localStorage.setItem('isGithubAuthorized', isAuthorized ? 'true' : 'false');
-
-        if (!isAuthorized) {
-          timeoutId = setTimeout(checkAuth, 5000);
-        }
-      } catch (err) {
-        console.error('Failed to check token:', err);
-        timeoutId = setTimeout(checkAuth, 5000);
-      }
-    };
-
-    checkAuth();
-
-    return () => clearTimeout(timeoutId);
-  }, [isAuthorizedModalOpen]);
-
-  const renderCreateGithubRepo = () => (
+  return (
     <>
       <Button
         onClick={() => setIsModalOpen(true)}
-        variant="outline"
-        size="sm"
-        className="h-8 px-3 text-sm font-medium bg-transparent">
-        <Github />
+        variant={variant === 'default' ? 'outline' : 'default'}
+        size={size}
+        className={className || buttonStyles[variant]}>
+        <Github className={size === 'lg' ? 'w-5 h-5 mr-2' : ''} />
         Create Repository
       </Button>
       <GithubModal
@@ -65,24 +44,6 @@ const GithubCreateRepo = ({ activeProjectId }: GithubCreateRepoProps) => {
       />
     </>
   );
-  const renderAuthorizeGithub = () => (
-    <>
-      <Button
-        onClick={() => setIsAuthorizedModalOpen(true)}
-        variant="outline"
-        size="sm"
-        className="h-8 px-3 text-sm font-medium bg-transparent">
-        <Github />
-        Authorize Github
-      </Button>
-      <AuthorizeGitHub
-        isOpen={isAuthorizedModalOpen}
-        onClose={() => setIsAuthorizedModalOpen(false)}
-      />
-    </>
-  );
-
-  return isGithubAuthorized ? renderCreateGithubRepo() : renderAuthorizeGithub();
 };
 
 export default GithubCreateRepo;

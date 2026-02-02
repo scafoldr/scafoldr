@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
 
   const token = request.cookies.get('auth')?.value;
 
-  if (pathname.startsWith('/app')) {
+  if (pathname.startsWith('/app') || pathname.startsWith('/code-generator')) {
     if (!token) {
       const { pathname, search } = request.nextUrl;
       const route = `${pathname}${search}`;
@@ -30,5 +30,5 @@ export function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/app/:path*', '/auth/:path*', '/api/:path*']
+  matcher: ['/app/:path*', '/auth/:path*', '/api/:path*', '/code-generator/:path*']
 };

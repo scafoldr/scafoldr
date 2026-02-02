@@ -11,15 +11,15 @@ interface TemplateCardProps {
 const TemplateCard = ({ template, onClick, isActive = false }: TemplateCardProps) => {
   return (
     <Card
-      className={`bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow hover:cursor-pointer ${isActive ? 'ring-2 ring-blue-500 bg-slate-100 dark:bg-slate-700' : ''}`}
+      className={`min-w-[280px] bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow hover:cursor-pointer ${isActive ? 'ring-2 ring-blue-500 bg-slate-100 dark:bg-slate-700' : ''}`}
       onClick={onClick}>
       <div className="flex items-center justify-center h-[80px] py-2">{template.Icon}</div>
       <h3 className="text-lg font-semibold mt-4 text-left flex gap-4 items-center justify-between">
-        {template.name}
+        <span className="line-clamp-1 text-ellipsis">{template.name}</span>
         {template.comingSoon && (
           <Badge
             variant="outline"
-            className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800">
+            className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800 whitespace-nowrap">
             Coming Soon
           </Badge>
         )}

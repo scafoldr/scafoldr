@@ -109,8 +109,8 @@ export function DynamicERDiagram({ dbmlCode, projectName }: DynamicERDiagramProp
 
   return (
     <div className="h-full bg-slate-50 dark:bg-slate-900 relative">
-      {/* Toolbar */}
-      <div className="absolute top-4 right-4 z-10 flex space-x-2">
+      {/* Toolbar - Now on the left and horizontal */}
+      <div className="absolute top-4 left-4 z-10 flex space-x-2">
         <Button variant="outline" size="sm" onClick={handleZoomOut} title="Zoom Out">
           <ZoomOut className="w-4 h-4" />
         </Button>
@@ -130,46 +130,49 @@ export function DynamicERDiagram({ dbmlCode, projectName }: DynamicERDiagramProp
         <DiagramComponent ref={diagramRef} initialDiagram={diagram} />
       </div>
 
-      {/* Legend */}
-      <Card className="absolute bottom-4 left-4 p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm">
-        <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">Legend</h4>
-        <div className="space-y-1 text-xs">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">🔑</span>
-            <span className="text-slate-600 dark:text-slate-300">Primary Key</span>
+      {/* Right sidebar with Legend and Instructions */}
+      <div className="absolute right-4 top-4 z-10 flex flex-col space-y-4 max-w-xs">
+        {/* Legend */}
+        <Card className="p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+          <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">Legend</h4>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm">🔑</span>
+              <span className="text-slate-600 dark:text-slate-300">Primary Key</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm">🔗</span>
+              <span className="text-slate-600 dark:text-slate-300">Foreign Key</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-1 bg-slate-400 dark:bg-slate-500 rounded" />
+              <span className="text-slate-600 dark:text-slate-300">Relationship Line</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-amber-500 rounded-full" />
+              <span className="text-slate-600 dark:text-slate-300">Source (PK)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              <span className="text-slate-600 dark:text-slate-300">Target (FK)</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">🔗</span>
-            <span className="text-slate-600 dark:text-slate-300">Foreign Key</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-1 bg-slate-400 dark:bg-slate-500 rounded" />
-            <span className="text-slate-600 dark:text-slate-300">Relationship Line</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-amber-500 rounded-full" />
-            <span className="text-slate-600 dark:text-slate-300">Source (PK)</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full" />
-            <span className="text-slate-600 dark:text-slate-300">Target (FK)</span>
-          </div>
-        </div>
-      </Card>
+        </Card>
 
-      {/* Instructions */}
-      <Card className="absolute bottom-4 right-4 p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm max-w-xs">
-        <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">
-          Instructions
-        </h4>
-        <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-          <p>• Drag tables to reposition them</p>
-          <p>• Drag the canvas to pan around</p>
-          <p>• Grid shows draggable area</p>
-          <p>• Use toolbar buttons for zoom controls</p>
-          <p>• Mouse wheel to zoom in/out</p>
-        </div>
-      </Card>
+        {/* Instructions */}
+        <Card className="p-3 bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+          <h4 className="font-semibold text-sm mb-2 text-slate-800 dark:text-slate-200">
+            Instructions
+          </h4>
+          <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+            <p>• Drag tables to reposition them</p>
+            <p>• Drag the canvas to pan around</p>
+            <p>• Grid shows draggable area</p>
+            <p>• Use toolbar buttons for zoom controls</p>
+            <p>• Mouse wheel to zoom in/out</p>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

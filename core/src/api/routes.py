@@ -27,19 +27,6 @@ config = Config()
     deprecated=True
 )
 def generate_backend_route(request: GenerateRequest):
-    """
-    DEPRECATED: This direct generation endpoint is deprecated and will be removed in a future version.
-    
-    Please use the /scafoldr-inc/consult endpoint instead, which provides a more robust
-    multi-agent approach with the Software Architect agent that can generate DBML and scaffold projects.
-    """
-    # Emit deprecation warning
-    warnings.warn(
-        "The /generate endpoint is deprecated. Use /scafoldr-inc/consult instead.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
     try:
         project_files = generate_backend(request)
         return project_files
